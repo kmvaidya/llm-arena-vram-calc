@@ -4,15 +4,15 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 ## Features
 
-- **Scrape** the Arena.ai open-source text leaderboard (API, Playwright, or CSV input)
+- **Scrape** the Arena.ai open-source text leaderboard (API, HF Space, Playwright, or CSV input)
 - **Resolve** total and active parameter counts via multiple strategies:
-  - Hardcoded known values for major models
+  - Small overrides dict for models with misleading names or no public metadata
   - Regex name parsing (e.g., `Qwen3-30B-A3B` → 30B total, 3B active, MoE)
+  - HuggingFace API (safetensors metadata + config.json)
   - Artificial Analysis scraping
-  - HuggingFace API lookup
 - **Compute** VRAM estimates at BF16, FP8, and INT4 precisions
-- **Flag** which models fit on single-GPU configurations (RTX PRO 6000, H100, H200, B200, B300)
-- **Output** enriched CSV and formatted XLSX with conditional formatting
+- **Flag** which models fit on single-GPU configurations (H100, RTX PRO 6000, H200, B200, B300)
+- **Output** enriched CSV, formatted XLSX, and auto-updated README.md tables
 
 ## Installation
 
@@ -27,40 +27,15 @@ playwright install chromium
 
 ```bash
 # Full pipeline (scrapes arena.ai live)
-python enrich_arena.py
+python enrich_arena.py --update-readme
 
 # Use a pre-downloaded CSV
-python enrich_arena.py --input arena_data.csv
+python enrich_arena.py --input arena_data.csv --update-readme
 
-# Skip network resolution (hardcoded + name parsing only)
-python enrich_arena.py --input arena_data.csv --no-network
-
-# Custom output directory
-python enrich_arena.py -o /path/to/output
+# Skip network resolution (overrides + name parsing only)
+python enrich_arena.py --input arena_data.csv --no-network --update-readme
 ```
 
-## Output
+## Automation
 
-Files are saved to `output/`:
-
-- `arena_leaderboard_enriched.csv` — Full enriched table
-- `arena_leaderboard_enriched.xlsx` — Formatted workbook with 3 sheets:
-  - **Full Table** — All data with green/red GPU fit indicators
-  - **GPU Summary** — Best model per GPU at each precision
-  - **Resolution Log** — How each model's parameters were resolved
-
-## GPU Configurations
-
-| GPU | VRAM | Architecture | Native FP8 |
-|-----|------|-------------|------------|
-| RTX PRO 6000 | 96 GB | Ada Lovelace | No (software emulation) |
-| H100 SXM | 80 GB | Hopper | Yes |
-| H200 SXM | 141 GB | Hopper | Yes |
-| B200 SXM | 180 GB | Blackwell | Yes |
-| B300 SXM | 288 GB | Blackwell Ultra | Yes |
-
-## VRAM Calculation
-
-- **Weight VRAM** = total_params × bytes_per_param (BF16: 2B, FP8: 1B, INT4: 0.5B)
-- **Serving VRAM** = weight VRAM × 1.25 (25% overhead for KV cache, activations, framework)
-- For MoE models, VRAM is based on **total** parameters (all experts must be loaded)
+A GitHub Actions workflow runs daily at 06:00 UTC to scrape the latest leaderboard and update the root README.md with fresh tables. See `.github/workflows/update-leaderboard.yml`.
