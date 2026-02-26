@@ -1,9 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-
-from enrich_arena import resolve_from_overrides, resolve_from_name, resolve_model_params
-
+from enrich_arena import resolve_from_name, resolve_from_overrides, resolve_model_params
 
 # ── resolve_from_overrides ────────────────────────────────────────────────
 

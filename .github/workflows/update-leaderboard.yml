@@ -23,7 +23,13 @@ jobs:
         run: uv python install 3.11
 
       - name: Install dependencies
-        run: uv sync --extra dev 2>/dev/null || uv pip install -r arena_enrichment/requirements.txt pytest
+        run: uv sync --extra dev 2>/dev/null || uv pip install -r arena_enrichment/requirements.txt pytest ruff mypy
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Type check (mypy)
+        run: uv run mypy arena_enrichment/
 
       - name: Run tests
         run: uv run pytest tests/ -v

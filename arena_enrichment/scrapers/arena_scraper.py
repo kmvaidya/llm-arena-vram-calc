@@ -12,9 +12,12 @@ Approaches in order:
 3. Raise error with instructions
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import re
+from typing import Any
 
 import pandas as pd
 import requests
@@ -32,7 +35,7 @@ EXPECTED_COLUMNS = [
 PROPRIETARY_LICENSES = {"Proprietary"}
 
 
-def scrape_arena_leaderboard(input_csv=None):
+def scrape_arena_leaderboard(input_csv: str | None = None) -> pd.DataFrame:
     """
     Scrape or load the Arena.ai open-source leaderboard.
 
@@ -58,7 +61,7 @@ def scrape_arena_leaderboard(input_csv=None):
     )
 
 
-def _scrape_arena_html():
+def _scrape_arena_html() -> pd.DataFrame | None:
     """
     Fetch the arena.ai leaderboard page and extract model data from the
     embedded Next.js payload.
@@ -128,7 +131,7 @@ def _scrape_arena_html():
     return df
 
 
-def _extract_entries_from_nextjs(html):
+def _extract_entries_from_nextjs(html: str) -> list[dict[str, Any]] | None:
     """
     Extract the leaderboard entries array from Next.js embedded data.
 
@@ -186,7 +189,7 @@ def _extract_entries_from_nextjs(html):
 # CSV loading (unchanged)
 # ---------------------------------------------------------------------------
 
-def _load_from_csv(path):
+def _load_from_csv(path: str) -> pd.DataFrame:
     """Load leaderboard from a local CSV file."""
     logger.info(f"Loading leaderboard from CSV: {path}")
     df = pd.read_csv(path)
@@ -195,13 +198,11 @@ def _load_from_csv(path):
     df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
 
     # Try to map common alternative column names
-    rename_map = {}
+    rename_map: dict[str, str] = {}
     for col in df.columns:
         if "rank" in col and "rank" not in rename_map.values():
             rename_map[col] = "rank"
-        elif "model" in col and "name" in col and "model_name" not in rename_map.values():
-            rename_map[col] = "model_name"
-        elif col == "model" and "model_name" not in rename_map.values():
+        elif "model" in col and "name" in col and "model_name" not in rename_map.values() or col == "model" and "model_name" not in rename_map.values():
             rename_map[col] = "model_name"
         elif "score" in col and "arena_score" not in rename_map.values():
             rename_map[col] = "arena_score"
@@ -224,7 +225,7 @@ def _load_from_csv(path):
                 break
         if ci_col:
             df["ci_lower"], df["ci_upper"] = zip(
-                *df[ci_col].apply(_parse_ci_string)
+                *df[ci_col].apply(_parse_ci_string), strict=False
             )
             if ci_col not in ("ci_lower", "ci_upper"):
                 df = df.drop(columns=[ci_col])
@@ -252,7 +253,7 @@ def _load_from_csv(path):
     return df[EXPECTED_COLUMNS].copy()
 
 
-def _parse_ci_string(ci_str):
+def _parse_ci_string(ci_str: Any) -> tuple[float | None, float | None]:
     """Parse CI string like '+5/-3' or '(1450, 1460)' into (lower, upper) offsets."""
     if pd.isna(ci_str):
         return (None, None)

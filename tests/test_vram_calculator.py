@@ -1,12 +1,11 @@
-import pytest
 import pandas as pd
-
+import pytest
 from vram_calculator import (
-    vram_estimate_gb,
-    practical_serving_gb,
     _find_best_gpu,
-    compute_vram_columns,
     add_all_vram_and_gpu_columns,
+    compute_vram_columns,
+    practical_serving_gb,
+    vram_estimate_gb,
 )
 
 

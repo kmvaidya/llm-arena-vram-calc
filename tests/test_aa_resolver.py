@@ -1,15 +1,12 @@
-import json
 
 import pytest
-
 from scrapers.aa_resolver import (
-    _normalize,
-    _parse_param_value,
     _build_lookup,
     _extract_models_from_rsc,
+    _normalize,
+    _parse_param_value,
     resolve_from_aa,
 )
-
 
 # ── _normalize ────────────────────────────────────────────────────────────
 

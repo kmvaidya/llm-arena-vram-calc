@@ -12,12 +12,15 @@ Usage:
     python enrich_arena.py --update-readme          # Also update root README.md
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
 import re
 import sys
 from datetime import datetime, timezone
+from typing import Any
 
 import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -27,10 +30,14 @@ from openpyxl.utils import get_column_letter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from known_models import MODEL_OVERRIDES
+from scrapers.aa_resolver import (
+    ModelParams,
+    get_aa_models,
+    resolve_from_aa,
+    resolve_single_from_aa,
+)
 from scrapers.arena_scraper import scrape_arena_leaderboard
-from scrapers.aa_resolver import get_aa_models, resolve_from_aa, resolve_single_from_aa
 from vram_calculator import (
-    GPU_CONFIGS,
     GPU_DISPLAY_NAMES,
     GPUS_BY_VRAM,
     add_all_vram_and_gpu_columns,
@@ -54,7 +61,7 @@ README_TOP_N = 50
 # Parameter resolution
 # ---------------------------------------------------------------------------
 
-def resolve_from_overrides(model_name):
+def resolve_from_overrides(model_name: str) -> ModelParams | None:
     """
     Strategy 1: Look up model in the small MODEL_OVERRIDES corrections dict.
 
@@ -113,7 +120,7 @@ def resolve_from_overrides(model_name):
     return None
 
 
-def resolve_from_name(model_name):
+def resolve_from_name(model_name: str) -> ModelParams | None:
     """
     Strategy 2: Parse parameter count from model name using regex.
 
@@ -179,7 +186,7 @@ def resolve_from_name(model_name):
     }
 
 
-def resolve_model_params(model_name, use_network=True, aa_lookup=None):
+def resolve_model_params(model_name: str, use_network: bool = True, aa_lookup: dict[str, Any] | None = None) -> tuple[ModelParams | None, str]:
     """
     Resolve parameter counts for a model using the priority chain.
 
@@ -240,7 +247,7 @@ HEADER_FILL = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="s
 HEADER_FONT = Font(bold=True, color="FFFFFF")
 
 
-def write_xlsx(df, resolution_log, output_path):
+def write_xlsx(df: pd.DataFrame, resolution_log: list[dict[str, Any]], output_path: str) -> None:
     """Write enriched data to a formatted XLSX file with 3 sheets."""
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         _write_full_table(df, writer)
@@ -249,7 +256,7 @@ def write_xlsx(df, resolution_log, output_path):
     logger.info(f"XLSX saved to: {output_path}")
 
 
-def _write_full_table(df, writer):
+def _write_full_table(df: pd.DataFrame, writer: pd.ExcelWriter) -> None:
     """Write the full enriched table with conditional formatting."""
     df.to_excel(writer, sheet_name="Full Table", index=False)
     ws = writer.sheets["Full Table"]
@@ -285,7 +292,7 @@ def _write_full_table(df, writer):
         ws.column_dimensions[col_letter].width = min(max_len + 3, 30)
 
 
-def _write_gpu_summary(df, writer):
+def _write_gpu_summary(df: pd.DataFrame, writer: pd.ExcelWriter) -> None:
     """Write GPU summary sheet."""
     rows = _build_gpu_summary_rows(df)
     summary_df = pd.DataFrame(rows)
@@ -307,7 +314,7 @@ def _write_gpu_summary(df, writer):
         ws.column_dimensions[col_letter].width = min(max_len + 3, 40)
 
 
-def _write_resolution_log(resolution_log, writer):
+def _write_resolution_log(resolution_log: list[dict[str, Any]], writer: pd.ExcelWriter) -> None:
     """Write resolution log sheet."""
     log_df = pd.DataFrame(resolution_log)
     log_df.to_excel(writer, sheet_name="Resolution Log", index=False)
@@ -328,7 +335,7 @@ def _write_resolution_log(resolution_log, writer):
         ws.column_dimensions[col_letter].width = min(max_len + 3, 40)
 
 
-def _build_gpu_summary_rows(df):
+def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
     """Build GPU summary data for both XLSX and README."""
     rows = []
     for gpu_key, gpu_vram in GPUS_BY_VRAM:
@@ -375,7 +382,7 @@ def _build_gpu_summary_rows(df):
 # README generation
 # ---------------------------------------------------------------------------
 
-def generate_readme(df, resolution_counts, aa_is_stale=False):
+def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_stale: bool = False) -> str:
     """
     Generate the full README.md content with:
     1. Best Model Per GPU — one table per precision
@@ -395,6 +402,10 @@ def generate_readme(df, resolution_counts, aa_is_stale=False):
     lines.append("Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) "
                  "open-source LLM leaderboard with parameter counts and VRAM estimates "
                  "for single-GPU deployment feasibility.")
+    lines.append("")
+    lines.append("Most LLM leaderboards rank models by quality but ignore deployment constraints. "
+                 "This tool answers: *\"What's the best model I can actually run on my hardware?\"* "
+                 "by cross-referencing Arena rankings with VRAM requirements across precisions.")
     lines.append("")
     lines.append(f"> **Last updated:** {now} | "
                  f"**Models:** {total} | "
@@ -420,8 +431,17 @@ def generate_readme(df, resolution_counts, aa_is_stale=False):
     lines.extend(_generate_leaderboard_table(df))
     lines.append("")
 
-    # How It Works section
-    lines.append("## How It Works")
+    # Architecture section
+    lines.append("## Architecture")
+    lines.append("")
+    lines.append("**Data flow:** Arena.ai leaderboard → parameter resolution "
+                 "(4-strategy fallback) → VRAM calculation → GPU feasibility matrix")
+    lines.append("")
+    lines.append("The parameter resolution chain prioritizes accuracy: manual overrides "
+                 "catch known errors, [Artificial Analysis](https://artificialanalysis.ai) "
+                 "provides bulk data for 400+ models via a single RSC stream request "
+                 "(cached locally, 24h TTL), name parsing extracts `{N}B` patterns as a "
+                 "fallback, and per-model page scraping handles the long tail.")
     lines.append("")
     lines.append("### VRAM Estimation")
     lines.append("")
@@ -431,21 +451,9 @@ def generate_readme(df, resolution_counts, aa_is_stale=False):
     lines.append("| FP8 | 1.0 | 70 GB weights, 87.5 GB serving |")
     lines.append("| INT4 | 0.5 | 35 GB weights, 43.8 GB serving |")
     lines.append("")
-    lines.append("- **Serving VRAM** = weight VRAM x 1.25 "
-                 "(25% overhead for KV cache, activations, framework)")
-    lines.append("- For **MoE models**, VRAM uses **total** parameters "
-                 "(all experts must be loaded)")
-    lines.append("")
-    lines.append("### Parameter Resolution")
-    lines.append("")
-    lines.append("Parameters are resolved via a priority chain:")
-    lines.append("")
-    lines.append("1. **Override corrections** — models with misleading names "
-                 "or wrong AA data")
-    lines.append("2. **[Artificial Analysis](https://artificialanalysis.ai)** "
-                 "— cached bulk model database (primary source)")
-    lines.append("3. **Name parsing** — regex extraction of `{N}B` and `A{N}B` "
-                 "patterns")
+    lines.append("**Serving VRAM** = weight VRAM × 1.25 "
+                 "(25% overhead for KV cache, activations, framework). "
+                 "For **MoE models**, all experts must be loaded regardless of active count.")
     lines.append("")
     lines.append("### GPUs")
     lines.append("")
@@ -462,24 +470,24 @@ def generate_readme(df, resolution_counts, aa_is_stale=False):
     lines.append("## Usage")
     lines.append("")
     lines.append("```bash")
-    lines.append("cd arena_enrichment")
-    lines.append("pip install -r requirements.txt")
+    lines.append("# Install dependencies")
+    lines.append("uv sync")
     lines.append("")
-    lines.append("# Full pipeline (scrapes arena.ai live)")
-    lines.append("python enrich_arena.py --update-readme")
+    lines.append("# Full pipeline (scrapes arena.ai live, updates README)")
+    lines.append("uv run python arena_enrichment/enrich_arena.py --update-readme")
     lines.append("")
     lines.append("# Use a pre-downloaded CSV")
-    lines.append("python enrich_arena.py --input data.csv --update-readme")
+    lines.append("uv run python arena_enrichment/enrich_arena.py --input data.csv --update-readme")
     lines.append("")
     lines.append("# Skip network resolution (overrides + name parsing only)")
-    lines.append("python enrich_arena.py --input data.csv --no-network --update-readme")
+    lines.append("uv run python arena_enrichment/enrich_arena.py --no-network --update-readme")
     lines.append("```")
     lines.append("")
 
     return "\n".join(lines)
 
 
-def _generate_gpu_precision_table(df, precision):
+def _generate_gpu_precision_table(df: pd.DataFrame, precision: str) -> list[str]:
     """Generate a compact GPU summary table for a single precision."""
     lines = []
     p_lower = precision.lower()
@@ -519,7 +527,7 @@ def _generate_gpu_precision_table(df, precision):
     return lines
 
 
-def _generate_leaderboard_table(df):
+def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
     """Generate the enriched leaderboard markdown table."""
     lines = []
 
@@ -588,7 +596,7 @@ def _generate_leaderboard_table(df):
 # Console summary
 # ---------------------------------------------------------------------------
 
-def print_console_summary(df, resolution_counts):
+def print_console_summary(df: pd.DataFrame, resolution_counts: dict[str, int]) -> None:
     """Print a nicely formatted console summary."""
     total = len(df)
     resolved = total - resolution_counts.get("UNKNOWN", 0)
@@ -637,7 +645,7 @@ def print_console_summary(df, resolution_counts):
 # Main pipeline
 # ---------------------------------------------------------------------------
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Enrich Arena.ai leaderboard with VRAM estimates"
     )
@@ -696,8 +704,8 @@ def main():
         if aa_is_stale:
             print("  WARNING: Using stale AA cache (RSC fetch failed)")
 
-    resolution_log = []
-    resolution_counts = {}
+    resolution_log: list[dict[str, Any]] = []
+    resolution_counts: dict[str, int] = {}
 
     for idx, row in df.iterrows():
         model_name = row["model_name"]

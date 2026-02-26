@@ -10,8 +10,12 @@ when:
   3. The model name is misleading (e.g., per-expert size instead of total)
 """
 
-# Model name fragment -> (total_params_B, active_params_B, architecture)
-MODEL_OVERRIDES = {
+from __future__ import annotations
+
+# (total_params_B, active_params_B, architecture)
+ModelOverride = tuple[float, float, str]
+
+MODEL_OVERRIDES: dict[str, ModelOverride] = {
     # === Models with misleading names ===
     "GPT-OSS-120B": (117, 5.1, "moe"),    # Name says 120B, actual is 117B
     "GPT-OSS-20B": (21, 3.6, "moe"),      # Name says 20B, actual is 21B

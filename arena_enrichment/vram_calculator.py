@@ -5,6 +5,8 @@ Computes estimated VRAM requirements at multiple precisions and
 determines which single-GPU configurations can serve each model.
 """
 
+from __future__ import annotations
+
 import pandas as pd
 
 # Bytes per parameter for each precision
@@ -43,7 +45,7 @@ FIT_PRECISIONS = ["BF16", "FP8", "INT4"]
 DEFAULT_OVERHEAD_PCT = 0.25
 
 
-def vram_estimate_gb(total_params_b, precision):
+def vram_estimate_gb(total_params_b: float, precision: str) -> float:
     """
     Estimate VRAM in GB to load model weights.
 
@@ -63,7 +65,7 @@ def vram_estimate_gb(total_params_b, precision):
     return total_params_b * bytes_per
 
 
-def practical_serving_gb(total_params_b, precision, overhead_pct=DEFAULT_OVERHEAD_PCT):
+def practical_serving_gb(total_params_b: float, precision: str, overhead_pct: float = DEFAULT_OVERHEAD_PCT) -> float:
     """
     Estimate total VRAM needed for serving with moderate batch size.
 
@@ -81,7 +83,7 @@ def practical_serving_gb(total_params_b, precision, overhead_pct=DEFAULT_OVERHEA
     return weight_gb * (1 + overhead_pct)
 
 
-def compute_vram_columns(df):
+def compute_vram_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add VRAM estimate columns to the DataFrame.
 
@@ -98,16 +100,16 @@ def compute_vram_columns(df):
     for precision in FIT_PRECISIONS:
         p_lower = precision.lower()
         df[f"vram_{p_lower}_weights_gb"] = df["total_params_b"].apply(
-            lambda x: round(vram_estimate_gb(x, precision), 1) if pd.notna(x) else None
+            lambda x, p=precision: round(vram_estimate_gb(x, p), 1) if pd.notna(x) else None
         )
         df[f"vram_{p_lower}_serving_gb"] = df["total_params_b"].apply(
-            lambda x: round(practical_serving_gb(x, precision), 1) if pd.notna(x) else None
+            lambda x, p=precision: round(practical_serving_gb(x, p), 1) if pd.notna(x) else None
         )
 
     return df
 
 
-def compute_gpu_fit_columns(df):
+def compute_gpu_fit_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add GPU fit boolean columns to the DataFrame.
 
@@ -127,13 +129,13 @@ def compute_gpu_fit_columns(df):
             serving_col = f"vram_{p_lower}_serving_gb"
             fit_col = f"fits_{gpu_lower}_{p_lower}"
             df[fit_col] = df[serving_col].apply(
-                lambda x: bool(x <= gpu_vram) if pd.notna(x) else None
+                lambda x, vram=gpu_vram: bool(x <= vram) if pd.notna(x) else None
             )
 
     return df
 
 
-def compute_best_gpu_columns(df):
+def compute_best_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add summary columns for the smallest GPU that can serve each model.
 
@@ -157,7 +159,7 @@ def compute_best_gpu_columns(df):
     return df
 
 
-def _find_best_gpu(serving_gb):
+def _find_best_gpu(serving_gb: float) -> str:
     """Find the smallest GPU that can fit the given serving VRAM requirement."""
     for gpu_key, gpu_vram in GPUS_BY_VRAM:
         if serving_gb <= gpu_vram:
@@ -165,7 +167,7 @@ def _find_best_gpu(serving_gb):
     return "MULTI-GPU"
 
 
-def add_all_vram_and_gpu_columns(df):
+def add_all_vram_and_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add all VRAM and GPU-related columns to the DataFrame.
 

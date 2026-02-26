@@ -9,15 +9,38 @@ Per-model HTML scraping is available as a targeted fallback for models that
 are missing from the bulk data.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import os
 import re
 import time
 from datetime import datetime, timezone
+from typing import Any, TypedDict
 
 import requests
 from bs4 import BeautifulSoup
+
+
+class AAEntry(TypedDict):
+    """Processed model entry in the AA lookup cache."""
+
+    name: str
+    slug: str
+    is_open_weights: bool
+    context_window: int | None
+    total_params_b: float | None
+    active_params_b: float | None
+    architecture: str | None
+
+
+class ModelParams(TypedDict):
+    """Resolved model parameter data returned by resolution functions."""
+
+    total_params_b: float
+    active_params_b: float
+    architecture: str
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +52,11 @@ AA_LEADERBOARD_URL = "https://artificialanalysis.ai/leaderboards/models"
 AA_MODEL_BASE_URL = "https://artificialanalysis.ai/models"
 
 # Rate limiting for per-model fallback requests
-_last_request_time = 0
+_last_request_time: float = 0
 RATE_LIMIT_SECONDS = 1.5
 
 
-def _rate_limit():
+def _rate_limit() -> None:
     """Enforce rate limiting between requests."""
     global _last_request_time
     elapsed = time.time() - _last_request_time
@@ -46,7 +69,7 @@ def _rate_limit():
 # Bulk fetch via RSC stream
 # ---------------------------------------------------------------------------
 
-def _fetch_all_via_rsc():
+def _fetch_all_via_rsc() -> list[dict[str, Any]]:
     """
     Fetch all models from Artificial Analysis in a single HTTP request.
 
@@ -79,7 +102,7 @@ def _fetch_all_via_rsc():
     return models
 
 
-def _extract_models_from_rsc(text):
+def _extract_models_from_rsc(text: str) -> list[dict[str, Any]]:
     """Parse the model array out of the RSC payload."""
     # The model array contains objects with 'inference_parameters_active_billions'.
     # Find this marker, then scan backwards to the array start '[{'.
@@ -128,7 +151,7 @@ def _extract_models_from_rsc(text):
 # Per-model HTML fallback (Method 1: HTML table scraping)
 # ---------------------------------------------------------------------------
 
-def _fetch_single_model(slug):
+def _fetch_single_model(slug: str) -> ModelParams | None:
     """
     Scrape parameter data from an individual model page as a fallback.
 
@@ -184,7 +207,7 @@ def _fetch_single_model(slug):
     }
 
 
-def _parse_param_value(text):
+def _parse_param_value(text: str) -> float | None:
     """Parse a parameter value like '30.5B' or '671B' into a float in billions."""
     m = re.search(r"([\d.]+)\s*[Bb]", text)
     if m:
@@ -204,12 +227,12 @@ def _parse_param_value(text):
 # Cache management
 # ---------------------------------------------------------------------------
 
-def _load_cache():
+def _load_cache() -> tuple[dict[str, AAEntry] | None, str | None]:
     """Load cached AA model data from disk.  Returns (models_dict, fetched_at) or (None, None)."""
     if not os.path.exists(CACHE_FILE):
         return None, None
     try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+        with open(CACHE_FILE, encoding="utf-8") as f:
             data = json.load(f)
         return data.get("models", {}), data.get("fetched_at")
     except (json.JSONDecodeError, OSError) as e:
@@ -217,7 +240,7 @@ def _load_cache():
         return None, None
 
 
-def _save_cache(models_dict):
+def _save_cache(models_dict: dict[str, AAEntry]) -> None:
     """Persist the processed model lookup dict to disk."""
     os.makedirs(CACHE_DIR, exist_ok=True)
     data = {
@@ -230,7 +253,7 @@ def _save_cache(models_dict):
     logger.info(f"Cache saved: {len(models_dict)} models → {CACHE_FILE}")
 
 
-def _cache_is_fresh(fetched_at, max_age_hours):
+def _cache_is_fresh(fetched_at: str | None, max_age_hours: float) -> bool:
     """Check whether the cache timestamp is within the allowed age."""
     if not fetched_at:
         return False
@@ -246,20 +269,20 @@ def _cache_is_fresh(fetched_at, max_age_hours):
 # Build the lookup index from raw AA model list
 # ---------------------------------------------------------------------------
 
-def _normalize(name):
+def _normalize(name: str) -> str:
     """Normalize a model name for fuzzy matching: lowercase, strip separators and punctuation."""
     # Strip spaces, hyphens, underscores, dots, parentheses
     return re.sub(r"[\s\-_.()]+", "", name.lower())
 
 
-def _build_lookup(raw_models):
+def _build_lookup(raw_models: list[dict[str, Any]]) -> dict[str, AAEntry]:
     """
     Convert the raw list of AA model dicts into a lookup dict keyed by
     multiple normalized name variants for flexible matching.
 
     Each entry contains: name, slug, total_params_b, active_params_b, architecture.
     """
-    lookup = {}
+    lookup: dict[str, Any] = {}
 
     for m in raw_models:
         name = m.get("name") or ""
@@ -298,9 +321,12 @@ def _build_lookup(raw_models):
 
         for key in keys:
             # Prefer entries that have parameter data
-            if key in lookup and lookup[key].get("total_params_b") is not None:
-                if entry.get("total_params_b") is None:
-                    continue
+            if (
+                key in lookup
+                and lookup[key].get("total_params_b") is not None
+                and entry.get("total_params_b") is None
+            ):
+                continue
             lookup[key] = entry
 
     return lookup
@@ -310,7 +336,7 @@ def _build_lookup(raw_models):
 # Public API
 # ---------------------------------------------------------------------------
 
-def get_aa_models(max_age_hours=DEFAULT_MAX_AGE_HOURS, force_refresh=False):
+def get_aa_models(max_age_hours: float = DEFAULT_MAX_AGE_HOURS, force_refresh: bool = False) -> tuple[dict[str, AAEntry], bool]:
     """
     Get the full AA model lookup, using cache when fresh.
 
@@ -340,7 +366,7 @@ def get_aa_models(max_age_hours=DEFAULT_MAX_AGE_HOURS, force_refresh=False):
     return lookup, False
 
 
-def resolve_from_aa(model_name, aa_lookup=None):
+def resolve_from_aa(model_name: str, aa_lookup: dict[str, AAEntry] | None = None) -> ModelParams | None:
     """
     Resolve model parameters from the Artificial Analysis dataset.
 
@@ -352,7 +378,7 @@ def resolve_from_aa(model_name, aa_lookup=None):
         dict with {total_params_b, active_params_b, architecture} or None
     """
     if aa_lookup is None:
-        aa_lookup = get_aa_models()
+        aa_lookup, _ = get_aa_models()
 
     if not aa_lookup:
         return None
@@ -400,10 +426,12 @@ def resolve_from_aa(model_name, aa_lookup=None):
         # Also try the reverse: arena name contained in an AA key
         if not best_key:
             for key in aa_lookup:
-                if len(name_norm) >= min_key_len and name_norm in key:
-                    # Prefer the shortest containing key (most specific)
-                    if not best_key or len(key) < len(best_key):
-                        best_key = key
+                if (
+                    len(name_norm) >= min_key_len
+                    and name_norm in key
+                    and (not best_key or len(key) < len(best_key))
+                ):
+                    best_key = key
         if best_key:
             entry = aa_lookup[best_key]
 
@@ -414,14 +442,16 @@ def resolve_from_aa(model_name, aa_lookup=None):
     if total is None:
         return None
 
+    active = entry.get("active_params_b")
+    arch = entry.get("architecture")
     return {
-        "total_params_b": entry["total_params_b"],
-        "active_params_b": entry["active_params_b"],
-        "architecture": entry["architecture"],
+        "total_params_b": total,
+        "active_params_b": active if active is not None else total,
+        "architecture": arch if arch is not None else "dense",
     }
 
 
-def resolve_single_from_aa(model_name):
+def resolve_single_from_aa(model_name: str) -> ModelParams | None:
     """
     Fallback: scrape a single model page from AA by trying slug variants.
 
