@@ -202,7 +202,7 @@ def _load_from_csv(path: str) -> pd.DataFrame:
     for col in df.columns:
         if "rank" in col and "rank" not in rename_map.values():
             rename_map[col] = "rank"
-        elif "model" in col and "name" in col and "model_name" not in rename_map.values() or col == "model" and "model_name" not in rename_map.values():
+        elif (("model" in col and "name" in col) or col == "model") and "model_name" not in rename_map.values():
             rename_map[col] = "model_name"
         elif "score" in col and "arena_score" not in rename_map.values():
             rename_map[col] = "arena_score"

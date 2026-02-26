@@ -762,7 +762,7 @@ def main() -> None:
         print("\nStep 5: Updating README.md...")
         readme_content = generate_readme(df, resolution_counts, aa_is_stale=aa_is_stale)
         readme_path = os.path.join(REPO_ROOT, "README.md")
-        with open(readme_path, "w") as f:
+        with open(readme_path, "w", encoding="utf-8") as f:
             f.write(readme_content)
         print(f"  README: {readme_path}")
 

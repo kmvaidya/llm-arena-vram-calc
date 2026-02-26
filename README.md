@@ -2,7 +2,9 @@
 
 Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) open-source LLM leaderboard with parameter counts and VRAM estimates for single-GPU deployment feasibility.
 
-> **Last updated:** 2026-02-26 15:35 UTC | **Models:** 187 | **Resolved:** 184 (98.4%)
+Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
+
+> **Last updated:** 2026-02-26 17:49 UTC | **Models:** 187 | **Resolved:** 184 (98.4%)
 
 ## Best Model Per GPU
 
@@ -237,7 +239,11 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 
 </details>
 
-## How It Works
+## Architecture
+
+**Data flow:** Arena.ai leaderboard â†’ parameter resolution (4-strategy fallback) â†’ VRAM calculation â†’ GPU feasibility matrix
+
+The parameter resolution chain prioritizes accuracy: manual overrides catch known errors, [Artificial Analysis](https://artificialanalysis.ai) provides bulk data for 400+ models via a single RSC stream request (cached locally, 24h TTL), name parsing extracts `{N}B` patterns as a fallback, and per-model page scraping handles the long tail.
 
 ### VRAM Estimation
 
@@ -247,16 +253,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | FP8 | 1.0 | 70 GB weights, 87.5 GB serving |
 | INT4 | 0.5 | 35 GB weights, 43.8 GB serving |
 
-- **Serving VRAM** = weight VRAM x 1.25 (25% overhead for KV cache, activations, framework)
-- For **MoE models**, VRAM uses **total** parameters (all experts must be loaded)
-
-### Parameter Resolution
-
-Parameters are resolved via a priority chain:
-
-1. **Override corrections** — models with misleading names or wrong AA data
-2. **[Artificial Analysis](https://artificialanalysis.ai)** — cached bulk model database (primary source)
-3. **Name parsing** — regex extraction of `{N}B` and `A{N}B` patterns
+**Serving VRAM** = weight VRAM Ã— 1.25 (25% overhead for KV cache, activations, framework). For **MoE models**, all experts must be loaded regardless of active count.
 
 ### GPUs
 
@@ -271,15 +268,15 @@ Parameters are resolved via a priority chain:
 ## Usage
 
 ```bash
-cd arena_enrichment
-pip install -r requirements.txt
+# Install dependencies
+uv sync
 
-# Full pipeline (scrapes arena.ai live)
-python enrich_arena.py --update-readme
+# Full pipeline (scrapes arena.ai live, updates README)
+uv run python arena_enrichment/enrich_arena.py --update-readme
 
 # Use a pre-downloaded CSV
-python enrich_arena.py --input data.csv --update-readme
+uv run python arena_enrichment/enrich_arena.py --input data.csv --update-readme
 
 # Skip network resolution (overrides + name parsing only)
-python enrich_arena.py --input data.csv --no-network --update-readme
+uv run python arena_enrichment/enrich_arena.py --no-network --update-readme
 ```
