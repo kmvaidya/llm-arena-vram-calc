@@ -26,10 +26,9 @@ from openpyxl.utils import get_column_letter
 # Add parent directory to path so imports work when running directly
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from known_models import ARENA_TO_HF, MODEL_OVERRIDES
+from known_models import MODEL_OVERRIDES
 from scrapers.arena_scraper import scrape_arena_leaderboard
-from scrapers.aa_resolver import resolve_from_artificial_analysis
-from scrapers.hf_resolver import resolve_from_huggingface
+from scrapers.aa_resolver import get_aa_models, resolve_from_aa, resolve_single_from_aa
 from vram_calculator import (
     GPU_CONFIGS,
     GPU_DISPLAY_NAMES,
@@ -60,37 +59,48 @@ def resolve_from_overrides(model_name):
     Strategy 1: Look up model in the small MODEL_OVERRIDES corrections dict.
 
     Only contains models where automated resolution gives wrong/no answers.
-    Tries exact match first, then substring match with safeguards.
+    Tries case-insensitive exact match first, then normalized substring match
+    with safeguards to avoid false positives on distilled variants.
     """
-    # Exact match
-    if model_name in MODEL_OVERRIDES:
-        total, active, arch = MODEL_OVERRIDES[model_name]
+    name_lower = model_name.lower()
+
+    # Build case-insensitive lookup (lazy, rebuilt each call — dict is small)
+    overrides_lower = {k.lower(): k for k in MODEL_OVERRIDES}
+
+    # Exact match (case-insensitive)
+    if name_lower in overrides_lower:
+        orig_key = overrides_lower[name_lower]
+        total, active, arch = MODEL_OVERRIDES[orig_key]
         return {
             "total_params_b": total,
             "active_params_b": active,
             "architecture": arch,
         }
 
-    # Substring match — find the longest matching key, but skip if the
-    # model name contains additional size indicators (like "Qwen3-8B" in
-    # "DeepSeek-R1-0528-Qwen3-8B") that suggest a different/distilled model.
-    # In that case, let name parsing handle it.
+    # Normalized substring match — normalize separators so "Command R+" matches
+    # "command-r-plus" and "GLM-4.5-Air" matches "glm-4.5-air".
+    def _normalize(s):
+        return re.sub(r'[\s\-_]+', '-', s.lower()).replace('+', '-plus-').strip('-')
+
+    name_norm = _normalize(model_name)
+
+    # Skip substring matching if the name contains a size indicator (like
+    # "Qwen3-8B" in "DeepSeek-R1-0528-Qwen3-8B") — that suggests a
+    # different/distilled model. Let name parsing handle it instead.
     has_size_in_name = bool(re.search(
-        r'(?:^|[\s\-_])(\d+(?:\.\d+)?)\s*B(?:[\s\-_]|$)',
-        model_name, re.IGNORECASE
+        r'(?:^|-)(\d+(?:\.\d+)?)b(?:-|$)',
+        name_norm, re.IGNORECASE
     ))
     if has_size_in_name:
-        # Name has a size indicator — prefer name parsing over substring override
         return None
 
     best_match = None
     best_len = 0
-    name_lower = model_name.lower()
     for key in MODEL_OVERRIDES:
-        key_lower = key.lower()
-        if key_lower in name_lower and len(key) > best_len:
+        key_norm = _normalize(key)
+        if key_norm in name_norm and len(key_norm) > best_len:
             best_match = key
-            best_len = len(key)
+            best_len = len(key_norm)
 
     if best_match:
         total, active, arch = MODEL_OVERRIDES[best_match]
@@ -169,54 +179,52 @@ def resolve_from_name(model_name):
     }
 
 
-def resolve_model_params(model_name, use_network=True):
+def resolve_model_params(model_name, use_network=True, aa_lookup=None):
     """
     Resolve parameter counts for a model using the priority chain.
 
     Priority:
-        1. MODEL_OVERRIDES (small corrections dict)
-        2. Parse from model name (fast, no network)
-        3. HuggingFace API (if use_network)
-        4. Artificial Analysis (if use_network)
+        1. MODEL_OVERRIDES (corrections for AA mistakes, misleading names, etc.)
+        2. Artificial Analysis cache (bulk data, covers most open-source models)
+        3. Parse from model name (fast, no network — last resort)
+        4. AA single-model scrape (if use_network, for models missing from bulk)
         5. UNKNOWN
+
+    Args:
+        model_name: Arena model name
+        use_network: Whether to allow network requests (AA single-model fallback)
+        aa_lookup: Pre-loaded AA lookup dict (pass for efficiency in batch calls)
 
     Returns:
         tuple of (params_dict, source_name)
     """
-    # Strategy 1: Override corrections (small dict, highest priority)
+    # Strategy 1: Override corrections (highest priority — fixes AA mistakes)
     result = resolve_from_overrides(model_name)
     if result:
         return result, "override"
 
-    # Strategy 2: Parse from model name
+    # Strategy 2: Artificial Analysis cache (primary automated source)
+    if aa_lookup is not None:
+        try:
+            result = resolve_from_aa(model_name, aa_lookup=aa_lookup)
+            if result:
+                return result, "artificial_analysis"
+        except Exception as e:
+            logger.debug(f"AA cache resolution failed for {model_name}: {e}")
+
+    # Strategy 3: Parse from model name
     result = resolve_from_name(model_name)
     if result:
         return result, "name_parsing"
 
-    if not use_network:
-        return None, "UNKNOWN"
-
-    # Strategy 3: HuggingFace API
-    try:
-        hf_id = ARENA_TO_HF.get(model_name)
-        if not hf_id:
-            for key, hf_repo in ARENA_TO_HF.items():
-                if key.lower() in model_name.lower():
-                    hf_id = hf_repo
-                    break
-        result = resolve_from_huggingface(model_name, hf_id=hf_id)
-        if result:
-            return result, "huggingface"
-    except Exception as e:
-        logger.debug(f"HF resolution failed for {model_name}: {e}")
-
-    # Strategy 4: Artificial Analysis
-    try:
-        result = resolve_from_artificial_analysis(model_name)
-        if result:
-            return result, "artificial_analysis"
-    except Exception as e:
-        logger.debug(f"AA resolution failed for {model_name}: {e}")
+    # Strategy 4: AA single-model page scrape (expensive, last resort)
+    if use_network:
+        try:
+            result = resolve_single_from_aa(model_name)
+            if result:
+                return result, "aa_single_scrape"
+        except Exception as e:
+            logger.debug(f"AA single scrape failed for {model_name}: {e}")
 
     return None, "UNKNOWN"
 
@@ -369,9 +377,10 @@ def _build_gpu_summary_rows(df):
 
 def generate_readme(df, resolution_counts):
     """
-    Generate the full README.md content with two tables:
-    1. Best Model Per GPU (compact, most actionable)
-    2. Enriched Leaderboard (top N visible, rest collapsed)
+    Generate the full README.md content with:
+    1. Best Model Per GPU — one table per precision
+    2. Enriched Leaderboard — compact table with collapsible rest
+    3. How It Works / Usage
     """
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     total = len(df)
@@ -392,17 +401,18 @@ def generate_readme(df, resolution_counts):
                  f"**Resolved:** {resolved} ({pct:.1f}%)")
     lines.append("")
 
-    # Table 1: Best Model Per GPU
+    # Table 1: Best Model Per GPU — one sub-table per precision
     lines.append("## Best Model Per GPU")
     lines.append("")
-    lines.append("Highest-ranked Arena model that fits on each single GPU at each precision "
-                 "(with 25% serving overhead for KV cache, activations, and framework).")
+    lines.append("Highest-ranked Arena model that fits on each single GPU "
+                 "(includes 25% serving overhead for KV cache, activations, and framework).")
     lines.append("")
-    lines.extend(_generate_gpu_table(df))
-    lines.append("")
+    for precision in ["BF16", "FP8", "INT4"]:
+        lines.extend(_generate_gpu_precision_table(df, precision))
+        lines.append("")
 
     # Table 2: Enriched Leaderboard
-    lines.append("## Open-Source LLM Leaderboard (Enriched)")
+    lines.append("## Full Leaderboard")
     lines.append("")
     lines.extend(_generate_leaderboard_table(df))
     lines.append("")
@@ -410,25 +420,31 @@ def generate_readme(df, resolution_counts):
     # How It Works section
     lines.append("## How It Works")
     lines.append("")
-    lines.append("### VRAM Calculation")
-    lines.append("- **Weight VRAM** = total_params x bytes_per_param "
-                 "(BF16: 2B, FP8: 1B, INT4: 0.5B)")
-    lines.append("- **Serving VRAM** = weight_VRAM x 1.25 "
+    lines.append("### VRAM Estimation")
+    lines.append("")
+    lines.append("| Precision | Bytes/Param | Example: 70B model |")
+    lines.append("|-----------|-------------|---------------------|")
+    lines.append("| BF16 | 2.0 | 140 GB weights, 175 GB serving |")
+    lines.append("| FP8 | 1.0 | 70 GB weights, 87.5 GB serving |")
+    lines.append("| INT4 | 0.5 | 35 GB weights, 43.8 GB serving |")
+    lines.append("")
+    lines.append("- **Serving VRAM** = weight VRAM x 1.25 "
                  "(25% overhead for KV cache, activations, framework)")
-    lines.append("- For **MoE models**, VRAM is based on **total** parameters "
-                 "(all experts must be loaded into memory)")
+    lines.append("- For **MoE models**, VRAM uses **total** parameters "
+                 "(all experts must be loaded)")
     lines.append("")
     lines.append("### Parameter Resolution")
-    lines.append("Parameters are resolved automatically via a priority chain:")
-    lines.append("1. **Override corrections** - small dict for models with misleading "
-                 "names or no public metadata")
-    lines.append("2. **Name parsing** - regex extraction of `{N}B` and `A{N}B` "
-                 "patterns from model names")
-    lines.append("3. **HuggingFace API** - safetensors metadata and config.json "
-                 "for architecture details")
-    lines.append("4. **Artificial Analysis** - web scraping as backup")
     lines.append("")
-    lines.append("### GPU Configurations")
+    lines.append("Parameters are resolved via a priority chain:")
+    lines.append("")
+    lines.append("1. **Override corrections** — models with misleading names "
+                 "or wrong AA data")
+    lines.append("2. **[Artificial Analysis](https://artificialanalysis.ai)** "
+                 "— cached bulk model database (primary source)")
+    lines.append("3. **Name parsing** — regex extraction of `{N}B` and `A{N}B` "
+                 "patterns")
+    lines.append("")
+    lines.append("### GPUs")
     lines.append("")
     lines.append("| GPU | VRAM | Architecture | Native FP8 |")
     lines.append("|-----|------|-------------|------------|")
@@ -460,36 +476,42 @@ def generate_readme(df, resolution_counts):
     return "\n".join(lines)
 
 
-def _generate_gpu_table(df):
-    """Generate the GPU summary markdown table."""
+def _generate_gpu_precision_table(df, precision):
+    """Generate a compact GPU summary table for a single precision."""
     lines = []
+    p_lower = precision.lower()
+    serving_col = f"vram_{p_lower}_serving_gb"
 
-    # Build header: GPU | VRAM | for each precision: Best Model | Rank | VRAM
-    lines.append("| GPU | VRAM | Best Model (FP8) | Rank | VRAM Est. | Best Model (INT4) | Rank | VRAM Est. |")
-    lines.append("|-----|------|------------------|------|-----------|-------------------|------|-----------|")
+    label = {"BF16": "BF16 (Full Precision)", "FP8": "FP8 (8-bit)",
+             "INT4": "INT4 (4-bit)"}[precision]
+    lines.append(f"### {label}")
+    lines.append("")
+    lines.append("| GPU | VRAM | Best Model | Arena Rank | Params | Arch | Serving VRAM |")
+    lines.append("|-----|------|------------|------------|--------|------|--------------|")
+
+    if serving_col not in df.columns:
+        return lines
 
     for gpu_key, gpu_vram in GPUS_BY_VRAM:
         display = GPU_DISPLAY_NAMES[gpu_key]
-        cells = [display, f"{gpu_vram} GB"]
-
-        for precision in ["FP8", "INT4"]:
-            p_lower = precision.lower()
-            serving_col = f"vram_{p_lower}_serving_gb"
-            if serving_col not in df.columns:
-                cells.extend(["—", "—", "—"])
-                continue
-
-            fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
-            if not fits.empty:
-                best = fits.iloc[0]
-                rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
-                name = best["model_name"]
-                serving = f"{round(best[serving_col], 1)} GB"
-                cells.extend([name, f"#{rank}", serving])
-            else:
-                cells.extend(["*None fit*", "—", "—"])
-
-        lines.append("| " + " | ".join(str(c) for c in cells) + " |")
+        fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
+        if not fits.empty:
+            best = fits.iloc[0]
+            rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
+            name = best["model_name"]
+            total = best.get("total_params_b")
+            total_s = f"{total:g}B" if pd.notna(total) else "?"
+            arch = (best.get("architecture") or "?")
+            if pd.isna(arch):
+                arch = "?"
+            elif arch == "dense":
+                arch = "Dense"
+            elif arch == "moe":
+                arch = "MoE"
+            serving = f"{round(best[serving_col], 1)} GB"
+            lines.append(f"| {display} | {gpu_vram} GB | {name} | #{rank} | {total_s} | {arch} | {serving} |")
+        else:
+            lines.append(f"| {display} | {gpu_vram} GB | *No model fits* | — | — | — | — |")
 
     return lines
 
@@ -498,28 +520,42 @@ def _generate_leaderboard_table(df):
     """Generate the enriched leaderboard markdown table."""
     lines = []
 
-    header = "| Rank | Model | Score | Params (B) | Active (B) | Arch | VRAM FP8 | VRAM INT4 | Best GPU (FP8) |"
-    sep = "|------|-------|-------|------------|------------|------|----------|-----------|----------------|"
+    header = "| Rank | Model | Score | Params (B) | Arch | VRAM BF16 | VRAM FP8 | VRAM INT4 | Fits on |"
+    sep = "|------|-------|-------|------------|------|-----------|----------|-----------|---------|"
 
     def _format_row(row):
         rank = int(row["rank"]) if pd.notna(row.get("rank")) else "?"
         name = row.get("model_name", "?")
         score = int(row["arena_score"]) if pd.notna(row.get("arena_score")) else "?"
         total = row.get("total_params_b")
-        total_s = f"{total:g}" if pd.notna(total) else "?"
         active = row.get("active_params_b")
-        active_s = f"{active:g}" if pd.notna(active) else "?"
+        # Show "total (active)" for MoE, just "total" for dense
+        if pd.notna(total) and pd.notna(active) and total != active:
+            params_s = f"{total:g} ({active:g})"
+        elif pd.notna(total):
+            params_s = f"{total:g}"
+        else:
+            params_s = "?"
         arch = (row.get("architecture") or "?").upper() if pd.notna(row.get("architecture")) else "?"
         if arch == "DENSE":
             arch = "Dense"
         elif arch == "MOE":
             arch = "MoE"
+        bf16 = row.get("vram_bf16_serving_gb")
+        bf16_s = f"{bf16:g}" if pd.notna(bf16) else "?"
         fp8 = row.get("vram_fp8_serving_gb")
-        fp8_s = f"{fp8:g} GB" if pd.notna(fp8) else "?"
+        fp8_s = f"{fp8:g}" if pd.notna(fp8) else "?"
         int4 = row.get("vram_int4_serving_gb")
-        int4_s = f"{int4:g} GB" if pd.notna(int4) else "?"
-        best = row.get("best_gpu_fp8", "?")
-        return f"| {rank} | {name} | {score} | {total_s} | {active_s} | {arch} | {fp8_s} | {int4_s} | {best} |"
+        int4_s = f"{int4:g}" if pd.notna(int4) else "?"
+        # "Fits on" — show smallest single GPU at FP8, the most practical precision
+        best_fp8 = row.get("best_gpu_fp8", "?")
+        if best_fp8 == "MULTI-GPU":
+            fits_s = "Multi-GPU"
+        elif best_fp8 == "UNKNOWN":
+            fits_s = "?"
+        else:
+            fits_s = f"{best_fp8} (FP8)"
+        return f"| {rank} | {name} | {score} | {params_s} | {arch} | {bf16_s} | {fp8_s} | {int4_s} | {fits_s} |"
 
     # Top N rows shown directly
     top_df = df.head(README_TOP_N)
@@ -533,7 +569,7 @@ def _generate_leaderboard_table(df):
     # Remaining rows in collapsible section
     if len(rest_df) > 0:
         lines.append("")
-        lines.append(f"<details><summary>Show all remaining models ({len(rest_df)} more)</summary>")
+        lines.append(f"<details><summary>Show remaining {len(rest_df)} models</summary>")
         lines.append("")
         lines.append(header)
         lines.append(sep)
@@ -560,10 +596,10 @@ def print_console_summary(df, resolution_counts):
     print("=" * 60)
     print(f"Total models: {total}")
     print(f"Parameters resolved: {resolved} ({pct:.1f}%)")
+    print(f"  - From AA cache:            {resolution_counts.get('artificial_analysis', 0)}")
     print(f"  - From overrides:           {resolution_counts.get('override', 0)}")
     print(f"  - From name parsing:        {resolution_counts.get('name_parsing', 0)}")
-    print(f"  - From HuggingFace:         {resolution_counts.get('huggingface', 0)}")
-    print(f"  - From Artificial Analysis: {resolution_counts.get('artificial_analysis', 0)}")
+    print(f"  - From AA single scrape:    {resolution_counts.get('aa_single_scrape', 0)}")
     print(f"  - Unresolved:               {resolution_counts.get('UNKNOWN', 0)}")
 
     for precision in ["BF16", "FP8"]:
@@ -610,12 +646,17 @@ def main():
     parser.add_argument(
         "--no-network",
         action="store_true",
-        help="Skip network-based resolution (HF, AA). Use only overrides + name parsing.",
+        help="Skip network-based resolution (AA). Use only overrides + name parsing.",
     )
     parser.add_argument(
         "--update-readme",
         action="store_true",
         help="Update the root README.md with leaderboard tables.",
+    )
+    parser.add_argument(
+        "--refresh-cache",
+        action="store_true",
+        help="Force re-fetch of the Artificial Analysis model cache.",
     )
     parser.add_argument(
         "--output-dir", "-o",
@@ -640,16 +681,26 @@ def main():
 
     # Step 2: Resolve parameter counts
     print("\nStep 2: Resolving model parameters...")
+    use_network = not args.no_network
+
+    # Pre-load AA model cache (one network request, or from disk)
+    aa_lookup = None
+    if use_network:
+        print("  Loading Artificial Analysis model database...")
+        aa_lookup = get_aa_models(force_refresh=args.refresh_cache)
+        print(f"  AA database: {len(aa_lookup)} entries loaded")
+
     resolution_log = []
     resolution_counts = {}
-    use_network = not args.no_network
 
     for idx, row in df.iterrows():
         model_name = row["model_name"]
         if pd.isna(model_name):
             continue
 
-        params, source = resolve_model_params(model_name, use_network=use_network)
+        params, source = resolve_model_params(
+            model_name, use_network=use_network, aa_lookup=aa_lookup
+        )
         resolution_counts[source] = resolution_counts.get(source, 0) + 1
 
         if params:

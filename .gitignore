@@ -21,3 +21,12 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Secrets
+.env
+
+# AA model cache (regenerated on demand)
+arena_enrichment/cache/
+
+# Test artifacts
+aa_api_response.json

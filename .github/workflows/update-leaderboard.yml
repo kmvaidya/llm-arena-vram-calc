@@ -19,12 +19,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: arena_enrichment/requirements.txt
 
       - name: Install Python dependencies
         run: pip install -r arena_enrichment/requirements.txt
-
-      - name: Install Playwright + Chromium
-        run: playwright install --with-deps chromium
 
       - name: Run enrichment pipeline
         run: python arena_enrichment/enrich_arena.py --update-readme
