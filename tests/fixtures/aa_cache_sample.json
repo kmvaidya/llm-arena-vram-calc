@@ -1,0 +1,114 @@
+{
+  "fetched_at": "2026-01-01T00:00:00+00:00",
+  "model_count": 12,
+  "models": {
+    "deepseekv3": {
+      "name": "DeepSeek V3",
+      "slug": "deepseek-v3",
+      "is_open_weights": true,
+      "context_window": 65536,
+      "total_params_b": 671.0,
+      "active_params_b": 36.7,
+      "architecture": "moe"
+    },
+    "deepseekv3dec'24": {
+      "name": "DeepSeek V3",
+      "slug": "deepseek-v3",
+      "is_open_weights": true,
+      "context_window": 65536,
+      "total_params_b": 671.0,
+      "active_params_b": 36.7,
+      "architecture": "moe"
+    },
+    "llama370binstruct": {
+      "name": "Llama 3 70B Instruct",
+      "slug": "llama-3-70b-instruct",
+      "is_open_weights": true,
+      "context_window": 8192,
+      "total_params_b": 70.6,
+      "active_params_b": 70.6,
+      "architecture": "dense"
+    },
+    "llama370b": {
+      "name": "Llama 3 70B",
+      "slug": "llama-3-70b",
+      "is_open_weights": true,
+      "context_window": 8192,
+      "total_params_b": 70.6,
+      "active_params_b": 70.6,
+      "architecture": "dense"
+    },
+    "qwen2572binstruct": {
+      "name": "Qwen2.5-72B-Instruct",
+      "slug": "qwen-2.5-72b-instruct",
+      "is_open_weights": true,
+      "context_window": 131072,
+      "total_params_b": 72.0,
+      "active_params_b": 72.0,
+      "architecture": "dense"
+    },
+    "mistralsmall3": {
+      "name": "Mistral Small 3",
+      "slug": "mistral-small-3",
+      "is_open_weights": true,
+      "context_window": 32768,
+      "total_params_b": 24.0,
+      "active_params_b": 24.0,
+      "architecture": "dense"
+    },
+    "commandrplus": {
+      "name": "Command R+",
+      "slug": "command-r-plus",
+      "is_open_weights": true,
+      "context_window": 128000,
+      "total_params_b": 104.0,
+      "active_params_b": 104.0,
+      "architecture": "dense"
+    },
+    "grok1": {
+      "name": "Grok-1",
+      "slug": "grok-1",
+      "is_open_weights": true,
+      "context_window": 8192,
+      "total_params_b": 314.0,
+      "active_params_b": 78.0,
+      "architecture": "moe"
+    },
+    "phi4": {
+      "name": "Phi-4 Multimodal",
+      "slug": "phi-4",
+      "is_open_weights": true,
+      "context_window": 16384,
+      "total_params_b": 5.6,
+      "active_params_b": 5.6,
+      "architecture": "dense"
+    },
+    "nullparamsmodel": {
+      "name": "NullParams Model",
+      "slug": "null-params",
+      "is_open_weights": true,
+      "context_window": 4096,
+      "total_params_b": null,
+      "active_params_b": null,
+      "architecture": null
+    },
+    "xy": {
+      "name": "XY",
+      "slug": "xy",
+      "is_open_weights": true,
+      "context_window": 4096,
+      "total_params_b": 1.0,
+      "active_params_b": 1.0,
+      "architecture": "dense"
+    },
+    "gemma327b": {
+      "name": "Gemma 3 27B",
+      "slug": "gemma-3-27b",
+      "is_open_weights": true,
+      "context_window": 8192,
+      "total_params_b": 27.2,
+      "active_params_b": 27.2,
+      "architecture": "dense"
+    }
+  }
+}

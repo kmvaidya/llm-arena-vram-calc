@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["arena_enrichment"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
