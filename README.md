@@ -2,7 +2,7 @@
 
 Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) open-source LLM leaderboard with parameter counts and VRAM estimates for single-GPU deployment feasibility.
 
-> **Last updated:** 2026-02-26 00:49 UTC | **Models:** 187 | **Resolved:** 184 (98.4%)
+> **Last updated:** 2026-02-26 06:53 UTC | **Models:** 187 | **Resolved:** 184 (98.4%)
 
 ## Best Model Per GPU
 
@@ -254,9 +254,9 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 
 Parameters are resolved via a priority chain:
 
-1. **Override corrections** — models with misleading names or wrong AA data
-2. **[Artificial Analysis](https://artificialanalysis.ai)** — cached bulk model database (primary source)
-3. **Name parsing** — regex extraction of `{N}B` and `A{N}B` patterns
+1. **Override corrections** â€” models with misleading names or wrong AA data
+2. **[Artificial Analysis](https://artificialanalysis.ai)** â€” cached bulk model database (primary source)
+3. **Name parsing** â€” regex extraction of `{N}B` and `A{N}B` patterns
 
 ### GPUs
 
