@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -37,3 +38,13 @@ jobs:
           git add README.md arena_enrichment/output/
           git diff --cached --quiet || git commit -m "Update leaderboard tables [automated]"
           git push
+
+      - name: Create issue on failure
+        if: failure()
+        run: |
+          gh issue create \
+            --title "Leaderboard update failed ($(date -u +%Y-%m-%d))" \
+            --body "The daily leaderboard update workflow failed.\n\n**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nPlease check the logs for details." \
+            --label "bug"
+        env:
+          GH_TOKEN: ${{ github.token }}

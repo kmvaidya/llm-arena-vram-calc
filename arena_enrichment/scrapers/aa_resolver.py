@@ -314,14 +314,15 @@ def get_aa_models(max_age_hours=DEFAULT_MAX_AGE_HOURS, force_refresh=False):
     """
     Get the full AA model lookup, using cache when fresh.
 
-    Returns a dict keyed by normalized name variants, each value containing
-    name, slug, total_params_b, active_params_b, architecture.
+    Returns:
+        tuple of (lookup_dict, is_stale) where is_stale indicates the data
+        came from a stale cache fallback (RSC fetch failed).
     """
     if not force_refresh:
         cached, fetched_at = _load_cache()
         if cached and _cache_is_fresh(fetched_at, max_age_hours):
             logger.info(f"Using cached AA data ({len(cached)} entries, fetched {fetched_at})")
-            return cached
+            return cached, False
 
     # Fetch fresh data
     raw_models = _fetch_all_via_rsc()
@@ -330,13 +331,13 @@ def get_aa_models(max_age_hours=DEFAULT_MAX_AGE_HOURS, force_refresh=False):
         cached, fetched_at = _load_cache()
         if cached:
             logger.warning(f"RSC fetch failed, using stale cache ({fetched_at})")
-            return cached
+            return cached, True
         logger.warning("No AA data available (fetch failed, no cache)")
-        return {}
+        return {}, True
 
     lookup = _build_lookup(raw_models)
     _save_cache(lookup)
-    return lookup
+    return lookup, False
 
 
 def resolve_from_aa(model_name, aa_lookup=None):

@@ -375,7 +375,7 @@ def _build_gpu_summary_rows(df):
 # README generation
 # ---------------------------------------------------------------------------
 
-def generate_readme(df, resolution_counts):
+def generate_readme(df, resolution_counts, aa_is_stale=False):
     """
     Generate the full README.md content with:
     1. Best Model Per GPU — one table per precision
@@ -400,6 +400,9 @@ def generate_readme(df, resolution_counts):
                  f"**Models:** {total} | "
                  f"**Resolved:** {resolved} ({pct:.1f}%)")
     lines.append("")
+    if aa_is_stale:
+        lines.append("> **Warning:** AA data may be stale (RSC fetch failed, using cached data).")
+        lines.append("")
 
     # Table 1: Best Model Per GPU — one sub-table per precision
     lines.append("## Best Model Per GPU")
@@ -685,10 +688,13 @@ def main():
 
     # Pre-load AA model cache (one network request, or from disk)
     aa_lookup = None
+    aa_is_stale = False
     if use_network:
         print("  Loading Artificial Analysis model database...")
-        aa_lookup = get_aa_models(force_refresh=args.refresh_cache)
+        aa_lookup, aa_is_stale = get_aa_models(force_refresh=args.refresh_cache)
         print(f"  AA database: {len(aa_lookup)} entries loaded")
+        if aa_is_stale:
+            print("  WARNING: Using stale AA cache (RSC fetch failed)")
 
     resolution_log = []
     resolution_counts = {}
@@ -711,6 +717,7 @@ def main():
             df.at[idx, "total_params_b"] = None
             df.at[idx, "active_params_b"] = None
             df.at[idx, "architecture"] = None
+        df.at[idx, "resolution_source"] = source
 
         resolution_log.append({
             "model_name": model_name,
@@ -745,7 +752,7 @@ def main():
     # Step 5: Update README if requested
     if args.update_readme:
         print("\nStep 5: Updating README.md...")
-        readme_content = generate_readme(df, resolution_counts)
+        readme_content = generate_readme(df, resolution_counts, aa_is_stale=aa_is_stale)
         readme_path = os.path.join(REPO_ROOT, "README.md")
         with open(readme_path, "w") as f:
             f.write(readme_content)
