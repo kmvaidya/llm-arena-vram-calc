@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-03-02 06:50 UTC | **Models:** 187 | **Resolved:** 184 (98.4%)
+> **Last updated:** 2026-03-03 06:42 UTC | **Models:** 187 | **Resolved:** 181 (96.8%)
 
 ## Best Model Per GPU
 
@@ -176,11 +176,11 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 125 | wizardlm-70b | 1184 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 126 | deepseek-llm-67b-chat | 1184 | 67 | Dense | 167.5 | 83.8 | 41.9 | RTX PRO 6000 (FP8) |
 | 127 | yi-34b-chat | 1183 | 34 | Dense | 85 | 42.5 | 21.2 | H100 SXM (FP8) |
-| 128 | openchat-3.5-0106 | 1182 | 7 | Dense | 17.5 | 8.8 | 4.4 | H100 SXM (FP8) |
-| 129 | openchat-3.5 | 1182 | 7 | Dense | 17.5 | 8.8 | 4.4 | H100 SXM (FP8) |
+| 128 | openchat-3.5-0106 | 1182 | ? | ? | ? | ? | ? | ? |
+| 129 | openchat-3.5 | 1182 | ? | ? | ? | ? | ? | ? |
 | 130 | granite-3.0-8b-instruct | 1181 | 8 | Dense | 20 | 10 | 5 | H100 SXM (FP8) |
 | 131 | gemma-1.1-7b-it | 1180 | 7 | Dense | 17.5 | 8.8 | 4.4 | H100 SXM (FP8) |
-| 132 | snowflake-arctic-instruct | 1179 | 480 (17) | MoE | 1200 | 600 | 300 | Multi-GPU |
+| 132 | snowflake-arctic-instruct | 1179 | ? | ? | ? | ? | ? | ? |
 | 133 | granite-3.1-2b-instruct | 1179 | 2 | Dense | 5 | 2.5 | 1.2 | H100 SXM (FP8) |
 | 134 | tulu-2-dpo-70b | 1178 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 135 | openhermes-2.5-mistral-7b | 1175 | 7 | Dense | 17.5 | 8.8 | 4.4 | H100 SXM (FP8) |
