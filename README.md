@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-04-01 07:14 UTC | **Models:** 191 | **Resolved:** 153 (80.1%)
+> **Last updated:** 2026-04-02 07:07 UTC | **Models:** 191 | **Resolved:** 153 (80.1%)
 
 > **Warning:** AA data may be stale (RSC fetch failed, using cached data).
 
