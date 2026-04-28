@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-04-27 08:14 UTC | **Models:** 200 | **Resolved:** 158 (79.0%)
+> **Last updated:** 2026-04-28 08:16 UTC | **Models:** 200 | **Resolved:** 158 (79.0%)
 
 > **Warning:** AA data may be stale (RSC fetch failed, using cached data).
 
@@ -49,49 +49,49 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 1 | glm-5.1 | 1469 | ? | ? | ? | ? | ? | ? |
 | 2 | deepseek-v4-pro | 1463 | 1600 (49) | MoE | 4000 | 2000 | 1000 | Multi-GPU |
 | 3 | deepseek-v4-pro-thinking | 1462 | ? | ? | ? | ? | ? | ? |
-| 4 | kimi-k2.6 | 1458 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
+| 4 | kimi-k2.6 | 1459 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
 | 5 | glm-5 | 1457 | 744 (40) | MoE | 1860 | 930 | 465 | Multi-GPU |
-| 6 | gemma-4-31b | 1451 | 31 | Dense | 77.5 | 38.8 | 19.4 | H100 SXM (FP8) |
-| 7 | kimi-k2.5-thinking | 1449 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
+| 6 | gemma-4-31b | 1450 | 31 | Dense | 77.5 | 38.8 | 19.4 | H100 SXM (FP8) |
+| 7 | kimi-k2.5-thinking | 1448 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
 | 8 | qwen3.5-397b-a17b | 1446 | 397 (17) | MoE | 992.5 | 496.2 | 248.1 | Multi-GPU |
 | 9 | glm-4.7 | 1442 | ? | ? | ? | ? | ? | ? |
 | 10 | deepseek-v4-flash-thinking | 1439 | ? | ? | ? | ? | ? | ? |
 | 11 | gemma-4-26b-a4b | 1438 | 26 (4) | MoE | 65 | 32.5 | 16.2 | H100 SXM (FP8) |
-| 12 | deepseek-v4-flash | 1433 | 284 (13) | MoE | 710 | 355 | 177.5 | Multi-GPU |
-| 13 | kimi-k2.5-instant | 1432 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
+| 12 | deepseek-v4-flash | 1432 | 284 (13) | MoE | 710 | 355 | 177.5 | Multi-GPU |
+| 13 | kimi-k2.5-instant | 1431 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
 | 14 | kimi-k2-thinking-turbo | 1429 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
 | 15 | glm-4.6 | 1425 | ? | ? | ? | ? | ? | ? |
 | 16 | deepseek-v3.2-exp-thinking | 1424 | ? | ? | ? | ? | ? | ? |
 | 17 | deepseek-v3.2 | 1424 | ? | ? | ? | ? | ? | ? |
-| 18 | deepseek-v3.2-exp | 1423 | ? | ? | ? | ? | ? | ? |
+| 18 | deepseek-v3.2-exp | 1422 | ? | ? | ? | ? | ? | ? |
 | 19 | qwen3-235b-a22b-instruct-2507 | 1422 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
 | 20 | deepseek-v3.2-thinking | 1422 | ? | ? | ? | ? | ? | ? |
 | 21 | deepseek-r1-0528 | 1421 | ? | ? | ? | ? | ? | ? |
-| 22 | qwen3.5-122b-a10b | 1418 | 122 (10) | MoE | 305 | 152.5 | 76.2 | B200 SXM (FP8) |
-| 23 | kimi-k2-0905-preview | 1418 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
+| 22 | kimi-k2-0905-preview | 1417 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
+| 23 | qwen3.5-122b-a10b | 1417 | 122 (10) | MoE | 305 | 152.5 | 76.2 | B200 SXM (FP8) |
 | 24 | deepseek-v3.1 | 1417 | ? | ? | ? | ? | ? | ? |
-| 25 | kimi-k2-0711-preview | 1417 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
-| 26 | deepseek-v3.1-terminus-thinking | 1417 | ? | ? | ? | ? | ? | ? |
+| 25 | deepseek-v3.1-terminus-thinking | 1417 | ? | ? | ? | ? | ? | ? |
+| 26 | kimi-k2-0711-preview | 1417 | 1000 (32) | MoE | 2500 | 1250 | 625 | Multi-GPU |
 | 27 | deepseek-v3.1-thinking | 1416 | ? | ? | ? | ? | ? | ? |
 | 28 | deepseek-v3.1-terminus | 1415 | ? | ? | ? | ? | ? | ? |
 | 29 | qwen3-vl-235b-a22b-instruct | 1415 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
-| 30 | mistral-large-3 | 1415 | 675 (41) | MoE | 1687.5 | 843.8 | 421.9 | Multi-GPU |
-| 31 | glm-4.5 | 1411 | 355 (32) | MoE | 887.5 | 443.8 | 221.9 | Multi-GPU |
-| 32 | qwen3.5-27b | 1405 | 27 | Dense | 67.5 | 33.8 | 16.9 | H100 SXM (FP8) |
-| 33 | minimax-m2.7 | 1403 | ? | ? | ? | ? | ? | ? |
+| 30 | mistral-large-3 | 1414 | 675 (41) | MoE | 1687.5 | 843.8 | 421.9 | Multi-GPU |
+| 31 | glm-4.5 | 1410 | 355 (32) | MoE | 887.5 | 443.8 | 221.9 | Multi-GPU |
+| 32 | qwen3.5-27b | 1404 | 27 | Dense | 67.5 | 33.8 | 16.9 | H100 SXM (FP8) |
+| 33 | minimax-m2.7 | 1404 | ? | ? | ? | ? | ? | ? |
 | 34 | qwen3-235b-a22b-no-thinking | 1402 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
 | 35 | qwen3-next-80b-a3b-instruct | 1401 | 80 (3) | MoE | 200 | 100 | 50 | H200 SXM (FP8) |
 | 36 | longcat-flash-chat | 1401 | 560 (27) | MoE | 1400 | 700 | 350 | Multi-GPU |
-| 37 | minimax-m2.5 | 1399 | ? | ? | ? | ? | ? | ? |
-| 38 | qwen3-235b-a22b-thinking-2507 | 1399 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
+| 37 | qwen3-235b-a22b-thinking-2507 | 1399 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
+| 38 | minimax-m2.5 | 1398 | ? | ? | ? | ? | ? | ? |
 | 39 | deepseek-r1 | 1397 | 685 (37) | MoE | 1712.5 | 856.2 | 428.1 | Multi-GPU |
-| 40 | qwen3-vl-235b-a22b-thinking | 1395 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
-| 41 | qwen3.5-35b-a3b | 1395 | 35 (3) | MoE | 87.5 | 43.8 | 21.9 | H100 SXM (FP8) |
+| 40 | qwen3.5-35b-a3b | 1396 | 35 (3) | MoE | 87.5 | 43.8 | 21.9 | H100 SXM (FP8) |
+| 41 | qwen3-vl-235b-a22b-thinking | 1395 | 235 (22) | MoE | 587.5 | 293.8 | 146.9 | Multi-GPU |
 | 42 | deepseek-v3-0324 | 1395 | 671 (37) | MoE | 1677.5 | 838.8 | 419.4 | Multi-GPU |
 | 43 | mimo-v2-flash (non-thinking) | 1392 | ? | ? | ? | ? | ? | ? |
-| 44 | step-3.5-flash | 1392 | ? | ? | ? | ? | ? | ? |
-| 45 | mimo-v2-flash (thinking) | 1387 | ? | ? | ? | ? | ? | ? |
-| 46 | qwen3-coder-480b-a35b-instruct | 1387 | 480 (35) | MoE | 1200 | 600 | 300 | Multi-GPU |
+| 44 | step-3.5-flash | 1391 | ? | ? | ? | ? | ? | ? |
+| 45 | qwen3-coder-480b-a35b-instruct | 1387 | 480 (35) | MoE | 1200 | 600 | 300 | Multi-GPU |
+| 46 | mimo-v2-flash (thinking) | 1387 | ? | ? | ? | ? | ? | ? |
 | 47 | minimax-m2.1-preview | 1385 | ? | ? | ? | ? | ? | ? |
 | 48 | qwen3-30b-a3b-instruct-2507 | 1383 | 30 (3) | MoE | 75 | 37.5 | 18.8 | H100 SXM (FP8) |
 | 49 | glm-4.6v | 1377 | ? | ? | ? | ? | ? | ? |
@@ -104,7 +104,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 51 | trinity-large-preview | 1374 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 52 | glm-4.5-air | 1372 | ? | ? | ? | ? | ? | ? |
 | 53 | qwen3-next-80b-a3b-thinking | 1369 | 80 (3) | MoE | 200 | 100 | 50 | H200 SXM (FP8) |
-| 54 | glm-4.7-flash | 1368 | ? | ? | ? | ? | ? | ? |
+| 54 | glm-4.7-flash | 1367 | ? | ? | ? | ? | ? | ? |
 | 55 | gemma-3-27b-it | 1365 | 27 | Dense | 67.5 | 33.8 | 16.9 | H100 SXM (FP8) |
 | 56 | minimax-m1 | 1363 | ? | ? | ? | ? | ? | ? |
 | 57 | nvidia-nemotron-3-super-120b-a12b | 1361 | 120 (12) | MoE | 300 | 150 | 75 | B200 SXM (FP8) |
@@ -112,11 +112,11 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 59 | mistral-small-2506 | 1357 | ? | ? | ? | ? | ? | ? |
 | 60 | intellect-3 | 1356 | 107 | Dense | 267.5 | 133.8 | 66.9 | H200 SXM (FP8) |
 | 61 | command-a-03-2025 | 1353 | ? | ? | ? | ? | ? | ? |
-| 62 | gpt-oss-120b | 1353 | 117 (5.1) | MoE | 292.5 | 146.2 | 73.1 | B200 SXM (FP8) |
-| 63 | glm-4.5v | 1353 | ? | ? | ? | ? | ? | ? |
+| 62 | glm-4.5v | 1353 | ? | ? | ? | ? | ? | ? |
+| 63 | gpt-oss-120b | 1353 | 117 (5.1) | MoE | 292.5 | 146.2 | 73.1 | B200 SXM (FP8) |
 | 64 | step-3 | 1347 | ? | ? | ? | ? | ? | ? |
-| 65 | qwen3-32b | 1347 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
-| 66 | llama-3.1-nemotron-ultra-253b-v1 | 1347 | 253 | Dense | 632.5 | 316.2 | 158.1 | Multi-GPU |
+| 65 | llama-3.1-nemotron-ultra-253b-v1 | 1346 | 253 | Dense | 632.5 | 316.2 | 158.1 | Multi-GPU |
+| 66 | qwen3-32b | 1346 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 67 | minimax-m2 | 1346 | 230 (10) | MoE | 575 | 287.5 | 143.8 | B300 SXM (FP8) |
 | 68 | ling-flash-2.0 | 1345 | ? | ? | ? | ? | ? | ? |
 | 69 | nvidia-llama-3.3-nemotron-super-49b-v1.5 | 1342 | 49 | Dense | 122.5 | 61.2 | 30.6 | H100 SXM (FP8) |
@@ -136,20 +136,20 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 83 | gemma-3n-e4b-it | 1318 | 8.4 (4) | MoE | 21 | 10.5 | 5.2 | H100 SXM (FP8) |
 | 84 | qwen-max-0919 | 1317 | ? | ? | ? | ? | ? | ? |
 | 85 | gpt-oss-20b | 1317 | 21 (3.6) | MoE | 52.5 | 26.2 | 13.1 | H100 SXM (FP8) |
-| 86 | nvidia-nemotron-3-nano-30b-a3b-bf16 | 1317 | 30 (3) | MoE | 75 | 37.5 | 18.8 | H100 SXM (FP8) |
+| 86 | nvidia-nemotron-3-nano-30b-a3b-bf16 | 1316 | 30 (3) | MoE | 75 | 37.5 | 18.8 | H100 SXM (FP8) |
 | 87 | athene-v2-chat | 1314 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
 | 88 | mistral-large-2407 | 1313 | 123 | Dense | 307.5 | 153.8 | 76.9 | B200 SXM (FP8) |
 | 89 | deepseek-v2.5 | 1306 | ? | ? | ? | ? | ? | ? |
 | 90 | athene-70b-0725 | 1305 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 91 | olmo-3-32b-think | 1305 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 92 | mistral-large-2411 | 1304 | ? | ? | ? | ? | ? | ? |
-| 93 | mistral-small-3.1-24b-instruct-2503 | 1303 | 24 | Dense | 60 | 30 | 15 | H100 SXM (FP8) |
-| 94 | gemma-3-4b-it | 1303 | 4 | Dense | 10 | 5 | 2.5 | H100 SXM (FP8) |
+| 93 | gemma-3-4b-it | 1303 | 4 | Dense | 10 | 5 | 2.5 | H100 SXM (FP8) |
+| 94 | mistral-small-3.1-24b-instruct-2503 | 1303 | 24 | Dense | 60 | 30 | 15 | H100 SXM (FP8) |
 | 95 | qwen2.5-72b-instruct | 1302 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
 | 96 | llama-3.1-nemotron-70b-instruct | 1298 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
-| 97 | llama-3.1-70b-instruct | 1293 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
+| 97 | llama-3.1-70b-instruct | 1292 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 98 | jamba-1.5-large | 1288 | ? | ? | ? | ? | ? | ? |
-| 99 | gemma-2-27b-it | 1288 | 27 | Dense | 67.5 | 33.8 | 16.9 | H100 SXM (FP8) |
+| 99 | gemma-2-27b-it | 1287 | 27 | Dense | 67.5 | 33.8 | 16.9 | H100 SXM (FP8) |
 | 100 | ibm-granite-h-small | 1286 | 8 | Dense | 20 | 10 | 5 | H100 SXM (FP8) |
 | 101 | llama-3.1-tulu-3-70b | 1285 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 102 | llama-3.1-nemotron-51b-instruct | 1285 | 51 | Dense | 127.5 | 63.8 | 31.9 | H100 SXM (FP8) |
@@ -164,7 +164,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 111 | gemma-2-9b-it | 1265 | 9 | Dense | 22.5 | 11.2 | 5.6 | H100 SXM (FP8) |
 | 112 | deepseek-coder-v2 | 1263 | 236 (21) | MoE | 590 | 295 | 147.5 | Multi-GPU |
 | 113 | command-r-plus | 1261 | ? | ? | ? | ? | ? | ? |
-| 114 | qwen2-72b-instruct | 1261 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
+| 114 | qwen2-72b-instruct | 1260 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
 | 115 | phi-4 | 1255 | 14 | Dense | 35 | 17.5 | 8.8 | H100 SXM (FP8) |
 | 116 | olmo-2-0325-32b-instruct | 1251 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 117 | command-r-08-2024 | 1249 | 35 | Dense | 87.5 | 43.8 | 21.9 | H100 SXM (FP8) |
@@ -173,7 +173,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 120 | qwen1.5-110b-chat | 1233 | 110 | Dense | 275 | 137.5 | 68.8 | H200 SXM (FP8) |
 | 121 | qwen1.5-72b-chat | 1232 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
 | 122 | mixtral-8x22b-instruct-v0.1 | 1228 | 140.8 (39.6) | MoE | 352 | 176 | 88 | B200 SXM (FP8) |
-| 123 | command-r | 1226 | ? | ? | ? | ? | ? | ? |
+| 123 | command-r | 1225 | ? | ? | ? | ? | ? | ? |
 | 124 | llama-3-8b-instruct | 1222 | 8 | Dense | 20 | 10 | 5 | H100 SXM (FP8) |
 | 125 | c4ai-aya-expanse-8b | 1222 | 8 | Dense | 20 | 10 | 5 | H100 SXM (FP8) |
 | 126 | llama-3.1-tulu-3-8b | 1220 | 8 | Dense | 20 | 10 | 5 | H100 SXM (FP8) |
@@ -190,7 +190,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 137 | qwen1.5-14b-chat | 1190 | 14 | Dense | 35 | 17.5 | 8.8 | H100 SXM (FP8) |
 | 138 | wizardlm-70b | 1183 | 70 | Dense | 175 | 87.5 | 43.8 | RTX PRO 6000 (FP8) |
 | 139 | deepseek-llm-67b-chat | 1183 | 67 | Dense | 167.5 | 83.8 | 41.9 | RTX PRO 6000 (FP8) |
-| 140 | yi-34b-chat | 1183 | 34 | Dense | 85 | 42.5 | 21.2 | H100 SXM (FP8) |
+| 140 | yi-34b-chat | 1182 | 34 | Dense | 85 | 42.5 | 21.2 | H100 SXM (FP8) |
 | 141 | openchat-3.5-0106 | 1181 | ? | ? | ? | ? | ? | ? |
 | 142 | openchat-3.5 | 1181 | ? | ? | ? | ? | ? | ? |
 | 143 | granite-3.0-8b-instruct | 1181 | 8 | Dense | 20 | 10 | 5 | H100 SXM (FP8) |
