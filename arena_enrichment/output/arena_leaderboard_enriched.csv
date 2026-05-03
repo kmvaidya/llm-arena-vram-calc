@@ -62,7 +62,7 @@ rank,model_name,arena_score,ci_lower,ci_upper,votes,organization,license,total_p
 61,nvidia-nemotron-3-super-120b-a12b,1361.03,1353.78,1368.29,7409,Nvidia,NVIDIA Open Model,120.0,12.0,moe,name_parsing,240.0,300.0,120.0,150.0,60.0,75.0,False,False,True,False,False,True,False,False,True,False,True,True,False,True,True,MULTI-GPU,B200 SXM
 62,deepseek-v3,1358.14,1353.41,1362.87,21770,DeepSeek,DeepSeek,671.0,37.0,moe,aa_single_scrape,1342.0,1677.5,671.0,838.8,335.5,419.4,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,MULTI-GPU,MULTI-GPU
 63,mistral-small-2506,1357.14,1351.94,1362.34,17720,Mistral,Apache 2.0,,,,UNKNOWN,,,,,,,,,,,,,,,,,,,,,,UNKNOWN,UNKNOWN
-64,intellect-3,1356.38,1348.03,1364.73,5334,Prime Intellect,MIT,107.0,107.0,dense,aa_single_scrape,214.0,267.5,107.0,133.8,53.5,66.9,False,False,True,False,False,True,False,True,True,False,True,True,True,True,True,B300 SXM,H200 SXM
+64,intellect-3,1356.38,1348.03,1364.73,5334,Prime Intellect,MIT,,,,UNKNOWN,,,,,,,,,,,,,,,,,,,,,,UNKNOWN,UNKNOWN
 65,command-a-03-2025,1353.53,1350.09,1356.97,56319,Cohere,CC-BY-NC-4.0,,,,UNKNOWN,,,,,,,,,,,,,,,,,,,,,,UNKNOWN,UNKNOWN
 66,glm-4.5v,1353.22,1344.88,1361.55,4969,Z.ai,MIT,,,,UNKNOWN,,,,,,,,,,,,,,,,,,,,,,UNKNOWN,UNKNOWN
 67,gpt-oss-120b,1352.97,1348.62,1357.32,30670,OpenAI,Apache 2.0,117,5.1,moe,override,234.0,292.5,117.0,146.2,58.5,73.1,False,False,True,False,False,True,False,False,True,False,True,True,False,True,True,MULTI-GPU,B200 SXM
@@ -114,7 +114,7 @@ rank,model_name,arena_score,ci_lower,ci_upper,votes,organization,license,total_p
 113,qwen2.5-coder-32b-instruct,1270.0,1261.88,1278.13,5432,Alibaba,Apache 2.0,32.0,32.0,dense,name_parsing,64.0,80.0,32.0,40.0,16.0,20.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,H100 SXM,H100 SXM
 114,c4ai-aya-expanse-32b,1266.47,1261.6,1271.35,27124,Cohere,CC-BY-NC-4.0,32.0,32.0,dense,name_parsing,64.0,80.0,32.0,40.0,16.0,20.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,H100 SXM,H100 SXM
 115,gemma-2-9b-it,1265.45,1261.65,1269.25,54611,Google,Gemma license,9.0,9.0,dense,name_parsing,18.0,22.5,9.0,11.2,4.5,5.6,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,H100 SXM,H100 SXM
-116,deepseek-coder-v2,1263.72,1257.44,1270.0,15147,DeepSeek,DeepSeek License,236.0,21.0,moe,aa_single_scrape,472.0,590.0,236.0,295.0,118.0,147.5,False,False,False,False,False,False,False,False,False,False,False,True,False,False,True,MULTI-GPU,MULTI-GPU
+116,deepseek-coder-v2,1263.72,1257.44,1270.0,15147,DeepSeek,DeepSeek License,,,,UNKNOWN,,,,,,,,,,,,,,,,,,,,,,UNKNOWN,UNKNOWN
 117,command-r-plus,1260.9,1256.57,1265.22,77554,Cohere,CC-BY-NC-4.0,,,,UNKNOWN,,,,,,,,,,,,,,,,,,,,,,UNKNOWN,UNKNOWN
 118,qwen2-72b-instruct,1260.88,1255.94,1265.82,37325,Alibaba,Qianwen LICENSE,72.0,72.0,dense,name_parsing,144.0,180.0,72.0,90.0,36.0,45.0,False,True,True,False,False,True,False,True,True,True,True,True,True,True,True,B200 SXM,RTX PRO 6000
 119,phi-4,1255.61,1251.03,1260.18,24126,Microsoft,MIT,14,14,dense,override,28.0,35.0,14.0,17.5,7.0,8.8,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,H100 SXM,H100 SXM
