@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-05-03 07:55 UTC | **Models:** 204 | **Resolved:** 157 (77.0%)
+> **Last updated:** 2026-05-04 08:25 UTC | **Models:** 204 | **Resolved:** 159 (77.9%)
 
 > **Warning:** AA data may be stale (RSC fetch failed, using cached data).
 
@@ -114,7 +114,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 61 | nvidia-nemotron-3-super-120b-a12b | 1361 | 120 (12) | MoE | 300 | 150 | 75 | B200 SXM (FP8) |
 | 62 | deepseek-v3 | 1358 | 671 (37) | MoE | 1677.5 | 838.8 | 419.4 | Multi-GPU |
 | 63 | mistral-small-2506 | 1357 | ? | ? | ? | ? | ? | ? |
-| 64 | intellect-3 | 1356 | ? | ? | ? | ? | ? | ? |
+| 64 | intellect-3 | 1356 | 107 | Dense | 267.5 | 133.8 | 66.9 | H200 SXM (FP8) |
 | 65 | command-a-03-2025 | 1353 | ? | ? | ? | ? | ? | ? |
 | 66 | glm-4.5v | 1353 | ? | ? | ? | ? | ? | ? |
 | 67 | gpt-oss-120b | 1352 | 117 (5.1) | MoE | 292.5 | 146.2 | 73.1 | B200 SXM (FP8) |
@@ -166,7 +166,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 113 | qwen2.5-coder-32b-instruct | 1270 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 114 | c4ai-aya-expanse-32b | 1266 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 115 | gemma-2-9b-it | 1265 | 9 | Dense | 22.5 | 11.2 | 5.6 | H100 SXM (FP8) |
-| 116 | deepseek-coder-v2 | 1263 | ? | ? | ? | ? | ? | ? |
+| 116 | deepseek-coder-v2 | 1263 | 236 (21) | MoE | 590 | 295 | 147.5 | Multi-GPU |
 | 117 | command-r-plus | 1260 | ? | ? | ? | ? | ? | ? |
 | 118 | qwen2-72b-instruct | 1260 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
 | 119 | phi-4 | 1255 | 14 | Dense | 35 | 17.5 | 8.8 | H100 SXM (FP8) |
