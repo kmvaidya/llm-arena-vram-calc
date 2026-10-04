@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-10-03 10:58 UTC | **Models:** 225 | **Resolved:** 170 (75.6%)
+> **Last updated:** 2026-10-04 11:40 UTC | **Models:** 225 | **Resolved:** 171 (76.0%)
 
 > **Warning:** AA data may be stale (RSC fetch failed, using cached data).
 
@@ -187,7 +187,7 @@ Highest-ranked Arena model that fits on each single GPU (includes 25% serving ov
 | 134 | qwen2.5-coder-32b-instruct | 1270 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 135 | c4ai-aya-expanse-32b | 1267 | 32 | Dense | 80 | 40 | 20 | H100 SXM (FP8) |
 | 136 | gemma-2-9b-it | 1266 | 9 | Dense | 22.5 | 11.2 | 5.6 | H100 SXM (FP8) |
-| 137 | deepseek-coder-v2 | 1265 | ? | ? | ? | ? | ? | ? |
+| 137 | deepseek-coder-v2 | 1265 | 236 (21) | MoE | 590 | 295 | 147.5 | Multi-GPU |
 | 138 | qwen2-72b-instruct | 1261 | 72 | Dense | 180 | 90 | 45 | RTX PRO 6000 (FP8) |
 | 139 | command-r-plus | 1261 | ? | ? | ? | ? | ? | ? |
 | 140 | phi-4 | 1256 | 14 | Dense | 35 | 17.5 | 8.8 | H100 SXM (FP8) |
