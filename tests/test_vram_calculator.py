@@ -7,6 +7,7 @@ from vram_calculator import (
     _find_best_node,
     add_all_vram_and_gpu_columns,
     compute_vram_columns,
+    decode_tokens_per_s,
     node_label,
     practical_serving_gb,
     vram_estimate_gb,
@@ -220,3 +221,40 @@ class TestAddAllColumns:
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "unknown-model"].iloc[0]
         assert row["best_node_fp8"] == "UNKNOWN"
+
+
+class TestDecodeTokensPerS:
+    def test_dense_formula(self):
+        # 0.6 x 3350 GB/s / (30B x 1 byte) = 67 tokens/s
+        assert decode_tokens_per_s(30, "dense", "FP8", 3350) == pytest.approx(67.0)
+
+    def test_moe_reads_only_active_params_at_lower_mbu(self):
+        # 0.3 x 4800 / (37B x 1 byte) for DeepSeek V3 on an H200
+        assert decode_tokens_per_s(37, "moe", "FP8", 4800) == pytest.approx(0.3 * 4800 / 37)
+
+    def test_int4_is_twice_fp8(self):
+        fp8 = decode_tokens_per_s(30, "dense", "FP8", 3350)
+        assert decode_tokens_per_s(30, "dense", "INT4", 3350) == pytest.approx(2 * fp8)
+
+    def test_every_gpu_has_a_bandwidth(self):
+        assert all(g.bandwidth_gbs > 0 for g in GPUS)
+
+
+class TestComputeSpeedColumns:
+    def test_speed_on_fits_on_gpu(self, sample_leaderboard_df):
+        df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
+        row = df[df["model_name"] == "small-model-8b"].iloc[0]
+        # FP8: 10 GB fits the RTX 4090: 0.6 x 1008 / 8 = 75.6
+        assert row["est_tok_s_fp8"] == pytest.approx(75.6)
+        # BF16: 20 GB also fits the RTX 4090: 0.6 x 1008 / 16 = 37.8
+        assert row["est_tok_s_bf16"] == pytest.approx(37.8)
+
+    def test_no_speed_when_several_gpus_needed(self, sample_leaderboard_df):
+        df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
+        row = df[df["model_name"] == "moe-model-600b"].iloc[0]
+        assert pd.isna(row["est_tok_s_fp8"])
+
+    def test_no_speed_for_unknown_model(self, sample_leaderboard_df):
+        df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
+        row = df[df["model_name"] == "unknown-model"].iloc[0]
+        assert pd.isna(row["est_tok_s_fp8"])

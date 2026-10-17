@@ -207,13 +207,40 @@ class TestFullPipeline:
         readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
 
         # Single-GPU table: each tier named once, on its first row
-        assert "| Consumer | RTX 4090 | 24 GB | DeepSeek-V3 (#1, 20 GB) |" in readme
+        # 0.6 x 1008 GB/s / (8B x 2 bytes) = 37.8 tokens/s
+        assert "| Consumer | RTX 4090 | 24 GB | DeepSeek-V3 (#1, 20 GB, ~38 tok/s) |" in readme
         assert "|  | RTX 5090 | 32 GB |" in readme
         # 8-GPU table: no desktop cards, the RTX PRO 6000 as Server Edition
         assert "8x RTX 4090" not in readme
         assert "8x Radeon AI PRO R9700" not in readme
         assert "| 8x RTX PRO 6000 Blackwell Server Edition | 768 GB |" in readme
         # GPU reference table
-        assert ("| Workstation | RTX PRO 6000 Blackwell | 96 GB | Blackwell | Yes "
+        assert ("| Workstation | RTX PRO 6000 Blackwell | 96 GB | 1.79 TB/s | Blackwell | Yes "
                 "| Server Edition only |") in readme
-        assert "| Data center | A100 80GB | 80 GB | Ampere | No (weight-only FP8 kernels) | Yes |" in readme
+        assert ("| Data center | A100 80GB | 80 GB | 2.04 TB/s | Ampere "
+                "| No (weight-only FP8 kernels) | Yes |") in readme
+
+    def test_formulas_and_speeds_in_readme(self, integration_leaderboard):
+        df = integration_leaderboard.copy().head(2)
+        df["total_params_b"] = [671.0, 72.0]
+        df["active_params_b"] = [37.0, 72.0]
+        df["architecture"] = ["moe", "dense"]
+        readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
+
+        assert "### Memory formula" in readme
+        assert ("Serving VRAM (GB) = total parameters (billions) × bytes per parameter × 1.25"
+                in readme)
+        assert "| FP8 | 1 | 70 GB | 87.5 GB |" in readme
+        assert "### Speed formula" in readme
+        assert ("Decode speed (tokens/s) ≈ MBU × memory bandwidth (GB/s) "
+                "÷ (active parameters (billions) × bytes per parameter)") in readme
+        assert "0.6 × 3,350 ÷ (30 × 1) ≈ 67 tokens/s" in readme
+
+        # Leaderboard: no speed for the model that needs 8 GPUs; one for the
+        # 72B dense model on its RTX PRO 6000: 0.6 x 1792 / 72 = 14.9
+        assert "| 8x H200 SXM / NVL (FP8) | — |" in readme
+        assert "| RTX PRO 6000 Blackwell (FP8) | ~15 tok/s |" in readme
+        assert "*Speed* is the estimated decode speed for one request on that GPU" in readme
+        # Node tables carry no speeds
+        node_section = readme.split("## Best Model Per 8-GPU Node")[1].split("## Full Leaderboard")[0]
+        assert "tok/s" not in node_section
