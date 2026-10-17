@@ -21,7 +21,7 @@ import logging
 import os
 import re
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, TypedDict
 
 import requests
@@ -273,7 +273,7 @@ def _save_cache(models_dict: dict[str, AAEntry]) -> None:
     """Persist the processed model lookup dict to disk."""
     os.makedirs(CACHE_DIR, exist_ok=True)
     data = {
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "fetched_at": datetime.now(UTC).isoformat(),
         "model_count": len(models_dict),
         "models": models_dict,
     }
@@ -306,10 +306,10 @@ def _save_params_cache(cache: dict[str, dict[str, Any]]) -> None:
 def _age_days(checked: str | None) -> float:
     """Days since a YYYY-MM-DD date; infinite when the date is missing or invalid."""
     try:
-        day = datetime.strptime(checked or "", "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        day = datetime.strptime(checked or "", "%Y-%m-%d").replace(tzinfo=UTC)
     except ValueError:
         return float("inf")
-    return (datetime.now(timezone.utc) - day).total_seconds() / 86400
+    return (datetime.now(UTC) - day).total_seconds() / 86400
 
 
 def _params_from_cache_entry(hit: dict[str, Any]) -> ModelParams | None:
@@ -350,7 +350,7 @@ def get_model_params(slug: str) -> ModelParams | None:
         "total_params_b": params["total_params_b"] if params else None,
         "active_params_b": params["active_params_b"] if params else None,
         "architecture": params["architecture"] if params else None,
-        "checked": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "checked": datetime.now(UTC).strftime("%Y-%m-%d"),
     }
     _save_params_cache(cache)
     return params
@@ -362,7 +362,7 @@ def _cache_is_fresh(fetched_at: str | None, max_age_hours: float) -> bool:
         return False
     try:
         fetched = datetime.fromisoformat(fetched_at)
-        age_hours = (datetime.now(timezone.utc) - fetched).total_seconds() / 3600
+        age_hours = (datetime.now(UTC) - fetched).total_seconds() / 3600
         return age_hours < max_age_hours
     except (ValueError, TypeError):
         return False

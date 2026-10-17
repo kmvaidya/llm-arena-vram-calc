@@ -1,6 +1,6 @@
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -258,7 +258,7 @@ def params_cache(monkeypatch, tmp_path):
 
 
 def _days_ago(days):
-    return (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    return (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
 
 
 @pytest.mark.usefixtures("no_rate_limit")

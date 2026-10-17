@@ -8,6 +8,8 @@ model.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import pandas as pd
 
 # Bytes per parameter for each precision
@@ -18,30 +20,74 @@ PRECISION_BYTES = {
     "MXFP4": 0.53,    # ~4.25 bits (used by GPT-OSS natively)
 }
 
-# GPU configurations: name -> VRAM in GB
-GPU_CONFIGS = {
-    "RTX_PRO_6000": 96,
-    "H100": 80,
-    "H200": 141,
-    "B200": 180,
-    "B300": 288,
-}
+@dataclass(frozen=True)
+class Gpu:
+    """A GPU the tables report on."""
 
-# Display names for GPUs
-GPU_DISPLAY_NAMES = {
-    "RTX_PRO_6000": "RTX PRO 6000",
-    "H100": "H100 SXM",
-    "H200": "H200 SXM",
-    "B200": "B200 SXM",
-    "B300": "B300 SXM",
-}
+    key: str                # column id, as in fits_<key>_<precision>
+    name: str
+    vram_gb: int            # memory a server can use
+    tier: str               # "Consumer", "Workstation" or "Data center"
+    architecture: str
+    native_fp8: bool
+    # Sold in 8-GPU servers.  GeForce cards are not (NVIDIA's GeForce driver
+    # license bars data-center deployment), nor are workstation cards, which
+    # are built for desktops with up to four cards
+    in_8gpu_servers: bool = False
+    # The version that goes in 8-GPU servers, when not every version does
+    server_variant: str = ""
+    # The most widely deployed GPU at its memory size.  The leaderboard's
+    # "Fits on" names the smallest reference GPU (or 8-GPU server) that fits,
+    # so it reads "8x H200" rather than a rarer part that happens to be smaller
+    reference: bool = False
+
+
+# Every GPU in the tables, in display order: by tier, then memory.  Ties in
+# memory keep this order when picking the smallest GPU that fits.
+#
+# Checked 2026-10.  B200 lists the 180 GB per GPU usable on an HGX B200 board
+# (192 GB on the package).  Rubin ships as HGX Rubin NVL8 from H2 2026.  Left
+# out: rack-scale-only parts (GB200/GB300 NVL72, MI455X in AMD Helios), which
+# come as 72-GPU racks rather than single GPUs or 8-GPU servers, and AMD's
+# MI440X 8-GPU platform, whose memory is not yet published.
+GPUS: list[Gpu] = [
+    Gpu("rtx_4090", "RTX 4090", 24, "Consumer", "Ada Lovelace", True, reference=True),
+    Gpu("rtx_5090", "RTX 5090", 32, "Consumer", "Blackwell", True, reference=True),
+    Gpu("r9700", "Radeon AI PRO R9700", 32, "Workstation", "RDNA 4", True),
+    Gpu("rtx_pro_6000", "RTX PRO 6000 Blackwell", 96, "Workstation", "Blackwell", True,
+        in_8gpu_servers=True, server_variant="Server Edition", reference=True),
+    Gpu("l40s", "L40S", 48, "Data center", "Ada Lovelace", True,
+        in_8gpu_servers=True, reference=True),
+    Gpu("h100", "H100 SXM", 80, "Data center", "Hopper", True,
+        in_8gpu_servers=True, reference=True),
+    Gpu("a100", "A100 80GB", 80, "Data center", "Ampere", False, in_8gpu_servers=True),
+    Gpu("h100_nvl", "H100 NVL", 94, "Data center", "Hopper", True, in_8gpu_servers=True),
+    Gpu("gaudi3", "Gaudi 3", 128, "Data center", "Gaudi 3", True, in_8gpu_servers=True),
+    Gpu("h200", "H200 SXM / NVL", 141, "Data center", "Hopper", True,
+        in_8gpu_servers=True, reference=True),
+    Gpu("b200", "B200 SXM", 180, "Data center", "Blackwell", True,
+        in_8gpu_servers=True, reference=True),
+    Gpu("mi300x", "MI300X", 192, "Data center", "CDNA 3", True, in_8gpu_servers=True),
+    Gpu("mi325x", "MI325X", 256, "Data center", "CDNA 3", True, in_8gpu_servers=True),
+    Gpu("b300", "B300 SXM", 288, "Data center", "Blackwell Ultra", True,
+        in_8gpu_servers=True, reference=True),
+    Gpu("rubin", "Rubin", 288, "Data center", "Rubin", True, in_8gpu_servers=True),
+    Gpu("mi355x", "MI350X / MI355X", 288, "Data center", "CDNA 4", True, in_8gpu_servers=True),
+]
 
 # GPUs sorted by VRAM ascending (for finding smallest fitting GPU)
-GPUS_BY_VRAM = sorted(GPU_CONFIGS.items(), key=lambda x: x[1])
+GPUS_BY_VRAM = sorted(GPUS, key=lambda g: g.vram_gb)
 
 # GPUs in a standard server node (HGX/DGX-style), the usual way to serve
 # models too large for one GPU: weights are split across the node's GPUs
 NODE_GPU_COUNT = 8
+
+# GPUs sold in 8-GPU servers, sorted by VRAM ascending
+NODE_GPUS = [g for g in GPUS_BY_VRAM if g.in_8gpu_servers]
+
+# The reference GPUs and 8-GPU servers that "Fits on" chooses from, smallest first
+FITS_ON_GPUS = [g for g in GPUS_BY_VRAM if g.reference]
+FITS_ON_NODES = [g for g in NODE_GPUS if g.reference]
 
 # Precisions to compute for GPU fit columns
 FIT_PRECISIONS = ["BF16", "FP8", "INT4"]
@@ -127,14 +173,13 @@ def compute_gpu_fit_columns(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with GPU fit columns added
     """
-    for gpu_key, gpu_vram in GPU_CONFIGS.items():
-        gpu_lower = gpu_key.lower()
+    for gpu in GPUS:
         for precision in FIT_PRECISIONS:
             p_lower = precision.lower()
             serving_col = f"vram_{p_lower}_serving_gb"
-            fit_col = f"fits_{gpu_lower}_{p_lower}"
+            fit_col = f"fits_{gpu.key}_{p_lower}"
             df[fit_col] = df[serving_col].apply(
-                lambda x, vram=gpu_vram: bool(x <= vram) if pd.notna(x) else None
+                lambda x, vram=gpu.vram_gb: bool(x <= vram) if pd.notna(x) else None
             )
 
     return df
@@ -142,7 +187,7 @@ def compute_gpu_fit_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def compute_best_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add summary columns for the smallest GPU that can serve each model.
+    Add summary columns for the smallest reference GPU that can serve each model.
 
     Adds columns: best_gpu_bf16, best_gpu_fp8
 
@@ -165,21 +210,22 @@ def compute_best_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _find_best_gpu(serving_gb: float) -> str:
-    """Find the smallest GPU that can fit the given serving VRAM requirement."""
-    for gpu_key, gpu_vram in GPUS_BY_VRAM:
-        if serving_gb <= gpu_vram:
-            return GPU_DISPLAY_NAMES[gpu_key]
+    """Find the smallest reference GPU that can fit the given serving VRAM requirement."""
+    for gpu in FITS_ON_GPUS:
+        if serving_gb <= gpu.vram_gb:
+            return gpu.name
     return "MULTI-GPU"
 
 
-def node_label(gpu_key: str) -> str:
+def node_label(gpu: Gpu) -> str:
     """Display name for an 8-GPU node, e.g. '8x H100 SXM'."""
-    return f"{NODE_GPU_COUNT}x {GPU_DISPLAY_NAMES[gpu_key]}"
+    variant = f" {gpu.server_variant}" if gpu.server_variant else ""
+    return f"{NODE_GPU_COUNT}x {gpu.name}{variant}"
 
 
 def compute_best_node_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add summary columns for the smallest 8-GPU node that can serve each model.
+    Add summary columns for the smallest reference 8-GPU node that can serve each model.
 
     Adds columns: best_node_bf16, best_node_fp8
 
@@ -202,10 +248,10 @@ def compute_best_node_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _find_best_node(serving_gb: float) -> str:
-    """Find the smallest 8-GPU node that can fit the given serving VRAM requirement."""
-    for gpu_key, gpu_vram in GPUS_BY_VRAM:
-        if serving_gb <= gpu_vram * NODE_GPU_COUNT:
-            return node_label(gpu_key)
+    """Find the smallest reference 8-GPU node that can fit the given serving VRAM requirement."""
+    for gpu in FITS_ON_NODES:
+        if serving_gb <= gpu.vram_gb * NODE_GPU_COUNT:
+            return node_label(gpu)
     return "MULTI-NODE"
 
 

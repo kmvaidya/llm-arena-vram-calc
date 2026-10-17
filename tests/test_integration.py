@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pandas as pd
 import pytest
@@ -174,7 +174,7 @@ class TestFullPipeline:
         df = add_all_vram_and_gpu_columns(integration_leaderboard.copy().assign(
             total_params_b=None, active_params_b=None, architecture=None,
         ))
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
 
         fresh = generate_readme(df, {}, leaderboard_date=str(today - timedelta(days=2)))
         assert f"**Arena data:** {today - timedelta(days=2)}" in fresh
@@ -195,7 +195,25 @@ class TestFullPipeline:
         readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
 
         assert "## Best Model Per 8-GPU Node" in readme
-        assert "| 8x H100 SXM | 640 GB |" in readme
-        assert "| 8x H200 SXM | 1128 GB | DeepSeek-V3 | #1 |" in readme
-        assert "| 8x H200 SXM (FP8) |" in readme   # Fits on, row 1
-        assert "| RTX PRO 6000 (FP8) |" in readme  # Fits on, row 2: 90 GB, one GPU
+        assert ("| 8x H200 SXM / NVL | 1128 GB | Qwen2.5-72B-Instruct (#2, 180 GB) "
+                "| DeepSeek-V3 (#1, 838.8 GB) | DeepSeek-V3 (#1, 419.4 GB) |") in readme
+        # Fits on: the smallest 8-GPU server for row 1, one GPU for row 2 (90 GB)
+        assert "| 8x H200 SXM / NVL (FP8) |" in readme
+        assert "| RTX PRO 6000 Blackwell (FP8) |" in readme
+
+    def test_gpu_tiers_in_readme(self, integration_leaderboard):
+        df = integration_leaderboard.copy().head(1)
+        df["total_params_b"], df["active_params_b"], df["architecture"] = 8.0, 8.0, "dense"
+        readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
+
+        # Single-GPU table: each tier named once, on its first row
+        assert "| Consumer | RTX 4090 | 24 GB | DeepSeek-V3 (#1, 20 GB) |" in readme
+        assert "|  | RTX 5090 | 32 GB |" in readme
+        # 8-GPU table: no desktop cards, the RTX PRO 6000 as Server Edition
+        assert "8x RTX 4090" not in readme
+        assert "8x Radeon AI PRO R9700" not in readme
+        assert "| 8x RTX PRO 6000 Blackwell Server Edition | 768 GB |" in readme
+        # GPU reference table
+        assert ("| Workstation | RTX PRO 6000 Blackwell | 96 GB | Blackwell | Yes "
+                "| Server Edition only |") in readme
+        assert "| Data center | A100 80GB | 80 GB | Ampere | No (weight-only FP8 kernels) | Yes |" in readme

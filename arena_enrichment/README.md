@@ -12,7 +12,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
   - Artificial Analysis pages found by guessing the page name, for models missing from the list
   - Results with more active than total parameters are rejected
 - **Compute** VRAM estimates at BF16, FP8, and INT4 precisions
-- **Flag** which models fit on a single GPU (H100, RTX PRO 6000, H200, B200, B300) or an 8-GPU node of each
+- **Flag** which models fit on a single GPU, from consumer cards (RTX 4090, RTX 5090) through workstation (RTX PRO 6000) to data center (NVIDIA A100 to Rubin, AMD MI300X to MI355X, Intel Gaudi 3), or on an 8-GPU server of the GPUs sold that way (the list is `GPUS` in `vram_calculator.py`)
 - **Output** enriched CSV, formatted XLSX, and auto-updated README.md tables
 
 ## Installation

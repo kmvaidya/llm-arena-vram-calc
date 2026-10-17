@@ -21,7 +21,7 @@ import os
 import re
 import sys
 from collections.abc import Callable
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Any
 
 import pandas as pd
@@ -40,9 +40,11 @@ from scrapers.aa_resolver import (
 )
 from scrapers.arena_scraper import scrape_arena_leaderboard
 from vram_calculator import (
-    GPU_DISPLAY_NAMES,
-    GPUS_BY_VRAM,
+    FIT_PRECISIONS,
+    FITS_ON_GPUS,
+    GPUS,
     NODE_GPU_COUNT,
+    NODE_GPUS,
     add_all_vram_and_gpu_columns,
     node_label,
 )
@@ -353,29 +355,41 @@ def _write_resolution_log(resolution_log: list[dict[str, Any]], writer: pd.Excel
         ws.column_dimensions[col_letter].width = min(max_len + 3, 40)
 
 
-def _hardware_configs(gpu_count: int) -> list[tuple[str, int]]:
-    """(label, total VRAM in GB) for each GPU, alone (1) or as an 8-GPU node."""
+def _hardware_configs(gpu_count: int) -> list[tuple[str, str, int]]:
+    """
+    (tier, label, total VRAM in GB) for each single GPU (gpu_count 1), in
+    display order, or for each 8-GPU node, smallest first.
+    """
+    if gpu_count == 1:
+        return [(gpu.tier, gpu.name, gpu.vram_gb) for gpu in GPUS]
     return [
-        (GPU_DISPLAY_NAMES[gpu_key] if gpu_count == 1 else node_label(gpu_key), gpu_vram * gpu_count)
-        for gpu_key, gpu_vram in GPUS_BY_VRAM
+        (f"{NODE_GPU_COUNT}-GPU server", node_label(gpu), gpu.vram_gb * gpu_count)
+        for gpu in NODE_GPUS
     ]
 
 
+def _best_fit(df: pd.DataFrame, serving_col: str, vram_gb: int) -> pd.Series | None:
+    """The highest-ranked model whose serving VRAM fits, or None (df is in rank order)."""
+    if serving_col not in df.columns:
+        return None
+    fits = df[df[serving_col].notna() & (df[serving_col] <= vram_gb)]
+    return None if fits.empty else fits.iloc[0]
+
+
 def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
-    """Build GPU summary data for both XLSX and README: single GPUs, then 8-GPU nodes."""
+    """Build GPU summary data for the XLSX: single GPUs, then 8-GPU nodes."""
     rows = []
     for gpu_count in (1, NODE_GPU_COUNT):
-        for display, gpu_vram in _hardware_configs(gpu_count):
-            for precision in ["BF16", "FP8", "INT4"]:
-                p_lower = precision.lower()
-                serving_col = f"vram_{p_lower}_serving_gb"
+        for tier, display, gpu_vram in _hardware_configs(gpu_count):
+            for precision in FIT_PRECISIONS:
+                serving_col = f"vram_{precision.lower()}_serving_gb"
                 if serving_col not in df.columns:
                     continue
 
-                fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
-                if not fits.empty:
-                    best = fits.iloc[0]
+                best = _best_fit(df, serving_col, gpu_vram)
+                if best is not None:
                     rows.append({
+                        "Tier": tier,
                         "GPU": f"{display} ({gpu_vram} GB)",
                         "Precision": precision,
                         "Best Rank": int(best["rank"]) if pd.notna(best["rank"]) else "?",
@@ -387,6 +401,7 @@ def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
                     })
                 else:
                     rows.append({
+                        "Tier": tier,
                         "GPU": f"{display} ({gpu_vram} GB)",
                         "Precision": precision,
                         "Best Rank": "N/A",
@@ -411,12 +426,12 @@ def generate_readme(
 ) -> str:
     """
     Generate the full README.md content with:
-    1. Best Model Per GPU — one table per precision
+    1. Best Model Per GPU — one row per GPU, one column per precision
     2. Best Model Per 8-GPU Node — the same for servers of eight GPUs
     3. Enriched Leaderboard — compact table with collapsible rest
     4. How It Works / Usage
     """
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     total = len(df)
     resolved = total - resolution_counts.get("UNKNOWN", 0)
     pct = (resolved / total * 100) if total > 0 else 0
@@ -450,26 +465,25 @@ def generate_readme(
                      "so some parameter counts may be stale or missing.")
         lines.append("")
 
-    # Table 1: Best Model Per GPU — one sub-table per precision
+    # Table 1: Best Model Per GPU — one row per GPU, one column per precision
     lines.append("## Best Model Per GPU")
     lines.append("")
-    lines.append("Highest-ranked Arena model that fits on each single GPU "
-                 "(includes 25% serving overhead for KV cache, activations, and framework).")
+    lines.append("Highest-ranked Arena model that fits on one GPU at each precision, "
+                 "with its Arena rank and serving VRAM (weights plus 25% for KV cache, "
+                 "activations, and framework).")
     lines.append("")
-    for precision in ["BF16", "FP8", "INT4"]:
-        lines.extend(_generate_gpu_precision_table(df, precision))
-        lines.append("")
+    lines.extend(_generate_best_model_table(df))
+    lines.append("")
 
     # Table 2: Best Model Per 8-GPU Node — where the top of the leaderboard lives
     lines.append(f"## Best Model Per {NODE_GPU_COUNT}-GPU Node")
     lines.append("")
-    lines.append(f"Highest-ranked Arena model that fits on a server with {NODE_GPU_COUNT} of each GPU, "
-                 "the usual way to serve models too large for one GPU "
-                 "(weights split across the GPUs, same 25% serving overhead).")
+    lines.append(f"The same for a server with {NODE_GPU_COUNT} of one GPU, the usual way to "
+                 "serve models too large for one GPU (weights split across the GPUs). "
+                 f"Only GPUs sold in {NODE_GPU_COUNT}-GPU servers are listed; see [GPUs](#gpus).")
     lines.append("")
-    for precision in ["BF16", "FP8", "INT4"]:
-        lines.extend(_generate_gpu_precision_table(df, precision, gpu_count=NODE_GPU_COUNT))
-        lines.append("")
+    lines.extend(_generate_best_model_table(df, gpu_count=NODE_GPU_COUNT))
+    lines.append("")
 
     # Table 3: Enriched Leaderboard
     lines.append("## Full Leaderboard")
@@ -505,13 +519,30 @@ def generate_readme(
     lines.append("")
     lines.append("### GPUs")
     lines.append("")
-    lines.append("| GPU | VRAM | Architecture | Native FP8 |")
-    lines.append("|-----|------|-------------|------------|")
-    lines.append("| H100 SXM | 80 GB | Hopper | Yes |")
-    lines.append("| RTX PRO 6000 | 96 GB | Blackwell | Yes |")
-    lines.append("| H200 SXM | 141 GB | Hopper | Yes |")
-    lines.append("| B200 SXM | 180 GB | Blackwell | Yes |")
-    lines.append("| B300 SXM | 288 GB | Blackwell Ultra | Yes |")
+    lines.append(f"| Tier | GPU | VRAM | Architecture | Native FP8 | In {NODE_GPU_COUNT}-GPU servers |")
+    lines.append("|------|-----|------|--------------|------------|------------------|")
+    for gpu in GPUS:
+        if not gpu.in_8gpu_servers:
+            servers = "No"
+        elif gpu.server_variant:
+            servers = f"{gpu.server_variant} only"
+        else:
+            servers = "Yes"
+        fp8 = "Yes" if gpu.native_fp8 else "No (weight-only FP8 kernels)"
+        lines.append(f"| {gpu.tier} | {gpu.name} | {gpu.vram_gb} GB | {gpu.architecture} "
+                     f"| {fp8} | {servers} |")
+    lines.append("")
+    ladder = ", ".join(g.name for g in FITS_ON_GPUS)
+    lines.append(f"The leaderboard's *Fits on* names the smallest of the most widely deployed "
+                 f"GPUs that fits ({ladder}), or else an {NODE_GPU_COUNT}-GPU server of the "
+                 "smallest of them that fits; the tables above cover every GPU.")
+    lines.append("")
+    lines.append(f"GeForce cards are not in the {NODE_GPU_COUNT}-GPU tables because NVIDIA's "
+                 "GeForce driver license bars data-center deployment; workstation cards are "
+                 "built for desktops with up to four cards. Rack-scale systems "
+                 "(GB200/GB300 NVL72, AMD Helios with MI455X) come as 72-GPU racks rather "
+                 f"than single GPUs or {NODE_GPU_COUNT}-GPU servers, so they are not listed. "
+                 "B200 shows the 180 GB per GPU usable on an HGX B200 board.")
     lines.append("")
 
     # Usage section
@@ -538,47 +569,43 @@ def generate_readme(
 def _days_since(day: str | None) -> int | None:
     """Days from a YYYY-MM-DD date to today (UTC), or None if there is no valid date."""
     try:
-        return (datetime.now(timezone.utc).date() - date.fromisoformat(day or "")).days
+        return (datetime.now(UTC).date() - date.fromisoformat(day or "")).days
     except ValueError:
         return None
 
 
-def _generate_gpu_precision_table(df: pd.DataFrame, precision: str, gpu_count: int = 1) -> list[str]:
-    """Generate a compact GPU (or 8-GPU node) summary table for a single precision."""
+def _generate_best_model_table(df: pd.DataFrame, gpu_count: int = 1) -> list[str]:
+    """
+    One row per GPU (or 8-GPU node), one column per precision, each cell the
+    best model that fits: "name (#rank, serving GB)".
+    """
+    single = gpu_count == 1
     lines = []
-    p_lower = precision.lower()
-    serving_col = f"vram_{p_lower}_serving_gb"
+    if single:
+        lines.append("| Tier | GPU | VRAM | " + " | ".join(FIT_PRECISIONS) + " |")
+        lines.append("|------|-----|------|" + "|".join("------" for _ in FIT_PRECISIONS) + "|")
+    else:
+        lines.append("| Node | VRAM | " + " | ".join(FIT_PRECISIONS) + " |")
+        lines.append("|------|------|" + "|".join("------" for _ in FIT_PRECISIONS) + "|")
 
-    label = {"BF16": "BF16 (Full Precision)", "FP8": "FP8 (8-bit)",
-             "INT4": "INT4 (4-bit)"}[precision]
-    lines.append(f"### {label}")
-    lines.append("")
-    hardware = "GPU" if gpu_count == 1 else "Node"
-    lines.append(f"| {hardware} | VRAM | Best Model | Arena Rank | Params | Arch | Serving VRAM |")
-    lines.append(f"|{'-' * (len(hardware) + 2)}|------|------------|------------|--------|------|--------------|")
-
-    if serving_col not in df.columns:
-        return lines
-
-    for display, gpu_vram in _hardware_configs(gpu_count):
-        fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
-        if not fits.empty:
-            best = fits.iloc[0]
+    previous_tier = None
+    for tier, display, gpu_vram in _hardware_configs(gpu_count):
+        cells = []
+        for precision in FIT_PRECISIONS:
+            serving_col = f"vram_{precision.lower()}_serving_gb"
+            best = _best_fit(df, serving_col, gpu_vram)
+            if best is None:
+                cells.append("—")
+                continue
             rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
-            name = best["model_name"]
-            total = best.get("total_params_b")
-            total_s = f"{total:g}B" if pd.notna(total) else "?"
-            arch = (best.get("architecture") or "?")
-            if pd.isna(arch):
-                arch = "?"
-            elif arch == "dense":
-                arch = "Dense"
-            elif arch == "moe":
-                arch = "MoE"
-            serving = f"{round(best[serving_col], 1)} GB"
-            lines.append(f"| {display} | {gpu_vram} GB | {name} | #{rank} | {total_s} | {arch} | {serving} |")
+            cells.append(f"{best['model_name']} (#{rank}, {round(best[serving_col], 1):g} GB)")
+        if single:
+            # Name each tier once, on its first row
+            tier_cell = tier if tier != previous_tier else ""
+            previous_tier = tier
+            lines.append(f"| {tier_cell} | {display} | {gpu_vram} GB | " + " | ".join(cells) + " |")
         else:
-            lines.append(f"| {display} | {gpu_vram} GB | *No model fits* | — | — | — | — |")
+            lines.append(f"| {display} | {gpu_vram} GB | " + " | ".join(cells) + " |")
 
     return lines
 
@@ -614,8 +641,8 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
         fp8_s = f"{fp8:g}" if pd.notna(fp8) else "?"
         int4 = row.get("vram_int4_serving_gb")
         int4_s = f"{int4:g}" if pd.notna(int4) else "?"
-        # "Fits on" — show smallest single GPU at FP8, the most practical
-        # precision, or else the smallest 8-GPU node
+        # "Fits on" — show the smallest reference GPU at FP8, the most
+        # practical precision, or else the smallest reference 8-GPU node
         best_fp8 = row.get("best_gpu_fp8", "?")
         best_node_fp8 = row.get("best_node_fp8", "?")
         if best_fp8 == "UNKNOWN":
@@ -680,11 +707,10 @@ def print_console_summary(df: pd.DataFrame, resolution_counts: dict[str, int]) -
             continue
 
         print(f"\n=== Best Model Per GPU ({precision} serving) ===")
-        for gpu_key, gpu_vram in GPUS_BY_VRAM:
-            display = GPU_DISPLAY_NAMES[gpu_key]
-            fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
-            if not fits.empty:
-                best = fits.iloc[0]
+        for gpu in GPUS:
+            display, gpu_vram = gpu.name, gpu.vram_gb
+            best = _best_fit(df, serving_col, gpu_vram)
+            if best is not None:
                 rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
                 name = best["model_name"]
                 total_b = best.get("total_params_b", "?")
@@ -692,11 +718,11 @@ def print_console_summary(df: pd.DataFrame, resolution_counts: dict[str, int]) -
                 serving = round(best[serving_col], 1)
                 arch_label = f" {arch.upper()}" if arch and arch != "dense" else ""
                 print(
-                    f"  {display:20s} ({gpu_vram:3d} GB): "
+                    f"  {display:24s} ({gpu_vram:3d} GB): "
                     f"#{rank:<4} {name} ({total_b}B{arch_label}, ~{serving} GB serving)"
                 )
             else:
-                print(f"  {display:20s} ({gpu_vram:3d} GB): No model fits")
+                print(f"  {display:24s} ({gpu_vram:3d} GB): No model fits")
 
     print()
 

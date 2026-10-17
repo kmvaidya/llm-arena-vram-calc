@@ -1,10 +1,13 @@
 import pandas as pd
 import pytest
 from vram_calculator import (
+    GPUS,
+    NODE_GPUS,
     _find_best_gpu,
     _find_best_node,
     add_all_vram_and_gpu_columns,
     compute_vram_columns,
+    node_label,
     practical_serving_gb,
     vram_estimate_gb,
 )
@@ -61,17 +64,27 @@ class TestPracticalServingGb:
 
 
 class TestFindBestGpu:
+    def test_tiny_model(self):
+        assert _find_best_gpu(5) == "RTX 4090"
+
+    def test_exactly_rtx_4090(self):
+        assert _find_best_gpu(24) == "RTX 4090"
+
+    def test_fits_rtx_5090(self):
+        assert _find_best_gpu(30) == "RTX 5090"
+
+    def test_fits_l40s(self):
+        assert _find_best_gpu(40) == "L40S"
+
     def test_fits_h100(self):
         assert _find_best_gpu(75) == "H100 SXM"
 
-    def test_exactly_h100(self):
-        assert _find_best_gpu(80) == "H100 SXM"
-
-    def test_exceeds_h100_fits_rtx_pro(self):
-        assert _find_best_gpu(85) == "RTX PRO 6000"
+    def test_70b_at_fp8_names_rtx_pro_not_h100_nvl(self):
+        # 87.5 GB also fits a 94 GB H100 NVL, which is not a reference GPU
+        assert _find_best_gpu(87.5) == "RTX PRO 6000 Blackwell"
 
     def test_fits_h200(self):
-        assert _find_best_gpu(100) == "H200 SXM"
+        assert _find_best_gpu(140) == "H200 SXM / NVL"
 
     def test_fits_b200(self):
         assert _find_best_gpu(150) == "B200 SXM"
@@ -82,23 +95,23 @@ class TestFindBestGpu:
     def test_multi_gpu(self):
         assert _find_best_gpu(300) == "MULTI-GPU"
 
-    def test_tiny_model(self):
-        assert _find_best_gpu(5) == "H100 SXM"
-
-
 
 class TestFindBestNode:
-    def test_fits_h100_node(self):
-        assert _find_best_node(600) == "8x H100 SXM"
+    def test_fits_l40s_node(self):
+        assert _find_best_node(300) == "8x L40S"
 
     def test_exactly_h100_node(self):
         assert _find_best_node(640) == "8x H100 SXM"
 
-    def test_exceeds_h100_node_fits_rtx_pro_node(self):
-        assert _find_best_node(700) == "8x RTX PRO 6000"
+    def test_rtx_pro_node_is_server_edition(self):
+        assert _find_best_node(700) == "8x RTX PRO 6000 Blackwell Server Edition"
 
-    def test_fits_h200_node(self):
-        assert _find_best_node(1000) == "8x H200 SXM"
+    def test_deepseek_v3_at_fp8_names_h200_not_gaudi(self):
+        # 856 GB also fits 8x Gaudi 3 (1024 GB), which is not a reference GPU
+        assert _find_best_node(856) == "8x H200 SXM / NVL"
+
+    def test_fits_b200_node(self):
+        assert _find_best_node(1400) == "8x B200 SXM"
 
     def test_fits_b300_node(self):
         # A 1.6T model at FP8 needs 2000 GB with serving overhead
@@ -106,6 +119,43 @@ class TestFindBestNode:
 
     def test_multi_node(self):
         assert _find_best_node(3000) == "MULTI-NODE"
+
+    def test_small_model_still_gets_smallest_node(self):
+        # Desktop cards are not 8-GPU servers, so the smallest node is 8x L40S
+        assert _find_best_node(10) == "8x L40S"
+
+
+class TestGpuList:
+    def test_keys_and_names_unique(self):
+        assert len({g.key for g in GPUS}) == len(GPUS)
+        assert len({g.name for g in GPUS}) == len(GPUS)
+
+    def test_display_order_is_tier_then_memory(self):
+        tiers = ["Consumer", "Workstation", "Data center"]
+        order = [(tiers.index(g.tier), g.vram_gb) for g in GPUS]
+        assert order == sorted(order)
+
+    def test_nodes_exclude_desktop_cards(self):
+        # GeForce cards (license bars data-center use) and workstation cards
+        # are not sold in 8-GPU servers; the RTX PRO 6000 is, as Server Edition
+        node_names = {g.name for g in NODE_GPUS}
+        assert not any(g.tier == "Consumer" for g in NODE_GPUS)
+        assert "Radeon AI PRO R9700" not in node_names
+        rtx_pro = next(g for g in NODE_GPUS if g.key == "rtx_pro_6000")
+        assert node_label(rtx_pro) == "8x RTX PRO 6000 Blackwell Server Edition"
+
+    def test_nodes_sorted_by_memory(self):
+        assert [g.vram_gb for g in NODE_GPUS] == sorted(g.vram_gb for g in NODE_GPUS)
+
+    def test_reference_gpus_have_distinct_sizes(self):
+        sizes = [g.vram_gb for g in GPUS if g.reference]
+        assert len(sizes) == len(set(sizes))
+
+    def test_reference_nodes_are_8gpu_servers(self):
+        assert all(g.in_8gpu_servers for g in GPUS if g.reference and g.tier == "Data center")
+
+    def test_a100_has_no_native_fp8(self):
+        assert next(g for g in GPUS if g.key == "a100").native_fp8 is False
 
 
 class TestComputeVramColumns:
@@ -137,11 +187,17 @@ class TestAddAllColumns:
         assert "fits_h100_fp8" in df.columns
         assert "best_gpu_fp8" in df.columns
 
-    def test_small_model_fits_h100(self, sample_leaderboard_df):
+    def test_small_model_fits_consumer_gpu(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "small-model-8b"].iloc[0]
         assert row["fits_h100_fp8"] is True
-        assert row["best_gpu_fp8"] == "H100 SXM"
+        assert row["fits_rtx_4090_fp8"] is True   # 10 GB
+        assert row["best_gpu_fp8"] == "RTX 4090"
+
+    def test_fit_columns_for_every_gpu(self, sample_leaderboard_df):
+        df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
+        for gpu in GPUS:
+            assert f"fits_{gpu.key}_fp8" in df.columns
 
     def test_huge_model_needs_multi_gpu(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
@@ -157,8 +213,8 @@ class TestAddAllColumns:
     def test_huge_model_gets_a_node(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "moe-model-600b"].iloc[0]
-        assert row["best_node_bf16"] == "8x B300 SXM"   # 1500 GB
-        assert row["best_node_fp8"] == "8x RTX PRO 6000"  # 750 GB
+        assert row["best_node_bf16"] == "8x B300 SXM"   # 1500 GB: over 8x B200's 1440
+        assert row["best_node_fp8"] == "8x RTX PRO 6000 Blackwell Server Edition"  # 750 GB
 
     def test_unknown_model_has_unknown_node(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
