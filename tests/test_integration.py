@@ -80,7 +80,7 @@ class TestFullPipeline:
         # All expected columns exist
         for col in [
             "total_params_b", "active_params_b", "architecture",
-            "vram_bf16_weights_gb", "vram_fp8_serving_gb",
+            "vram_bf16_weights_gib", "vram_fp8_serving_gib",
             "best_gpu_fp8", "fits_h100_fp8",
         ]:
             assert col in df.columns, f"Missing column: {col}"
@@ -89,7 +89,7 @@ class TestFullPipeline:
         dsv3 = df[df["model_name"] == "DeepSeek-V3"].iloc[0]
         assert dsv3["total_params_b"] == 671.0
         assert dsv3["architecture"] == "moe"
-        assert dsv3["vram_fp8_serving_gb"] > 600  # 671 * 1.0 * 1.25 = 838.75
+        assert dsv3["vram_fp8_serving_gib"] > 600  # 671B x 1.06 bytes = 662 GiB of weights
 
         # Llama-4-Maverick: should resolve via override (400B MoE)
         mav = df[df["model_name"] == "Llama-4-Maverick"].iloc[0]
@@ -136,7 +136,7 @@ class TestFullPipeline:
 
         # Contains expected sections
         assert "# LLM Arena VRAM Calculator" in readme
-        assert "## Best Model Per GPU" in readme
+        assert "## Best Model Per Hardware" in readme
         assert "## Full Leaderboard" in readme
         assert "## Architecture" in readme
         assert "## Usage" in readme
@@ -186,61 +186,81 @@ class TestFullPipeline:
         undated = generate_readme(df, {})
         assert "Arena data" not in undated
 
-    def test_node_tables_and_fits_on(self, integration_leaderboard):
+    def _two_models(self, integration_leaderboard):
         df = integration_leaderboard.copy().head(2)
-        # Too big for one GPU at FP8 (838.75 GB), fits 8x H200 (1128 GB)
+        # A 671B MoE (37B active) that needs 8 GPUs, and a 72B dense model
         df["total_params_b"] = [671.0, 72.0]
         df["active_params_b"] = [37.0, 72.0]
         df["architecture"] = ["moe", "dense"]
-        readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
+        return generate_readme(add_all_vram_and_gpu_columns(df), {})
 
-        assert "## Best Model Per 8-GPU Node" in readme
-        assert ("| 8x H200 SXM / NVL | 1128 GB | Qwen2.5-72B-Instruct (#2, 180 GB) "
-                "| DeepSeek-V3 (#1, 838.8 GB) | DeepSeek-V3 (#1, 419.4 GB) |") in readme
-        # Fits on: the smallest 8-GPU server for row 1, one GPU for row 2 (90 GB)
-        assert "| 8x H200 SXM / NVL (FP8) |" in readme
-        assert "| RTX PRO 6000 Blackwell (FP8) |" in readme
+    def test_one_hardware_table(self, integration_leaderboard):
+        readme = self._two_models(integration_leaderboard)
+        assert "## Best Model Per Hardware" in readme
+        assert "## Best Model Per 8-GPU Node" not in readme
+        assert "### GPUs" not in readme
+        # 8x H200: BF16 DeepSeek needs 1,266 GiB of 1,128, so Qwen; FP8 DeepSeek
+        # needs 667.9 + 7 x 1.5 = 678 GiB.  Speeds: 144 GB / 30,720 GB/s + 1 + 3 ms;
+        # 45.1 GB / 30,720 GB/s + 2 + 6 ms
+        assert ("| 8x H200 SXM | 1,128 GiB | 8 × 4.8 TB/s "
+                "| Qwen2.5-72B-Instruct (#2, 150 GiB, ~120 tok/s) "
+                "| DeepSeek-V3 (#1, 678 GiB, ~110 tok/s) "
+                "| DeepSeek-V3 (#1, 391 GiB, ~110 tok/s) |") in readme
+        # PCIe servers get no speed
+        l40s_row = next(line for line in readme.splitlines() if "| 8x L40S |" in line)
+        assert "Qwen2.5-72B-Instruct (#2, 56 GiB)" in l40s_row
+        assert "tok/s" not in l40s_row
 
-    def test_gpu_tiers_in_readme(self, integration_leaderboard):
+    def test_fits_on_and_speed_in_leaderboard(self, integration_leaderboard):
+        readme = self._two_models(integration_leaderboard)
+        # DeepSeek at FP8 needs 678 GiB: over 8x H100 (640), within 8x RTX PRO
+        # 6000 (768), a PCIe server with no speed estimate
+        assert "| 8x RTX PRO 6000 Blackwell Server Edition (FP8) | — |" in readme
+        # Qwen 72B at FP8 needs 76.6 GiB of an H100's 80: 76.3 GB / 2,680 GB/s + 1 ms
+        assert "| H100 SXM (FP8) | ~34 tok/s |" in readme
+        # Whole GiB from 100 up, one decimal below
+        assert "| 671 (37) | MoE | 1,255 | 668 | 380 |" in readme
+        assert "| 72 | Dense | 140 | 76.6 | 45.7 |" in readme
+        assert "*Speed* is the estimated generation speed for one request there" in readme
+
+    def test_hardware_tiers_in_readme(self, integration_leaderboard):
         df = integration_leaderboard.copy().head(1)
         df["total_params_b"], df["active_params_b"], df["architecture"] = 8.0, 8.0, "dense"
         readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
 
-        # Single-GPU table: each tier named once, on its first row
-        # 0.6 x 1008 GB/s / (8B x 2 bytes) = 37.8 tokens/s
-        assert "| Consumer | RTX 4090 | 24 GB | DeepSeek-V3 (#1, 20 GB, ~38 tok/s) |" in readme
-        assert "|  | RTX 5090 | 32 GB |" in readme
-        # 8-GPU table: no desktop cards, the RTX PRO 6000 as Server Edition
-        assert "8x RTX 4090" not in readme
-        assert "8x Radeon AI PRO R9700" not in readme
-        assert "| 8x RTX PRO 6000 Blackwell Server Edition | 768 GB |" in readme
-        # GPU reference table
-        assert ("| Workstation | RTX PRO 6000 Blackwell | 96 GB | 1.79 TB/s | Blackwell | Yes "
-                "| Server Edition only |") in readme
-        assert ("| Data center | A100 80GB | 80 GB | 2.04 TB/s | Ampere "
-                "| No (weight-only FP8 kernels) | Yes |") in readme
+        # 8B at BF16: 14.9 + 2 + 1.5 = 18.4 GiB; 16 GB / 806 GB/s + 1 ms = 48 tok/s
+        assert ("| Consumer GPU | RTX 4090 | 24 GiB | 1.01 TB/s "
+                "| DeepSeek-V3 (#1, 18 GiB, ~48 tok/s) |") in readme
+        # Macs: 75% of RAM, Apple's fixed cost: 16 GB / 245.6 GB/s + 3 ms
+        assert ("| Unified memory | Mac mini / MacBook Pro, M5 Pro 64 GB | 48 of 64 GiB "
+                "| 0.307 TB/s | DeepSeek-V3 (#1, 18 GiB, ~15 tok/s) |") in readme
+        assert "|  | DGX Spark (GB10), 128 GB | 115 of 128 GiB | 0.273 TB/s |" in readme
+        # 8-GPU servers: no desktop hardware, the RTX PRO 6000 as Server Edition
+        for desktop in ("8x RTX 4090", "8x Radeon AI PRO R9700", "8x Mac", "8x DGX Spark",
+                        "8x DGX Station"):
+            assert desktop not in readme
+        assert "| 8x RTX PRO 6000 Blackwell Server Edition | 768 GiB |" in readme
+        # The notes say why
+        assert "GeForce driver license bars data-center deployment" in readme
+        assert "sudo sysctl iogpu.wired_limit_mb" in readme
 
-    def test_formulas_and_speeds_in_readme(self, integration_leaderboard):
-        df = integration_leaderboard.copy().head(2)
-        df["total_params_b"] = [671.0, 72.0]
-        df["active_params_b"] = [37.0, 72.0]
-        df["architecture"] = ["moe", "dense"]
-        readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
+    def test_formulas_and_accuracy_in_readme(self, integration_leaderboard):
+        readme = self._two_models(integration_leaderboard)
 
         assert "### Memory formula" in readme
-        assert ("Serving VRAM (GB) = total parameters (billions) × bytes per parameter × 1.25"
+        assert "Memory (GiB) = total parameters (billions) × GiB per billion parameters" in readme
+        assert ("+ KV cache: 4 GiB (16,384 tokens × 256 KiB; 2 GiB under 15B parameters)"
                 in readme)
-        assert "| FP8 | 1 | 70 GB | 87.5 GB |" in readme
-        assert "### Speed formula" in readme
-        assert ("Decode speed (tokens/s) ≈ MBU × memory bandwidth (GB/s) "
-                "÷ (active parameters (billions) × bytes per parameter)") in readme
-        assert "0.6 × 3,350 ÷ (30 × 1) ≈ 67 tokens/s" in readme
+        assert "+ 1.5 GiB per GPU" in readme
+        assert "| FP8 | 1.06 | 0.987 | FP8, GGUF Q8_0, MLX 8-bit |" in readme
+        assert "70 × 0.987 + 4 + 1.5 = 74.6 GiB, so it fits an H100 (80 GiB)" in readme
 
-        # Leaderboard: no speed for the model that needs 8 GPUs; one for the
-        # 72B dense model on its RTX PRO 6000: 0.6 x 1792 / 72 = 14.9
-        assert "| 8x H200 SXM / NVL (FP8) | — |" in readme
-        assert "| RTX PRO 6000 Blackwell (FP8) | ~15 tok/s |" in readme
-        assert "*Speed* is the estimated decode speed for one request on that GPU" in readme
-        # Node tables carry no speeds
-        node_section = readme.split("## Best Model Per 8-GPU Node")[1].split("## Full Leaderboard")[0]
-        assert "tok/s" not in node_section
+        assert "### Speed formula" in readme
+        assert ("Time per token (ms) = bytes per token ÷ (0.8 × bandwidth × GPUs) + fixed cost"
+                in readme)
+        assert ("31.8 ÷ (0.8 × 3,350 GB/s) = 11.9 ms, plus 1 ms, so about 78 tokens/s"
+                in readme)
+
+        assert "#### How close are the estimates?" in readme
+        assert "Checked against 49 published single-request speeds" in readme
+        assert "| DGX Spark | [gpt-oss-120b MXFP4](" in readme

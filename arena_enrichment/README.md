@@ -1,6 +1,6 @@
 # Arena.ai Leaderboard Enrichment
 
-Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) open-source LLM leaderboard with parameter counts and VRAM estimates for GPU deployment feasibility.
+Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) open-source LLM leaderboard with parameter counts, memory estimates and generation-speed estimates, to answer which model is the best one a given GPU, Mac or server can run.
 
 ## Features
 
@@ -11,8 +11,8 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
   - Regex name parsing (e.g., `Qwen3-30B-A3B` → 30B total, 3B active, MoE)
   - Artificial Analysis pages found by guessing the page name, for models missing from the list
   - Results with more active than total parameters are rejected
-- **Compute** VRAM estimates at BF16, FP8, and INT4 precisions, and single-request decode speed on one GPU from its memory bandwidth (formulas in the root README)
-- **Flag** which models fit on a single GPU, from consumer cards (RTX 4090, RTX 5090) through workstation (RTX PRO 6000) to data center (NVIDIA A100 to Rubin, AMD MI300X to MI355X, Intel Gaudi 3), or on an 8-GPU server of the GPUs sold that way (the list is `GPUS` in `vram_calculator.py`)
+- **Compute** the memory each model needs at BF16, FP8 and INT4, in GiB (weights, a 16K-token KV cache and the runtime), and its single-request generation speed from the hardware's memory bandwidth, on one device or an 8-GPU server. The formulas are in the root README; the speed formula is checked against published measurements in `measurements.py`
+- **Flag** which models fit on each device: consumer GPUs (RTX 4090, RTX 5090), computers whose GPU shares system RAM (Macs, DGX Spark, Ryzen AI Max+ 395, counting the share the system gives the GPU), workstations (Radeon AI PRO R9700, RTX PRO 6000, DGX Station) and data-center GPUs (NVIDIA A100 to Rubin, AMD MI300X to MI355X, Intel Gaudi 3), and on 8-GPU servers of the GPUs sold that way (the list is `HARDWARE` in `vram_calculator.py`)
 - **Output** enriched CSV, formatted XLSX, and auto-updated README.md tables
 
 ## Installation

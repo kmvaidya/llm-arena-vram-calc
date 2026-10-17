@@ -21,6 +21,7 @@ import os
 import re
 import sys
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -32,6 +33,7 @@ from openpyxl.utils import get_column_letter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from known_models import MODEL_OVERRIDES
+from measurements import MEASUREMENTS
 from scrapers.aa_resolver import (
     ModelParams,
     get_aa_models,
@@ -40,17 +42,30 @@ from scrapers.aa_resolver import (
 )
 from scrapers.arena_scraper import scrape_arena_leaderboard
 from vram_calculator import (
-    DECODE_MBU,
-    DEFAULT_OVERHEAD_PCT,
+    BANDWIDTH_EFFICIENCY,
+    BYTES_PER_GIB,
+    CONTEXT_TOKENS,
     FIT_PRECISIONS,
     FITS_ON_GPUS,
-    GPUS,
+    FIXED_MS_PER_TOKEN,
+    HARDWARE,
+    KV_BYTES_PER_TOKEN,
+    KV_BYTES_PER_TOKEN_SMALL,
+    MOE_BYTES_FACTOR,
     NODE_GPU_COUNT,
     NODE_GPUS,
     PRECISION_BYTES,
+    RUNTIME_GIB,
+    SMALL_MODEL_PARAMS_B,
+    SYNC_MS_PER_TOKEN,
+    Hardware,
     add_all_vram_and_gpu_columns,
     decode_tokens_per_s,
+    hardware_speed,
+    kv_cache_gib,
     node_label,
+    node_serving_gib,
+    serving_gib,
 )
 
 logging.basicConfig(
@@ -359,27 +374,55 @@ def _write_resolution_log(resolution_log: list[dict[str, Any]], writer: pd.Excel
         ws.column_dimensions[col_letter].width = min(max_len + 3, 40)
 
 
-def _hardware_configs(gpu_count: int) -> list[tuple[str, str, int, int | None]]:
-    """
-    (tier, label, total VRAM in GB, memory bandwidth in GB/s) for each single
-    GPU (gpu_count 1), in display order, or for each 8-GPU node, smallest
-    first.  Nodes carry no bandwidth: the speed formula only holds on one GPU.
-    """
-    if gpu_count == 1:
-        return [(gpu.tier, gpu.name, gpu.vram_gb, gpu.bandwidth_gbs) for gpu in GPUS]
-    return [
-        (f"{NODE_GPU_COUNT}-GPU server", node_label(gpu), gpu.vram_gb * gpu_count, None)
-        for gpu in NODE_GPUS
-    ]
+@dataclass(frozen=True)
+class HardwareRow:
+    """One row of the hardware table: a single device, or an 8-GPU server of one GPU."""
+
+    hardware: Hardware
+    gpu_count: int
+
+    @property
+    def tier(self) -> str:
+        return self.hardware.tier if self.gpu_count == 1 else f"{NODE_GPU_COUNT}-GPU server"
+
+    @property
+    def label(self) -> str:
+        return self.hardware.name if self.gpu_count == 1 else node_label(self.hardware)
+
+    @property
+    def memory_label(self) -> str:
+        """The memory a model can use, in GiB ("96 of 128 GiB")."""
+        hw = self.hardware
+        if self.gpu_count > 1:
+            return f"{self.gpu_count * hw.usable_gib:,.0f} GiB"
+        if hw.usable_memory_gb is not None:
+            return f"{hw.usable_memory_gb:g} of {hw.memory_gb:g} GiB"
+        return f"{hw.memory_gb:g} GiB"
+
+    @property
+    def bandwidth_label(self) -> str:
+        tb_s = f"{self.hardware.bandwidth_gbs / 1000:.3g} TB/s"
+        return tb_s if self.gpu_count == 1 else f"{self.gpu_count} × {tb_s}"
+
+    def needed_gib(self, single_serving_gib: float) -> float:
+        """Memory a model needs here, from its single-GPU serving memory."""
+        return single_serving_gib if self.gpu_count == 1 else node_serving_gib(single_serving_gib)
+
+    def fits(self, single_serving_gib: float) -> bool:
+        return self.needed_gib(single_serving_gib) <= self.hardware.usable_gib * self.gpu_count
 
 
-def _estimated_speed(model: pd.Series, precision: str, bandwidth_gbs: int | None) -> float | None:
-    """Single-request decode speed on one GPU, or None (8-GPU node or unknown architecture)."""
-    if bandwidth_gbs is None or model.get("architecture") not in DECODE_MBU:
-        return None
-    return decode_tokens_per_s(
-        model["active_params_b"], model["architecture"], precision, bandwidth_gbs
-    )
+def _hardware_rows() -> list[HardwareRow]:
+    """Every single device in display order, then every 8-GPU server, smallest first."""
+    return ([HardwareRow(hw, 1) for hw in HARDWARE]
+            + [HardwareRow(gpu, NODE_GPU_COUNT) for gpu in NODE_GPUS])
+
+
+def _format_gib(gib: float | None) -> str:
+    """Whole GiB from 100 up ("1,568"), one decimal below ("22.3")."""
+    if gib is None or pd.isna(gib):
+        return "?"
+    return f"{gib:,.0f}" if gib >= 100 else f"{gib:.1f}"
 
 
 def _format_speed(tokens_per_s: float) -> str:
@@ -387,53 +430,69 @@ def _format_speed(tokens_per_s: float) -> str:
     return f"~{float(f'{tokens_per_s:.2g}'):g} tok/s"
 
 
-def _best_fit(df: pd.DataFrame, serving_col: str, vram_gb: int) -> pd.Series | None:
-    """The highest-ranked model whose serving VRAM fits, or None (df is in rank order)."""
+def _best_fit(df: pd.DataFrame, serving_col: str, row: HardwareRow) -> pd.Series | None:
+    """The highest-ranked model that fits the hardware, or None (df is in rank order)."""
     if serving_col not in df.columns:
         return None
-    fits = df[df[serving_col].notna() & (df[serving_col] <= vram_gb)]
+    serving = df[serving_col]
+    fits = df[serving.notna() & serving.apply(lambda x: pd.notna(x) and row.fits(x))]
     return None if fits.empty else fits.iloc[0]
 
 
 def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
-    """Build GPU summary data for the XLSX: single GPUs, then 8-GPU nodes."""
+    """Build the hardware summary for the XLSX: single devices, then 8-GPU servers."""
     rows = []
-    for gpu_count in (1, NODE_GPU_COUNT):
-        for tier, display, gpu_vram, bandwidth in _hardware_configs(gpu_count):
-            for precision in FIT_PRECISIONS:
-                serving_col = f"vram_{precision.lower()}_serving_gb"
-                if serving_col not in df.columns:
-                    continue
+    for hw_row in _hardware_rows():
+        for precision in FIT_PRECISIONS:
+            serving_col = f"vram_{precision.lower()}_serving_gib"
+            if serving_col not in df.columns:
+                continue
 
-                best = _best_fit(df, serving_col, gpu_vram)
-                if best is not None:
-                    speed = _estimated_speed(best, precision, bandwidth)
-                    rows.append({
-                        "Tier": tier,
-                        "GPU": f"{display} ({gpu_vram} GB)",
-                        "Precision": precision,
-                        "Best Rank": int(best["rank"]) if pd.notna(best["rank"]) else "?",
-                        "Model": best["model_name"],
-                        "Total Params (B)": best.get("total_params_b", "?"),
-                        "Active Params (B)": best.get("active_params_b", "?"),
-                        "Architecture": best.get("architecture", "?"),
-                        "Serving VRAM (GB)": round(best[serving_col], 1),
-                        "Est. tok/s": round(speed, 1) if speed is not None else "",
-                    })
-                else:
-                    rows.append({
-                        "Tier": tier,
-                        "GPU": f"{display} ({gpu_vram} GB)",
-                        "Precision": precision,
-                        "Best Rank": "N/A",
-                        "Model": "No model fits",
-                        "Total Params (B)": "",
-                        "Active Params (B)": "",
-                        "Architecture": "",
-                        "Serving VRAM (GB)": "",
-                        "Est. tok/s": "",
-                    })
+            base = {
+                "Tier": hw_row.tier,
+                "Hardware": hw_row.label,
+                "Usable memory": hw_row.memory_label,
+                "Bandwidth": hw_row.bandwidth_label,
+                "Precision": precision,
+            }
+            best = _best_fit(df, serving_col, hw_row)
+            if best is not None:
+                speed = hardware_speed(hw_row.hardware, best, precision, hw_row.gpu_count)
+                rows.append({
+                    **base,
+                    "Best Rank": int(best["rank"]) if pd.notna(best["rank"]) else "?",
+                    "Model": best["model_name"],
+                    "Total Params (B)": best.get("total_params_b", "?"),
+                    "Active Params (B)": best.get("active_params_b", "?"),
+                    "Architecture": best.get("architecture", "?"),
+                    "Memory needed (GiB)": round(hw_row.needed_gib(best[serving_col]), 1),
+                    "Est. tok/s": round(speed, 1) if speed is not None else "",
+                })
+            else:
+                rows.append({
+                    **base,
+                    "Best Rank": "N/A",
+                    "Model": "No model fits",
+                    "Total Params (B)": "",
+                    "Active Params (B)": "",
+                    "Architecture": "",
+                    "Memory needed (GiB)": "",
+                    "Est. tok/s": "",
+                })
     return rows
+
+
+def _speed_accuracy() -> tuple[list[tuple[Any, float]], float, float]:
+    """Each measurement with its estimate, the median error, and the share within ±20%."""
+    pairs = [
+        (m, decode_tokens_per_s(m.active_params_b, m.architecture, m.precision,
+                                m.bandwidth_gbs, m.platform, m.gpu_count))
+        for m in MEASUREMENTS
+    ]
+    errors = sorted(abs(estimate / m.tokens_per_s - 1) for m, estimate in pairs)
+    median = errors[len(errors) // 2] if len(errors) % 2 else sum(errors[len(errors) // 2 - 1:len(errors) // 2 + 1]) / 2
+    within_20 = sum(e <= 0.2 for e in errors) / len(errors)
+    return pairs, median, within_20
 
 
 # ---------------------------------------------------------------------------
@@ -448,10 +507,10 @@ def generate_readme(
 ) -> str:
     """
     Generate the full README.md content with:
-    1. Best Model Per GPU — one row per GPU, one column per precision
-    2. Best Model Per 8-GPU Node — the same for servers of eight GPUs
-    3. Enriched Leaderboard — compact table with collapsible rest
-    4. How It Works / Usage
+    1. Best Model Per Hardware — one row per device or 8-GPU server,
+       one column per precision
+    2. Enriched Leaderboard — compact table with collapsible rest
+    3. How It Works (memory and speed formulas, accuracy) / Usage
     """
     now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     total = len(df)
@@ -465,7 +524,8 @@ def generate_readme(
     lines.append("")
     lines.append("Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) "
                  "open-source LLM leaderboard with parameter counts and VRAM estimates "
-                 "for single-GPU and 8-GPU server deployment feasibility.")
+                 "and speed estimates for consumer GPUs, Macs and other unified-memory "
+                 "computers, workstations, data-center GPUs and 8-GPU servers.")
     lines.append("")
     lines.append("Most LLM leaderboards rank models by quality but ignore deployment constraints. "
                  "This tool answers: *\"What's the best model I can actually run on my hardware?\"* "
@@ -487,34 +547,30 @@ def generate_readme(
                      "so some parameter counts may be stale or missing.")
         lines.append("")
 
-    # Table 1: Best Model Per GPU — one row per GPU, one column per precision
-    lines.append("## Best Model Per GPU")
+    # Table 1: Best Model Per Hardware — one row per device or 8-GPU server
+    lines.append("## Best Model Per Hardware")
     lines.append("")
-    lines.append("Highest-ranked Arena model that fits on one GPU at each precision, "
-                 "with its Arena rank, serving VRAM and estimated decode speed for one "
-                 "request (see [Memory formula](#memory-formula) and "
-                 "[Speed formula](#speed-formula)).")
+    lines.append("Highest-ranked Arena model that fits each piece of hardware at each precision, "
+                 "with its Arena rank, the memory it needs and its estimated generation speed "
+                 "for one request (see [Memory formula](#memory-formula) and "
+                 "[Speed formula](#speed-formula)). *Memory* is what a model can use: the "
+                 "GPU's memory, or for computers whose GPU shares system RAM, the share the "
+                 "system gives it.")
     lines.append("")
-    lines.extend(_generate_best_model_table(df))
+    lines.extend(_generate_hardware_table(df))
     lines.append("")
-
-    # Table 2: Best Model Per 8-GPU Node — where the top of the leaderboard lives
-    lines.append(f"## Best Model Per {NODE_GPU_COUNT}-GPU Node")
-    lines.append("")
-    lines.append(f"The same for a server with {NODE_GPU_COUNT} of one GPU, the usual way to "
-                 "serve models too large for one GPU (weights split across the GPUs). "
-                 f"Only GPUs sold in {NODE_GPU_COUNT}-GPU servers are listed; see [GPUs](#gpus).")
-    lines.append("")
-    lines.extend(_generate_best_model_table(df, gpu_count=NODE_GPU_COUNT))
+    lines.extend(_hardware_notes())
     lines.append("")
 
-    # Table 3: Enriched Leaderboard
+    # Table 2: Enriched Leaderboard
+    ladder = ", ".join(g.name for g in FITS_ON_GPUS)
     lines.append("## Full Leaderboard")
     lines.append("")
-    lines.append("*Fits on* is the smallest widely deployed GPU (or "
-                 f"{NODE_GPU_COUNT}-GPU server) that holds the model at FP8; *Speed* is the "
-                 "estimated decode speed for one request on that GPU "
-                 "(see [Speed formula](#speed-formula)).")
+    lines.append("*GiB* columns are the memory each model needs (see [Memory formula]"
+                 f"(#memory-formula)). *Fits on* is the smallest of the most widely deployed GPUs ({ladder}) "
+                 f"that holds the model at FP8, or else an {NODE_GPU_COUNT}-GPU server of the "
+                 "smallest of them; *Speed* is the estimated generation speed for one request "
+                 "there (see [Speed formula](#speed-formula)).")
     lines.append("")
     lines.extend(_generate_leaderboard_table(df))
     lines.append("")
@@ -523,7 +579,7 @@ def generate_readme(
     lines.append("## Architecture")
     lines.append("")
     lines.append("**Data flow:** Arena.ai leaderboard → parameter resolution "
-                 "(4-strategy fallback) → VRAM calculation → GPU feasibility matrix")
+                 "(4-strategy fallback) → memory and speed estimates → hardware table")
     lines.append("")
     lines.append("The parameter resolution chain prioritizes accuracy: manual overrides "
                  "catch known errors, [Artificial Analysis](https://artificialanalysis.ai) "
@@ -533,87 +589,9 @@ def generate_readme(
                  "and guessed page names handle the long tail. Results where active "
                  "parameters exceed the total are rejected.")
     lines.append("")
-    overhead = 1 + DEFAULT_OVERHEAD_PCT
-    lines.append("### Memory formula")
+    lines.extend(_memory_formula_section())
     lines.append("")
-    lines.append("```")
-    lines.append(f"Serving VRAM (GB) = total parameters (billions) × bytes per parameter × {overhead:g}")
-    lines.append("```")
-    lines.append("")
-    lines.append("| Precision | Bytes per parameter | 70B model: weights | 70B model: serving |")
-    lines.append("|-----------|---------------------|--------------------|--------------------|")
-    for precision in FIT_PRECISIONS:
-        weights = 70 * PRECISION_BYTES[precision]
-        lines.append(f"| {precision} | {PRECISION_BYTES[precision]:g} | {weights:g} GB "
-                     f"| {round(weights * overhead, 1):g} GB |")
-    lines.append("")
-    lines.append(f"- The ×{overhead:g} adds {DEFAULT_OVERHEAD_PCT:.0%} for the KV cache (the attention "
-                 "keys and values kept for every token in context), activations and the serving "
-                 "framework. The KV cache grows with context length and with the number of "
-                 "requests served at once, so long contexts or many users need more.")
-    lines.append("- **MoE models** count all their parameters: every expert must sit in memory, "
-                 "even though each token uses only a few.")
-    lines.append(f"- A model fits a GPU when its serving VRAM is at most the GPU's memory, and an "
-                 f"{NODE_GPU_COUNT}-GPU server when it is at most {NODE_GPU_COUNT} × that memory.")
-    lines.append("")
-
-    h100 = next(g for g in GPUS if g.key == "h100")
-    example = decode_tokens_per_s(30, "dense", "FP8", h100.bandwidth_gbs)
-    lines.append("### Speed formula")
-    lines.append("")
-    lines.append("Generating each token reads every active weight from memory once, so with one "
-                 "request at a time the GPU's memory bandwidth, not its compute, sets the speed:")
-    lines.append("")
-    lines.append("```")
-    lines.append("Decode speed (tokens/s) ≈ MBU × memory bandwidth (GB/s) "
-                 "÷ (active parameters (billions) × bytes per parameter)")
-    lines.append("```")
-    lines.append("")
-    lines.append("- **Active parameters** are all the parameters of a dense model, and only those "
-                 "used per token for an MoE model (for example 37B of DeepSeek V3's 671B).")
-    lines.append(f"- **MBU** (model bandwidth utilization) is the share of peak bandwidth real "
-                 f"software reaches: {DECODE_MBU['dense']:g} for dense models (Databricks measured "
-                 f"55–60% with one request; RTX 4090 llama.cpp results work out to 57–70%) and "
-                 f"{DECODE_MBU['moe']:g} for MoE models, which read their experts in many small "
-                 f"pieces (Qwen3-30B-A3B on an RTX 4090 works out to 25–40%).")
-    lines.append(f"- Example: a 30B dense model at FP8 on an H100 SXM: {DECODE_MBU['dense']:g} × "
-                 f"{h100.bandwidth_gbs:,} ÷ (30 × 1) ≈ {example:.0f} tokens/s.")
-    lines.append("- This assumes one request and a short context. Reading a long context's KV "
-                 "cache lowers the speed; serving many requests at once raises a GPU's total "
-                 "throughput, not the speed each request sees.")
-    lines.append(f"- **No speed is shown for {NODE_GPU_COUNT}-GPU servers.** With one request, the "
-                 "GPUs wait on each other at every layer and use only a small part of their "
-                 "combined bandwidth: DeepSeek-R1 on 8× H200 has been measured at about 47 "
-                 "tokens/s, where the formula's ceiling is about 1,000.")
-    lines.append("")
-    lines.append("### GPUs")
-    lines.append("")
-    lines.append(f"| Tier | GPU | VRAM | Bandwidth | Architecture | Native FP8 "
-                 f"| In {NODE_GPU_COUNT}-GPU servers |")
-    lines.append("|------|-----|------|-----------|--------------|------------|------------------|")
-    for gpu in GPUS:
-        if not gpu.in_8gpu_servers:
-            servers = "No"
-        elif gpu.server_variant:
-            servers = f"{gpu.server_variant} only"
-        else:
-            servers = "Yes"
-        fp8 = "Yes" if gpu.native_fp8 else "No (weight-only FP8 kernels)"
-        lines.append(f"| {gpu.tier} | {gpu.name} | {gpu.vram_gb} GB "
-                     f"| {gpu.bandwidth_gbs / 1000:.3g} TB/s | {gpu.architecture} "
-                     f"| {fp8} | {servers} |")
-    lines.append("")
-    ladder = ", ".join(g.name for g in FITS_ON_GPUS)
-    lines.append(f"The leaderboard's *Fits on* names the smallest of the most widely deployed "
-                 f"GPUs that fits ({ladder}), or else an {NODE_GPU_COUNT}-GPU server of the "
-                 "smallest of them that fits; the tables above cover every GPU.")
-    lines.append("")
-    lines.append(f"GeForce cards are not in the {NODE_GPU_COUNT}-GPU tables because NVIDIA's "
-                 "GeForce driver license bars data-center deployment; workstation cards are "
-                 "built for desktops with up to four cards. Rack-scale systems "
-                 "(GB200/GB300 NVL72, AMD Helios with MI455X) come as 72-GPU racks rather "
-                 f"than single GPUs or {NODE_GPU_COUNT}-GPU servers, so they are not listed. "
-                 "B200 shows the 180 GB per GPU usable on an HGX B200 board.")
+    lines.extend(_speed_formula_section())
     lines.append("")
 
     # Usage section
@@ -645,44 +623,189 @@ def _days_since(day: str | None) -> int | None:
         return None
 
 
-def _generate_best_model_table(df: pd.DataFrame, gpu_count: int = 1) -> list[str]:
+def _generate_hardware_table(df: pd.DataFrame) -> list[str]:
     """
-    One row per GPU (or 8-GPU node), one column per precision, each cell the
-    best model that fits: "name (#rank, serving GB, ~speed)", with no speed
-    for nodes.
+    One row per device or 8-GPU server, one column per precision, each cell
+    the best model that fits: "name (#rank, GiB needed, ~speed)".
     """
-    single = gpu_count == 1
-    lines = []
-    if single:
-        lines.append("| Tier | GPU | VRAM | " + " | ".join(FIT_PRECISIONS) + " |")
-        lines.append("|------|-----|------|" + "|".join("------" for _ in FIT_PRECISIONS) + "|")
-    else:
-        lines.append("| Node | VRAM | " + " | ".join(FIT_PRECISIONS) + " |")
-        lines.append("|------|------|" + "|".join("------" for _ in FIT_PRECISIONS) + "|")
+    lines = ["| Tier | Hardware | Memory | Bandwidth | " + " | ".join(FIT_PRECISIONS) + " |",
+             "|------|----------|--------|-----------|" + "|".join("------" for _ in FIT_PRECISIONS) + "|"]
 
     previous_tier = None
-    for tier, display, gpu_vram, bandwidth in _hardware_configs(gpu_count):
+    for hw_row in _hardware_rows():
         cells = []
         for precision in FIT_PRECISIONS:
-            serving_col = f"vram_{precision.lower()}_serving_gb"
-            best = _best_fit(df, serving_col, gpu_vram)
+            serving_col = f"vram_{precision.lower()}_serving_gib"
+            best = _best_fit(df, serving_col, hw_row)
             if best is None:
                 cells.append("—")
                 continue
             rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
-            details = [f"#{rank}", f"{round(best[serving_col], 1):g} GB"]
-            speed = _estimated_speed(best, precision, bandwidth)
+            details = [f"#{rank}", f"{round(hw_row.needed_gib(best[serving_col])):,} GiB"]
+            speed = hardware_speed(hw_row.hardware, best, precision, hw_row.gpu_count)
             if speed is not None:
                 details.append(_format_speed(speed))
             cells.append(f"{best['model_name']} ({', '.join(details)})")
-        if single:
-            # Name each tier once, on its first row
-            tier_cell = tier if tier != previous_tier else ""
-            previous_tier = tier
-            lines.append(f"| {tier_cell} | {display} | {gpu_vram} GB | " + " | ".join(cells) + " |")
-        else:
-            lines.append(f"| {display} | {gpu_vram} GB | " + " | ".join(cells) + " |")
+        # Name each tier once, on its first row
+        tier_cell = hw_row.tier if hw_row.tier != previous_tier else ""
+        previous_tier = hw_row.tier
+        lines.append(f"| {tier_cell} | {hw_row.label} | {hw_row.memory_label} "
+                     f"| {hw_row.bandwidth_label} | " + " | ".join(cells) + " |")
 
+    return lines
+
+
+def _hardware_notes() -> list[str]:
+    """What the hardware table includes and leaves out, and why."""
+    no_fp8 = ", ".join(hw.name.split(",")[0] for hw in HARDWARE if not hw.native_fp8
+                       and not hw.name.startswith("Mac"))
+    pcie = ", ".join(hw.server_name or hw.name for hw in NODE_GPUS if not hw.gpu_fabric)
+    return [
+        f"- **8-bit without FP8 hardware** ({no_fp8}, Macs): the FP8 column means 8-bit "
+        "weights such as GGUF Q8_0 or MLX 8-bit, which need the same memory.",
+        "- **Unified memory**: the GPU shares system RAM, which is several times slower than "
+        "GPU memory; the speeds show it. macOS gives the GPU 75% of RAM by default, and "
+        "`sudo sysctl iogpu.wired_limit_mb=<MB>` raises that until the next restart (leave "
+        "8–16 GiB for macOS). The Ryzen AI Max+ 395 gives its GPU up to 96 GiB on Windows "
+        "(around 108 GiB on Linux), the DGX Spark about 115 GiB after its operating system.",
+        f"- **{NODE_GPU_COUNT}-GPU servers** list only GPUs sold that way: GeForce cards are "
+        "left out because NVIDIA's GeForce driver license bars data-center deployment, as are "
+        "workstation cards, built for desktops of up to four; the RTX PRO 6000 appears as its "
+        "Server Edition. Speeds are estimated for boards that link every GPU to every other "
+        f"(NVLink, Infinity Fabric, Gaudi's on-board network); servers that connect GPUs over "
+        f"PCIe ({pcie}) show none, for lack of measurements.",
+        "- **Not listed**: rack-scale systems (GB200/GB300 NVL72, AMD Helios with MI455X), which "
+        "come as 72-GPU racks, and AMD's MI440X 8-GPU platform, whose memory is not yet "
+        "published. B200, B300 and Rubin show the memory an HGX board gives each GPU; Rubin's "
+        "figures (2 TB and 130 TB/s per board) are from NVIDIA's US page of 2026-10-15, while "
+        "its other pages list 2.3 TB and 176 TB/s. The DGX Station counts its 252 GiB of GPU "
+        "memory; its 496 GiB of CPU memory is about 18× slower.",
+    ]
+
+
+def _memory_formula_section() -> list[str]:
+    kv_large = CONTEXT_TOKENS * KV_BYTES_PER_TOKEN / BYTES_PER_GIB
+    kv_small = CONTEXT_TOKENS * KV_BYTES_PER_TOKEN_SMALL / BYTES_PER_GIB
+    h100 = next(hw for hw in HARDWARE if hw.key == "h100")
+    fp8_gib = PRECISION_BYTES["FP8"] * 1e9 / BYTES_PER_GIB
+    example = serving_gib(70, "FP8")
+
+    def gib_per_billion(precision: str) -> str:
+        return f"{PRECISION_BYTES[precision] * 1e9 / BYTES_PER_GIB:.3g}"
+
+    return [
+        "### Memory formula",
+        "",
+        "```",
+        "Memory (GiB) = total parameters (billions) × GiB per billion parameters",
+        f"             + KV cache: {kv_large:g} GiB ({CONTEXT_TOKENS:,} tokens × "
+        f"{KV_BYTES_PER_TOKEN // 1024} KiB; {kv_small:g} GiB under {SMALL_MODEL_PARAMS_B}B parameters)",
+        f"             + {RUNTIME_GIB:g} GiB per GPU",
+        "```",
+        "",
+        "| Precision | Bytes per parameter | GiB per billion parameters | Files it covers |",
+        "|-----------|---------------------|----------------------------|-----------------|",
+        f"| BF16 | {PRECISION_BYTES['BF16']:g} | {gib_per_billion('BF16')} | 16-bit weights |",
+        f"| FP8 | {PRECISION_BYTES['FP8']:g} | {gib_per_billion('FP8')} | FP8, GGUF Q8_0, MLX 8-bit |",
+        f"| INT4 | {PRECISION_BYTES['INT4']:g} | {gib_per_billion('INT4')} "
+        "| GGUF Q4_K_M, AWQ, GPTQ, NVFP4, MLX 4-bit |",
+        "",
+        "- **GiB** (1,073,741,824 bytes) is the unit GPU and Mac memory is sold in, though it is "
+        "labelled GB: an \"80 GB\" H100 holds 80 GiB. A billion parameters at 2 bytes each is "
+        "2 billion bytes, or 1.86 GiB.",
+        "- **Bytes per parameter** are those of real files: quantized checkpoints also store "
+        "scale factors and usually keep the embeddings and output layer in 16-bit, so 4-bit "
+        "files of 30B-and-up models come to 0.56–0.61 bytes per parameter rather than 0.5, "
+        "and 8-bit files to 1.00–1.07.",
+        "- **MoE models** count all their parameters: every expert must sit in memory, even "
+        "though each token uses only a few.",
+        f"- **KV cache**: the attention keys and values kept for every token in context, "
+        f"reserved for one {CONTEXT_TOKENS:,}-token conversation. It does not shrink when the "
+        "weights are quantized and depends on the attention design, from about 70 KiB per "
+        "token for DeepSeek's MLA to 320 KiB for Llama 3.3 70B, which this tool does not know "
+        f"per model; {KV_BYTES_PER_TOKEN // 1024} KiB is a safe middle. Longer contexts and "
+        "several users at once need more.",
+        f"- **{RUNTIME_GIB:g} GiB per GPU** covers the CUDA or Metal context, the framework and "
+        f"activations. Split across {NODE_GPU_COUNT} GPUs, a model needs it on each.",
+        f"- Example: a 70B dense model at FP8 needs 70 × {fp8_gib:.3g} + {kv_cache_gib(70):g} + "
+        f"{RUNTIME_GIB:g} = {example:.1f} GiB, so it fits an H100 ({h100.usable_gib:g} GiB).",
+    ]
+
+
+def _speed_formula_section() -> list[str]:
+    efficiency = BANDWIDTH_EFFICIENCY
+    h100 = next(hw for hw in HARDWARE if hw.key == "h100")
+    example_gb = 30 * PRECISION_BYTES["FP8"]
+    example_ms = example_gb / (efficiency * h100.bandwidth_gbs) * 1000
+    example = decode_tokens_per_s(30, "dense", "FP8", h100.bandwidth_gbs)
+    gpu_ms = FIXED_MS_PER_TOKEN[("gpu", "dense")], FIXED_MS_PER_TOKEN[("gpu", "moe")]
+    apple_ms = FIXED_MS_PER_TOKEN[("apple", "dense")], FIXED_MS_PER_TOKEN[("apple", "moe")]
+    pairs, median, within_20 = _speed_accuracy()
+
+    lines = [
+        "### Speed formula",
+        "",
+        "Generating each token reads every active weight from memory once, so with one "
+        "request at a time memory bandwidth, not compute, sets the speed:",
+        "",
+        "```",
+        f"Time per token (ms) = bytes per token ÷ ({efficiency:g} × bandwidth × GPUs) + fixed cost",
+        f"Bytes per token     = active parameters × bytes per parameter (× {MOE_BYTES_FACTOR:g} for MoE)",
+        "Speed (tokens/s)    = 1000 ÷ time per token",
+        "```",
+        "",
+        "- **Active parameters** are all the parameters of a dense model, and only those used "
+        "per token for an MoE model (37B of DeepSeek V3's 671B). MoE models also keep their "
+        f"attention and shared layers at higher precision, hence ×{MOE_BYTES_FACTOR:g}.",
+        f"- **{efficiency:g}**: software reads weights at about {efficiency:.0%} of the "
+        "memory's peak bandwidth.",
+        f"- **Fixed cost per token** (starting the work for every layer, synchronising, "
+        f"sampling): {gpu_ms[0]:g} ms for dense and {gpu_ms[1]:g} ms for MoE models on "
+        f"NVIDIA, AMD and Intel hardware, {apple_ms[0]:g} and {apple_ms[1]:g} ms on Apple "
+        f"Silicon. When {NODE_GPU_COUNT} GPUs split one request they also exchange results "
+        f"at every layer: {SYNC_MS_PER_TOKEN['dense']:g} ms more for dense and "
+        f"{SYNC_MS_PER_TOKEN['moe']:g} ms for MoE models. This is why small and MoE models "
+        "fall short of their bandwidth limit on fast GPUs, and why 8 GPUs do not make one "
+        "request 8× faster.",
+        f"- Example: a 30B dense model at FP8 on an H100 SXM reads {example_gb:.1f} GB per "
+        f"token: {example_gb:.1f} ÷ ({efficiency:g} × {h100.bandwidth_gbs:,.0f} GB/s) = "
+        f"{example_ms:.1f} ms, plus {gpu_ms[0]:g} ms, so about {example:.0f} tokens/s.",
+        "- **Assumes** one request, a short context (a long context's KV cache is read for "
+        "every token too, about 20% slower at 8K tokens for a small MoE model), no speculative "
+        "decoding or multi-token prediction (which can add 2–3×), and an engine suited to the "
+        "hardware: vLLM, SGLang or TensorRT-LLM on data-center GPUs, where llama.cpp runs "
+        "30–55% below these estimates.",
+        "- **Reading the prompt** is a separate cost the tables do not estimate, limited by "
+        "compute rather than memory (about 2 × active parameters calculations per prompt "
+        "token). It is where computers whose GPU shares system RAM fall furthest behind: "
+        "llama.cpp reads a 7B model's prompt at about 440 tokens/s on an M4 Pro, 1,700 on a "
+        "Ryzen AI Max+ 395, 3,200 on an M5 Max and 3,300 on a DGX Spark, against 14,800 on "
+        "an RTX 4090 ([Apple](https://github.com/ggml-org/llama.cpp/discussions/4167), "
+        "[Vulkan](https://github.com/ggml-org/llama.cpp/discussions/10879), "
+        "[CUDA](https://github.com/ggml-org/llama.cpp/discussions/15013)). With a 70B model, "
+        "a 10,000-token prompt takes seconds on data-center GPUs and can take minutes on "
+        "a Mac.",
+        "",
+        "#### How close are the estimates?",
+        "",
+        f"Checked against {len(pairs)} published single-request speeds "
+        "(`arena_enrichment/measurements.py`): the median estimate is within "
+        f"{median:.0%} of the measurement, and {within_20:.0%} are within ±20%. The constants "
+        "were chosen with these same measurements, so this shows the formula fits them rather "
+        "than proving it on new hardware. A selection:",
+        "",
+        "| Hardware | Model | Engine | Measured | Estimate |",
+        "|----------|-------|--------|----------|----------|",
+    ]
+    for m, estimate in pairs:
+        if m.in_readme:
+            lines.append(f"| {m.hardware} | [{m.model}]({m.source}) | {m.engine} "
+                         f"| {float(f'{m.tokens_per_s:.3g}'):g} tok/s | {_format_speed(estimate).lstrip('~')} |")
+    lines.append("")
+    lines.append("The largest misses are llama.cpp on data-center GPUs (the A100, H100 and "
+                 "MI300X run 30–55% below the estimate) and an early-2025 SGLang run of "
+                 "DeepSeek-R1 on 8× H200 at less than half the estimate; reported DeepSeek "
+                 "speeds have varied widely between engine versions.")
     return lines
 
 
@@ -690,7 +813,7 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
     """Generate the enriched leaderboard markdown table."""
     lines = []
 
-    header = ("| Rank | Model | Score | Params (B) | Arch | VRAM BF16 | VRAM FP8 | VRAM INT4 "
+    header = ("| Rank | Model | Score | Params (B) | Arch | GiB BF16 | GiB FP8 | GiB INT4 "
               "| Fits on | Speed |")
     sep = "|------|-------|-------|------------|------|-----------|----------|-----------|---------|-------|"
 
@@ -712,12 +835,8 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
             arch = "Dense"
         elif arch == "MOE":
             arch = "MoE"
-        bf16 = row.get("vram_bf16_serving_gb")
-        bf16_s = f"{bf16:g}" if pd.notna(bf16) else "?"
-        fp8 = row.get("vram_fp8_serving_gb")
-        fp8_s = f"{fp8:g}" if pd.notna(fp8) else "?"
-        int4 = row.get("vram_int4_serving_gb")
-        int4_s = f"{int4:g}" if pd.notna(int4) else "?"
+        bf16_s, fp8_s, int4_s = (_format_gib(row.get(f"vram_{p.lower()}_serving_gib"))
+                                 for p in FIT_PRECISIONS)
         # "Fits on" — show the smallest reference GPU at FP8, the most
         # practical precision, or else the smallest reference 8-GPU node
         best_fp8 = row.get("best_gpu_fp8", "?")
@@ -730,14 +849,14 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
             fits_s = "Multi-node"
         else:
             fits_s = f"{best_node_fp8} (FP8)"
-        # Speed — one request on the "Fits on" GPU; none for 8-GPU servers
+        # Speed — one request on the "Fits on" hardware; none for PCIe servers
         tok_s = row.get("est_tok_s_fp8")
         if pd.notna(tok_s):
             speed_s = _format_speed(tok_s)
-        elif best_fp8 == "MULTI-GPU":
-            speed_s = "—"
-        else:
+        elif best_fp8 == "UNKNOWN":
             speed_s = "?"
+        else:
+            speed_s = "—"
         return (f"| {rank} | {name} | {score} | {params_s} | {arch} | {bf16_s} | {fp8_s} "
                 f"| {int4_s} | {fits_s} | {speed_s} |")
 
@@ -788,29 +907,29 @@ def print_console_summary(df: pd.DataFrame, resolution_counts: dict[str, int]) -
 
     for precision in ["BF16", "FP8"]:
         p_lower = precision.lower()
-        serving_col = f"vram_{p_lower}_serving_gb"
+        serving_col = f"vram_{p_lower}_serving_gib"
         if serving_col not in df.columns:
             continue
 
-        print(f"\n=== Best Model Per GPU ({precision} serving) ===")
-        for gpu in GPUS:
-            display, gpu_vram = gpu.name, gpu.vram_gb
-            best = _best_fit(df, serving_col, gpu_vram)
+        print(f"\n=== Best Model Per Hardware ({precision} serving) ===")
+        for hw_row in _hardware_rows():
+            display, gpu_vram = hw_row.label, hw_row.memory_label
+            best = _best_fit(df, serving_col, hw_row)
             if best is not None:
-                speed = _estimated_speed(best, precision, gpu.bandwidth_gbs)
+                speed = hardware_speed(hw_row.hardware, best, precision, hw_row.gpu_count)
                 speed_s = f", {_format_speed(speed)}" if speed is not None else ""
                 rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
                 name = best["model_name"]
                 total_b = best.get("total_params_b", "?")
                 arch = best.get("architecture", "?")
-                serving = round(best[serving_col], 1)
+                serving = round(hw_row.needed_gib(best[serving_col]), 1)
                 arch_label = f" {arch.upper()}" if arch and arch != "dense" else ""
                 print(
-                    f"  {display:24s} ({gpu_vram:3d} GB): "
-                    f"#{rank:<4} {name} ({total_b}B{arch_label}, ~{serving} GB serving{speed_s})"
+                    f"  {display:42s} ({gpu_vram:>11s}): "
+                    f"#{rank:<4} {name} ({total_b}B{arch_label}, ~{serving} GiB serving{speed_s})"
                 )
             else:
-                print(f"  {display:24s} ({gpu_vram:3d} GB): No model fits")
+                print(f"  {display:42s} ({gpu_vram:>11s}): No model fits")
 
     print()
 
