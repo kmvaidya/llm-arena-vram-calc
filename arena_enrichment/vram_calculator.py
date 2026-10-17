@@ -262,7 +262,12 @@ def serving_gib(total_params_b: float, precision: str, gpu_count: int = 1) -> fl
     Returns:
         Serving memory in GiB
     """
-    return weights_gib(total_params_b, precision) + kv_cache_gib(total_params_b) + RUNTIME_GIB * gpu_count
+    return serving_from_weights(weights_gib(total_params_b, precision), total_params_b, gpu_count)
+
+
+def serving_from_weights(weights: float, total_params_b: float, gpu_count: int = 1) -> float:
+    """Serving memory from the weights' memory: + KV cache + runtime per GPU, in GiB."""
+    return weights + kv_cache_gib(total_params_b) + RUNTIME_GIB * gpu_count
 
 
 def node_serving_gib(single_serving_gib: float) -> float:
@@ -355,17 +360,18 @@ def compute_vram_columns(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with memory columns added
     """
+    # Kept unrounded: speed is worked out from the weights' bytes per parameter
     released = df["released_weights_gib"] if "released_weights_gib" in df.columns else None
     for column in COLUMNS:
         weights = [
-            round(column_weights_gib(total, None if released is None or pd.isna(released[i])
-                                     else released[i], column), 1)
+            column_weights_gib(total, None if released is None or pd.isna(released[i])
+                               else released[i], column)
             if pd.notna(total) else None
             for i, total in df["total_params_b"].items()
         ]
         df[f"vram_{column}_weights_gib"] = weights
         df[f"vram_{column}_serving_gib"] = [
-            round(w + kv_cache_gib(total) + RUNTIME_GIB, 1) if w is not None else None
+            serving_from_weights(w, total) if w is not None else None
             for w, total in zip(weights, df["total_params_b"], strict=True)
         ]
 

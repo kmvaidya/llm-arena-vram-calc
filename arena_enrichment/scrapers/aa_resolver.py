@@ -17,6 +17,7 @@ missing from the list.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -90,6 +91,11 @@ UNREADABLE_PAGES: set[str] = set()
 # A fresh model list this much smaller than the saved one is a misread page,
 # not AA dropping models, and is not saved
 MIN_LIST_SHARE = 0.5
+# After this many pages in a row cannot be read, the site is taken as down
+# for the rest of the run: cached results are used and nothing more is
+# asked, so an outage costs a few timeouts rather than one per model
+MAX_FAILURES_IN_A_ROW = 5
+_failures_in_a_row = 0
 
 AA_LEADERBOARD_URL = "https://artificialanalysis.ai/leaderboards/models"
 AA_MODEL_BASE_URL = "https://artificialanalysis.ai/models"
@@ -195,13 +201,37 @@ def _extract_models_from_rsc(text: str) -> list[dict[str, Any]]:
 # Per-model pages (parameter counts)
 # ---------------------------------------------------------------------------
 
+# First parts of Hugging Face paths that are not a model's owner
+_HF_NON_MODEL_PATHS = {"collections", "spaces", "datasets", "papers", "docs", "blog", "models",
+                       "organizations", "settings", "join", "login", "posts", "learn"}
+
+
 def _hf_repo_from_url(url: str | None) -> str | None:
-    """'owner/name' from a Hugging Face model URL, or None for another site."""
-    m = re.match(r"https?://(?:www\.)?huggingface\.co/([\w.-]+/[\w.-]+)", url or "")
-    return m.group(1) if m else None
+    """'owner/name' from a Hugging Face model URL, or None for another page or site."""
+    m = re.match(r"https?://(?:www\.)?huggingface\.co/([\w.-]+)/([\w.-]+)", url or "")
+    if not m or m.group(1) in _HF_NON_MODEL_PATHS:
+        return None
+    return f"{m.group(1)}/{m.group(2)}"
 
 
 def _fetch_single_model(slug: str) -> ModelPage | None:
+    """
+    _read_page, unless MAX_FAILURES_IN_A_ROW pages in a row have failed in
+    this run: then AAUnavailable straight away.
+    """
+    global _failures_in_a_row
+    if _failures_in_a_row >= MAX_FAILURES_IN_A_ROW:
+        raise AAUnavailable(f"{slug}: skipped, {_failures_in_a_row} pages in a row failed")
+    try:
+        page = _read_page(slug)
+    except AAUnavailable:
+        _failures_in_a_row += 1
+        raise
+    _failures_in_a_row = 0
+    return page
+
+
+def _read_page(slug: str) -> ModelPage | None:
     """
     Read a model's AA page: its parameter counts and the Hugging Face
     repository its "Model weights" row links to.
@@ -329,6 +359,11 @@ def _model_count(lookup: dict[str, AAEntry]) -> int:
     return len({entry["slug"] or entry["name"] for entry in lookup.values()})
 
 
+def saved_model_list() -> dict[str, AAEntry]:
+    """The saved AA model list, without fetching it ({} when there is none)."""
+    return _load_cache()[0] or {}
+
+
 def validate_params_cache() -> None:
     """Raise if the committed page cache cannot be read, before a run relies on it."""
     _load_params_cache()
@@ -367,6 +402,14 @@ def _save_params_cache(cache: dict[str, dict[str, Any]]) -> None:
     os.replace(partial, PARAMS_CACHE_FILE)
 
 
+def expiry_spread_days(key: str) -> int:
+    """
+    0-9 more days of cache life, fixed per key, so that entries saved on the
+    same day do not all expire, and get read again, on the same day.
+    """
+    return int(hashlib.sha256(key.encode()).hexdigest(), 16) % 10
+
+
 def age_days(checked: str | None) -> float:
     """Days since a YYYY-MM-DD date; infinite when the date is missing or invalid."""
     try:
@@ -402,8 +445,10 @@ def get_model_page(slug: str, fetch: bool = True) -> ModelPage | None:
     hit = cache.get(slug)
     if hit is not None:
         has_params = hit.get("total_params_b") is not None
-        max_age = PARAMS_MAX_AGE_DAYS if has_params else MISSING_PARAMS_MAX_AGE_DAYS
-        fresh = age_days(hit.get("checked")) < max_age and ("hf_repo" in hit or not has_params)
+        max_age = ((PARAMS_MAX_AGE_DAYS if has_params else MISSING_PARAMS_MAX_AGE_DAYS)
+                   + expiry_spread_days(slug))
+        # Entries saved before pages were read for their weights link lack "hf_repo"
+        fresh = age_days(hit.get("checked")) < max_age and "hf_repo" in hit
         if fresh or not fetch:
             return _page_from_cache_entry(hit)
     if not fetch:
@@ -419,9 +464,13 @@ def get_model_page(slug: str, fetch: bool = True) -> ModelPage | None:
     if (page is None or page["total_params_b"] is None) and hit is not None \
             and hit.get("total_params_b") is not None:
         # The entry stays expired, so every run checks the page again and
-        # reports it until the reader is fixed
+        # reports it until the reader is fixed; a weights link it still has
+        # is kept
         logger.warning(f"AA page {slug} no longer shows parameter counts; keeping the cached ones")
         LOST_SIZES.add(slug)
+        if page is not None and page["hf_repo"] and page["hf_repo"] != hit.get("hf_repo"):
+            hit["hf_repo"] = page["hf_repo"]
+            _save_params_cache(cache)
         return _page_from_cache_entry(hit)
 
     cache[slug] = {

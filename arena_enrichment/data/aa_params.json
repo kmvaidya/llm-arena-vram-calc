@@ -35,12 +35,14 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "dbrx-instruct-preview": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-coder-v2": {
@@ -80,6 +82,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v2.5-1210": {
@@ -120,6 +123,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3-1-thinking": {
@@ -139,66 +143,77 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3-2-exp-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3-2-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.1": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.1-terminus": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.1-terminus-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.1-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.2": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.2-exp": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.2-exp-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3.2-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v4-1-flash": {
@@ -219,6 +234,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v4-flash-high-preview": {
@@ -319,36 +335,42 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-4.5v": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-4.6": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-4.6v": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-4.7": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-4.7-flash": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-5": {
@@ -376,6 +398,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-5-3": {
@@ -396,12 +419,14 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-5.2": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-5.2-max": {
@@ -502,6 +527,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "jamba-1.5-mini": {
@@ -575,18 +601,21 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2-flash-(thinking)": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2-flash-non-thinking": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2-flash-thinking": {
@@ -605,6 +634,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m1": {
@@ -631,6 +661,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m2-5": {
@@ -651,24 +682,28 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m2.1-preview": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m2.5": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m2.7": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m3": {

@@ -21,7 +21,7 @@ from typing import Any
 
 import requests
 
-from scrapers.aa_resolver import DATA_DIR, age_days
+from scrapers.aa_resolver import DATA_DIR, MAX_FAILURES_IN_A_ROW, age_days, expiry_spread_days
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,9 @@ CACHE_FILE = os.path.join(DATA_DIR, "hf_checkpoints.json")
 # while a repository without them may still be filling up
 MAX_AGE_DAYS = 30
 MISSING_MAX_AGE_DAYS = 7
+# Requests that failed in a row in this run; at MAX_FAILURES_IN_A_ROW the
+# API is taken as down and only the cache is used
+_failures_in_a_row = 0
 
 
 class HFUnavailable(Exception):
@@ -39,6 +42,23 @@ class HFUnavailable(Exception):
 
 def _fetch_checkpoint_bytes(repo: str) -> int | None:
     """
+    _read_checkpoint_bytes, unless MAX_FAILURES_IN_A_ROW requests in a row
+    have failed in this run: then HFUnavailable straight away.
+    """
+    global _failures_in_a_row
+    if _failures_in_a_row >= MAX_FAILURES_IN_A_ROW:
+        raise HFUnavailable(f"{repo}: skipped, {_failures_in_a_row} requests in a row failed")
+    try:
+        size = _read_checkpoint_bytes(repo)
+    except HFUnavailable:
+        _failures_in_a_row += 1
+        raise
+    _failures_in_a_row = 0
+    return size
+
+
+def _read_checkpoint_bytes(repo: str) -> int | None:
+    """
     Bytes of a repository's top-level .safetensors files, or None when the
     repository does not exist or holds none.  Raises HFUnavailable when the
     API cannot be read, so that an outage is not remembered as a missing
@@ -46,7 +66,7 @@ def _fetch_checkpoint_bytes(repo: str) -> int | None:
     """
     url = HF_MODEL_API.format(repo=repo)
     try:
-        resp = requests.get(url, params={"blobs": "true"}, timeout=30)
+        resp = requests.get(url, params={"blobs": "true"}, timeout=20)
     except requests.RequestException as e:
         raise HFUnavailable(f"{url}: {e}") from e
     if resp.status_code == 429 or resp.status_code >= 500:
@@ -54,11 +74,16 @@ def _fetch_checkpoint_bytes(repo: str) -> int | None:
     if resp.status_code != 200:
         # Hugging Face answers 401 for a repository that does not exist
         return None
-    siblings = resp.json().get("siblings") or []
-    total = sum(
-        f.get("size") or 0 for f in siblings
-        if f.get("rfilename", "").endswith(".safetensors") and "/" not in f["rfilename"]
-    )
+    try:
+        siblings = resp.json().get("siblings") or []
+    except (ValueError, AttributeError) as e:
+        raise HFUnavailable(f"{url}: unreadable answer ({e})") from e
+    weights = [f for f in siblings
+               if f.get("rfilename", "").endswith(".safetensors") and "/" not in f["rfilename"]]
+    # Mistral repositories hold their weights twice: consolidated*.safetensors
+    # for mistral-inference and model-*.safetensors for transformers
+    transformers_files = [f for f in weights if not f["rfilename"].startswith("consolidated")]
+    total = sum(f.get("size") or 0 for f in (transformers_files or weights))
     return total or None
 
 
@@ -99,7 +124,7 @@ def checkpoint_bytes(repo: str, fetch: bool = True) -> int | None:
     cache = _load_cache()
     hit = cache.get(repo)
     if hit is not None:
-        max_age = MAX_AGE_DAYS if hit.get("bytes") else MISSING_MAX_AGE_DAYS
+        max_age = (MAX_AGE_DAYS if hit.get("bytes") else MISSING_MAX_AGE_DAYS) + expiry_spread_days(repo)
         if age_days(hit.get("checked")) < max_age or not fetch:
             return hit.get("bytes")
     if not fetch:

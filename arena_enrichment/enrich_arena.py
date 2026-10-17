@@ -21,7 +21,7 @@ import os
 import re
 import statistics
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Any, TypedDict
@@ -123,12 +123,15 @@ _OVERRIDE_KEYS = {_normalize_override(key): key for key in MODEL_OVERRIDES}
 _HF_REPO_KEYS = {_normalize_override(key): key for key in HF_REPOS}
 
 
-def _match_known(model_name: str, keys: dict[str, str]) -> str | None:
+def _match_known(model_name: str, keys: dict[str, str], exact: bool = False) -> str | None:
     """
-    The key of a known_models table that matches a name: exactly, or as its
-    start followed only by release parts.  The longest matching key wins.
+    The key of a known_models table that matches a name: exactly, or (unless
+    exact) as its start followed only by release parts.  The longest
+    matching key wins.
     """
     name = _normalize_override(model_name)
+    if exact:
+        return keys.get(name)
     best = None
     for key_norm in keys:
         if not name.startswith(key_norm):
@@ -306,10 +309,10 @@ class Release(TypedDict):
     release_source: str
 
 
-# A checkpoint under this many bytes per parameter belongs to another model
-# (a wrong link) and is ignored; one above 16-bit (FP32 files, extra copies)
-# is counted as 16-bit, the precision such models are served in
+# A checkpoint outside these bytes per parameter is another model's (a
+# wrong link), FP32 files or two copies of the weights, and is not used
 MIN_RELEASE_BYTES_PER_PARAM = 0.35
+MAX_RELEASE_BYTES_PER_PARAM = 2.2
 # Precision tags in a model's name, for models without a checkpoint to read
 _NAME_PRECISION = [
     (re.compile(r"(?:^|[-_])(?:nvfp4|mxfp4|fp4|int4|awq|gptq)(?:$|[-_])", re.IGNORECASE), "INT4"),
@@ -327,8 +330,10 @@ def resolve_release(
     """
     How a model was published: the precision its Arena name gives (an
     "-nvfp4" build), or else the size of the weight files in its official
-    Hugging Face repository (from HF_REPOS, or the one its AA page links).
-    Unknown (and taken as 16-bit by the tables) when none is found.
+    Hugging Face repository.  The repositories tried, until one has weights
+    of a plausible size: an HF_REPOS entry for exactly this name, the one
+    its AA page links, and an HF_REPOS entry for the model it is a release
+    of.  Unknown (and taken as 16-bit by the tables) when none is found.
     """
     unknown: Release = {"released_weights_gib": None, "release_format": None,
                         "release_source": "unknown"}
@@ -342,29 +347,39 @@ def resolve_release(
                     "release_format": release_format(PRECISION_BYTES[precision]),
                     "release_source": "name"}
 
-    known = _match_known(model_name, _HF_REPO_KEYS)
-    repo = HF_REPOS[known] if known else params.get("hf_repo")
-    if repo is None and aa_lookup:
-        try:
-            repo = hf_repo_for(model_name, aa_lookup, fetch=use_network)
-        except AAUnavailable:
-            repo = None
-    if repo:
+    def candidates() -> Iterator[str | None]:
+        exact = _match_known(model_name, _HF_REPO_KEYS, exact=True)
+        yield HF_REPOS[exact] if exact else None
+        yield params.get("hf_repo")
+        if aa_lookup:
+            try:
+                linked = hf_repo_for(model_name, aa_lookup, fetch=use_network)
+            except AAUnavailable:
+                linked = None
+            yield linked
+        release_of = _match_known(model_name, _HF_REPO_KEYS)
+        yield HF_REPOS[release_of] if release_of else None
+
+    tried = set()
+    for repo in candidates():
+        if not repo or repo in tried:
+            continue
+        tried.add(repo)
         try:
             size = checkpoint_bytes(repo, fetch=use_network)
         except HFUnavailable:
-            size = None
-        if size:
-            bytes_per_param = size / (total * 1e9)
-            if bytes_per_param >= MIN_RELEASE_BYTES_PER_PARAM:
-                return {
-                    "released_weights_gib": min(size, weights_gib(total, "BF16") * BYTES_PER_GIB)
-                    / BYTES_PER_GIB,
-                    "release_format": release_format(bytes_per_param),
-                    "release_source": f"huggingface:{repo}",
-                }
-            logger.warning(f"Ignoring {repo} for {model_name}: {size / 1e9:.0f} GB "
-                           f"is too small for {total:g}B parameters")
+            continue
+        if not size:
+            continue
+        bytes_per_param = size / (total * 1e9)
+        if MIN_RELEASE_BYTES_PER_PARAM <= bytes_per_param <= MAX_RELEASE_BYTES_PER_PARAM:
+            return {
+                "released_weights_gib": size / BYTES_PER_GIB,
+                "release_format": release_format(bytes_per_param),
+                "release_source": f"huggingface:{repo}",
+            }
+        logger.warning(f"Ignoring {repo} for {model_name}: {size / 1e9:.0f} GB of weights "
+                       f"for {total:g}B parameters is {bytes_per_param:.2f} bytes each")
     return unknown
 
 
@@ -1240,6 +1255,8 @@ def main() -> None:
 
     resolution_log: list[dict[str, Any]] = []
     resolution_counts: dict[str, int] = {}
+    # Without network, releases still come from the saved list and caches
+    release_lookup = aa_lookup if use_network else aa_resolver.saved_model_list()
 
     for idx, row in df.iterrows():
         model_name = row["model_name"]
@@ -1261,7 +1278,13 @@ def main() -> None:
             df.at[idx, "architecture"] = None
         df.at[idx, "resolution_source"] = source
 
-        release = resolve_release(model_name, params, aa_lookup, use_network=use_network)
+        try:
+            release = resolve_release(model_name, params, release_lookup, use_network=use_network)
+        except Exception:
+            # A bug or an unexpected answer, not an outage: the model is shown as 16-bit
+            logger.warning(f"Release lookup crashed for {model_name}", exc_info=True)
+            release = {"released_weights_gib": None, "release_format": None,
+                       "release_source": "unknown"}
         df.at[idx, "released_weights_gib"] = release["released_weights_gib"]
         df.at[idx, "release_format"] = release["release_format"]
         df.at[idx, "release_source"] = release["release_source"]
@@ -1291,7 +1314,8 @@ def main() -> None:
     os.makedirs(args.output_dir, exist_ok=True)
 
     csv_path = os.path.join(args.output_dir, "arena_leaderboard_enriched.csv")
-    df.to_csv(csv_path, index=False)
+    memory_cols = [c for c in df.columns if c.startswith("vram_") or c == "released_weights_gib"]
+    df.round({c: 1 for c in memory_cols}).to_csv(csv_path, index=False)
     print(f"  CSV: {csv_path}")
 
     xlsx_path = os.path.join(args.output_dir, "arena_leaderboard_enriched.xlsx")

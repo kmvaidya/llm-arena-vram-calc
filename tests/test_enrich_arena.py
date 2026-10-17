@@ -320,14 +320,30 @@ class TestResolveRelease:
         assert release["release_source"] == "name"
         mock_size.assert_not_called()
 
-    @patch("enrich_arena.checkpoint_bytes", return_value=600_000_000_000)
-    def test_above_16_bit_counts_as_16_bit(self, mock_size):
-        # FP32 files: served in 16-bit
+    @patch("enrich_arena.checkpoint_bytes", return_value=400_000_000_000)
+    def test_more_than_16_bit_is_not_used(self, mock_size):
+        # FP32 files, or two copies of the weights: the release is left unknown
         params = {"total_params_b": 100, "active_params_b": 100, "architecture": "dense",
                   "hf_repo": "old/fp32-model"}
-        release = resolve_release("old-model", params, None)
-        assert release["release_format"] == "16-bit"
-        assert release["released_weights_gib"] == pytest.approx(200e9 / GIB)
+        assert resolve_release("old-model", params, None)["release_format"] is None
+
+    @patch("enrich_arena.hf_repo_for", return_value="MiniMaxAI/MiniMax-M2-1")
+    @patch("enrich_arena.checkpoint_bytes", side_effect=[None, 230_100_000_000])
+    def test_falls_back_to_the_known_repository(self, mock_size, mock_repo):
+        # AA links a misspelled repository; HF_REPOS knows minimax-m2.1
+        params = {"total_params_b": 230, "active_params_b": 10, "architecture": "moe"}
+        release = resolve_release("minimax-m2.1-preview", params, {"x": {}})
+        assert release["release_source"] == "huggingface:MiniMaxAI/MiniMax-M2.1"
+        assert [c.args[0] for c in mock_size.call_args_list] == [
+            "MiniMaxAI/MiniMax-M2-1", "MiniMaxAI/MiniMax-M2.1"]
+
+    @patch("enrich_arena.checkpoint_bytes", return_value=798_000_000_000)
+    def test_own_aa_link_before_the_base_models_entry(self, mock_size):
+        # trinity-large-thinking has its own repository; "trinity-large" is a fallback
+        params = {"total_params_b": 398.6, "active_params_b": 13, "architecture": "moe",
+                  "hf_repo": "arcee-ai/Trinity-Large-Thinking"}
+        assert resolve_release("trinity-large-thinking", params, None)["release_source"] == \
+            "huggingface:arcee-ai/Trinity-Large-Thinking"
 
     @patch("enrich_arena.checkpoint_bytes", return_value=5_000_000_000)
     def test_checkpoint_far_too_small_is_ignored(self, mock_size):

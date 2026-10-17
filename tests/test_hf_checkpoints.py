@@ -40,6 +40,31 @@ class TestFetchCheckpointBytes:
         assert mock_get.call_args.kwargs["params"] == {"blobs": "true"}
 
     @patch("scrapers.hf_checkpoints.requests.get")
+    def test_mistral_layout_counted_once(self, mock_get):
+        # The same weights for mistral-inference and for transformers
+        mock_get.return_value = _model_info(
+            ("consolidated-00001-of-00002.safetensors", 120_000_000_000),
+            ("consolidated-00002-of-00002.safetensors", 125_000_000_000),
+            ("model-00001-of-00003.safetensors", 100_000_000_000),
+            ("model-00002-of-00003.safetensors", 100_000_000_000),
+            ("model-00003-of-00003.safetensors", 45_000_000_000),
+        )
+        assert _fetch_checkpoint_bytes("mistralai/Mistral-Large-Instruct-2407") == 245_000_000_000
+
+    @patch("scrapers.hf_checkpoints.requests.get")
+    def test_unreadable_answer_is_unavailable(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=200, json=MagicMock(side_effect=ValueError("html")))
+        with pytest.raises(HFUnavailable):
+            _fetch_checkpoint_bytes("org/model")
+
+    @patch("scrapers.hf_checkpoints.requests.get", side_effect=requests.Timeout("slow"))
+    def test_stops_asking_after_failures_in_a_row(self, mock_get):
+        for _ in range(hf_checkpoints.MAX_FAILURES_IN_A_ROW + 3):
+            with pytest.raises(HFUnavailable):
+                _fetch_checkpoint_bytes("org/model")
+        assert mock_get.call_count == hf_checkpoints.MAX_FAILURES_IN_A_ROW
+
+    @patch("scrapers.hf_checkpoints.requests.get")
     def test_repository_without_safetensors(self, mock_get):
         mock_get.return_value = _model_info(("pytorch_model.bin", 14_000_000_000))
         assert _fetch_checkpoint_bytes("old/model") is None
@@ -82,7 +107,7 @@ class TestCheckpointBytes:
 
     @patch("scrapers.hf_checkpoints._fetch_checkpoint_bytes", return_value=20)
     def test_expired_hit_refetched(self, mock_fetch, cache):
-        self._write(cache, "r", _days_ago(31), 10)
+        self._write(cache, "r", _days_ago(41), 10)
         assert checkpoint_bytes("r") == 20
 
     @patch("scrapers.hf_checkpoints._fetch_checkpoint_bytes")
@@ -105,7 +130,7 @@ class TestCheckpointBytes:
 
     @patch("scrapers.hf_checkpoints._fetch_checkpoint_bytes", return_value=None)
     def test_size_that_disappears_is_kept(self, mock_fetch, cache):
-        self._write(cache, "r", _days_ago(31), 10)
+        self._write(cache, "r", _days_ago(41), 10)
         assert checkpoint_bytes("r") == 10
 
     def test_corrupt_cache_raises(self, cache):

@@ -277,10 +277,10 @@ class TestReleaseColumns:
             {"total_params_b": 117.0, "released_weights_gib": 65.2e9 / GIB},
             {"total_params_b": 70.0, "released_weights_gib": None},
         ]))
-        assert list(df["vram_released_weights_gib"]) == [60.7, 130.4]
-        assert list(df["vram_8bit_weights_gib"]) == [60.7, 69.1]
+        assert list(df["vram_released_weights_gib"]) == pytest.approx([60.72, 130.39], abs=0.01)
+        assert list(df["vram_8bit_weights_gib"]) == pytest.approx([60.72, 69.10], abs=0.01)
         # 117B: 60.7 + 4 KV + 1.5 runtime
-        assert df["vram_released_serving_gib"][0] == 66.2
+        assert df["vram_released_serving_gib"][0] == pytest.approx(66.22, abs=0.01)
 
 
 class TestComputeVramColumns:
@@ -300,8 +300,8 @@ class TestComputeVramColumns:
         # No release known: 16-bit as released
         df = compute_vram_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "big-model-70b"].iloc[0]
-        assert row["vram_released_weights_gib"] == 130.4
-        assert row["vram_8bit_serving_gib"] == 74.6
+        assert row["vram_released_weights_gib"] == pytest.approx(130.39, abs=0.01)
+        assert row["vram_8bit_serving_gib"] == pytest.approx(74.60, abs=0.01)
 
 
 class TestAddAllColumns:

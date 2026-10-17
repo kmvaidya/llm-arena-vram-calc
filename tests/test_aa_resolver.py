@@ -296,6 +296,8 @@ class TestFetchSingleModel:
         ("https://huggingface.co/zai-org/GLM-5.3", "zai-org/GLM-5.3"),
         ("https://huggingface.co/openai/gpt-oss-120b/tree/main", "openai/gpt-oss-120b"),
         ("https://github.com/some/repo", None),
+        ("https://huggingface.co/collections/Qwen/qwen35-6890", None),
+        ("https://huggingface.co/spaces/owner/demo", None),
     ])
     @patch("scrapers.aa_resolver.requests.get")
     def test_weights_link(self, mock_get, href, repo):
@@ -359,7 +361,7 @@ class TestGetModelParams:
 
     @patch("scrapers.aa_resolver._fetch_single_model")
     def test_expired_hit_refetched(self, mock_fetch, params_cache):
-        self._write(params_cache, "m", _days_ago(31), self.PARAMS)
+        self._write(params_cache, "m", _days_ago(41), self.PARAMS)
         mock_fetch.return_value = {"total_params_b": 1.0, "active_params_b": 1.0,
                                    "architecture": "dense", "hf_repo": None}
         assert get_model_params("m")["total_params_b"] == 1.0
@@ -381,12 +383,12 @@ class TestGetModelParams:
         mock_fetch.assert_not_called()
 
     @patch("scrapers.aa_resolver._fetch_single_model")
-    def test_missing_params_remembered_for_a_week(self, mock_fetch, params_cache):
+    def test_missing_params_remembered_for_at_least_a_week(self, mock_fetch, params_cache):
         self._write(params_cache, "m", _days_ago(6))
         assert get_model_params("m") is None
         mock_fetch.assert_not_called()
 
-        self._write(params_cache, "m", _days_ago(8))
+        self._write(params_cache, "m", _days_ago(17))  # past 7 days and the 0-9 day spread
         mock_fetch.return_value = None
         assert get_model_params("m") is None
         mock_fetch.assert_called_once_with("m")
@@ -394,11 +396,11 @@ class TestGetModelParams:
     @patch("scrapers.aa_resolver._fetch_single_model", return_value=None)
     def test_page_that_lost_its_sizes_keeps_them(self, mock_fetch, params_cache, monkeypatch):
         monkeypatch.setattr(aa_resolver, "LOST_SIZES", set())
-        self._write(params_cache, "m", _days_ago(31), self.PARAMS)
+        self._write(params_cache, "m", _days_ago(41), self.PARAMS)
         assert get_model_params("m") == self.PARAMS
         assert {"m"} == aa_resolver.LOST_SIZES
         # Left expired, so the next run reads the page again
-        assert json.loads(params_cache.read_text())["m"]["checked"] == _days_ago(31)
+        assert json.loads(params_cache.read_text())["m"]["checked"] == _days_ago(41)
 
     @patch("scrapers.aa_resolver._fetch_single_model", side_effect=AAUnavailable("down"))
     def test_outage_keeps_expired_params(self, mock_fetch, params_cache):
@@ -639,3 +641,18 @@ class TestHfRepoFor:
         assert aa_resolver.hf_repo_for("other-model", _build_lookup(self.LOOKUP)) is None
         assert aa_resolver.hf_repo_for("kimi-k2.5", {}) is None
         mock_page.assert_not_called()
+
+
+@patch("scrapers.aa_resolver._rate_limit", lambda: None)
+@patch("scrapers.aa_resolver.requests.get", side_effect=requests.Timeout("slow"))
+def test_stops_reading_pages_after_failures_in_a_row(mock_get):
+    for _ in range(aa_resolver.MAX_FAILURES_IN_A_ROW + 3):
+        with pytest.raises(AAUnavailable):
+            _fetch_single_model("x")
+    assert mock_get.call_count == aa_resolver.MAX_FAILURES_IN_A_ROW
+
+
+def test_expiry_spread_is_fixed_per_key_and_under_ten_days():
+    spreads = {aa_resolver.expiry_spread_days(f"model-{i}") for i in range(200)}
+    assert spreads == set(range(10))
+    assert aa_resolver.expiry_spread_days("glm-5-3") == aa_resolver.expiry_spread_days("glm-5-3")

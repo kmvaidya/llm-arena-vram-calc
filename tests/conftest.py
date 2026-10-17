@@ -51,3 +51,11 @@ def sample_rsc_payload():
     ]
     # Wrap in RSC-like text with some prefix junk
     return f"some_prefix_data[{json.dumps(models[0])},{json.dumps(models[1])}]some_suffix"
+
+
+@pytest.fixture(autouse=True)
+def fresh_failure_streaks(monkeypatch):
+    """Each test starts with the sites taken as up."""
+    from scrapers import aa_resolver, hf_checkpoints
+    monkeypatch.setattr(aa_resolver, "_failures_in_a_row", 0)
+    monkeypatch.setattr(hf_checkpoints, "_failures_in_a_row", 0)
