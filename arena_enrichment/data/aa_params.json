@@ -130,6 +130,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v3-2": {
@@ -241,6 +242,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v4-flash-vision": {
@@ -433,6 +435,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "glm-5.3-flash": {
@@ -534,6 +537,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "kimi-k3": {
@@ -554,6 +558,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "llama-3-1-nemotron-ultra-253b-v1-reasoning": {
@@ -622,6 +627,7 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2.5": {
