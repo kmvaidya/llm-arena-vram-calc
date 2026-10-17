@@ -44,6 +44,7 @@ jobs:
         run: uv run python arena_enrichment/enrich_arena.py --update-readme --health-file "$RUNNER_TEMP/health.md"
 
       - name: Commit and push if changed
+        id: publish
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -67,12 +68,12 @@ jobs:
         if: failure()
         run: |
           details="Please check the run's log for details."
-          if [ -s "$RUNNER_TEMP/health.md" ]; then
+          if [ "$PUBLISHED" = "success" ] && [ -s "$RUNNER_TEMP/health.md" ]; then
             details="The tables were updated, but:
 
           $(cat "$RUNNER_TEMP/health.md")"
           fi
-          issue=$(gh issue list --state open --label bug --json number,title \
+          issue=$(gh issue list --state open --label bug --limit 200 --json number,title \
             --jq '[.[] | select(.title | startswith("Leaderboard update failed"))][0].number // empty')
           body="The daily leaderboard update failed on $(date -u +%Y-%m-%d).
 
@@ -89,12 +90,13 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+          PUBLISHED: ${{ steps.publish.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Close the failure issue
         if: success()
         run: |
-          issues=$(gh issue list --state open --label bug --json number,title \
+          issues=$(gh issue list --state open --label bug --limit 200 --json number,title \
             --jq '.[] | select(.title | startswith("Leaderboard update failed")) | .number')
           for issue in $issues; do
             gh issue close "$issue" --comment "The daily leaderboard update succeeded again: $RUN_URL"

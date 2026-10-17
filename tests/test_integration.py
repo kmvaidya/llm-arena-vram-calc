@@ -216,8 +216,9 @@ class TestFullPipeline:
         # DeepSeek at FP8 needs 678 GiB: over 8x H100 (640), within 8x RTX PRO
         # 6000 (768), a PCIe server with no speed estimate
         assert "| 8x RTX PRO 6000 Blackwell Server Edition (FP8) | — |" in readme
-        # Qwen 72B at FP8 needs 76.6 GiB of an H100's 80: 76.3 GB / 2,680 GB/s + 1 ms
-        assert "| H100 SXM (FP8) | ~34 tok/s |" in readme
+        # Qwen 72B at FP8 needs 76.6 GiB, over 95% of an H100's 80, so the
+        # RTX PRO 6000: 76.3 GB / 1,434 GB/s + 1 ms
+        assert "| RTX PRO 6000 Blackwell (FP8) | ~18 tok/s |" in readme
         # Whole GiB from 100 up, one decimal below
         assert "| 671 (37) | MoE | 1,255 | 668 | 380 |" in readme
         assert "| 72 | Dense | 140 | 76.6 | 45.7 |" in readme
@@ -228,9 +229,10 @@ class TestFullPipeline:
         df["total_params_b"], df["active_params_b"], df["architecture"] = 8.0, 8.0, "dense"
         readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
 
-        # 8B at BF16: 14.9 + 2 + 1.5 = 18.4 GiB; 16 GB / 806 GB/s + 1 ms = 48 tok/s
-        assert ("| Consumer GPU | RTX 4090 | 24 GiB | 1.01 TB/s "
-                "| DeepSeek-V3 (#1, 18 GiB, ~48 tok/s) |") in readme
+        # 8B at BF16: 14.9 + 2 + 1.5 = 18.4 GiB, over 95% of 16 GiB;
+        # 16 GB / 806 GB/s + 1 ms = 48 tok/s on an RTX 4090
+        assert "| Consumer GPU | RTX 5060 Ti 16 GB | 16 GiB | 0.448 TB/s | — |" in readme
+        assert "|  | RTX 4090 | 24 GiB | 1.01 TB/s | DeepSeek-V3 (#1, 18 GiB, ~48 tok/s) |" in readme
         # Macs: 75% of RAM, Apple's fixed cost: 16 GB / 245.6 GB/s + 3 ms
         assert ("| Unified memory | Mac mini / MacBook Pro, M5 Pro 64 GB | 48 of 64 GiB "
                 "| 0.307 TB/s | DeepSeek-V3 (#1, 18 GiB, ~15 tok/s) |") in readme
@@ -239,7 +241,8 @@ class TestFullPipeline:
         for desktop in ("8x RTX 4090", "8x Radeon AI PRO R9700", "8x Mac", "8x DGX Spark",
                         "8x DGX Station"):
             assert desktop not in readme
-        assert "| 8x RTX PRO 6000 Blackwell Server Edition | 768 GiB |" in readme
+        # The Server Edition's own bandwidth
+        assert "| 8x RTX PRO 6000 Blackwell Server Edition | 768 GiB | 8 × 1.6 TB/s |" in readme
         # The notes say why
         assert "GeForce driver license bars data-center deployment" in readme
         assert "sudo sysctl iogpu.wired_limit_mb" in readme
@@ -253,7 +256,9 @@ class TestFullPipeline:
                 in readme)
         assert "+ 1.5 GiB per GPU" in readme
         assert "| FP8 | 1.06 | 0.987 | FP8, GGUF Q8_0, MLX 8-bit |" in readme
-        assert "70 × 0.987 + 4 + 1.5 = 74.6 GiB, so it fits an H100 (80 GiB)" in readme
+        assert "70 × 0.987 + 4 + 1.5 = 74.6 GiB, so it fits an H100 (76 of 80 GiB)" in readme
+        assert "a model fits when it needs at most 95% of the memory" in readme
+        assert "For them the BF16 column describes weights nobody publishes" in readme
 
         assert "### Speed formula" in readme
         assert ("Time per token (ms) = bytes per token ÷ (0.8 × bandwidth × GPUs) + fixed cost"
@@ -262,5 +267,5 @@ class TestFullPipeline:
                 in readme)
 
         assert "#### How close are the estimates?" in readme
-        assert "Checked against 49 published single-request speeds" in readme
+        assert "Checked against 40 published single-request speeds" in readme
         assert "| DGX Spark | [gpt-oss-120b MXFP4](" in readme

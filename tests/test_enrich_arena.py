@@ -1,9 +1,11 @@
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 from enrich_arena import (
     check_health,
+    drop_unreleased,
     resolve_from_name,
     resolve_from_overrides,
     resolve_model_params,
@@ -46,6 +48,23 @@ class TestResolveFromOverrides:
     def test_returns_correct_keys(self):
         result = resolve_from_overrides("GPT-OSS-120B")
         assert set(result.keys()) == {"total_params_b", "active_params_b", "architecture"}
+
+    def test_release_tags_match_the_same_model(self):
+        for name in ("kimi-k2-0905-preview", "kimi-k2-thinking-turbo", "trinity-large-preview",
+                     "phi-3-mini-4k-instruct-june-2024", "deepseek-v4.1-flash-max"):
+            assert resolve_from_overrides(name) is not None, name
+
+    def test_other_models_sharing_a_prefix_fall_through(self):
+        # Another version or size of a model must not take its neighbour's size
+        for name in ("kimi-k2.7", "step-3.5", "mimo-v2.5-pro", "command-r7b-12-2024",
+                     "deepseek-v4.1-pro", "trinity-mini"):
+            assert resolve_from_overrides(name) is None, name
+        # A release of step-3.5-flash takes its own entry, not step-3's
+        assert resolve_from_overrides("step-3.5-flash-2603")["total_params_b"] == 199.4
+
+    def test_command_r_plus_is_not_command_r(self):
+        assert resolve_from_overrides("Command R+")["total_params_b"] == 104
+        assert resolve_from_overrides("command-r")["total_params_b"] == 35
 
     def test_kimi_substring_match(self):
         """Kimi-K2.5 should match via substring for names without size indicators."""
@@ -226,6 +245,15 @@ class TestCheckHealth:
         [no_copy] = check_health(226, 211, None, aa_list_problem=True)
         assert "there is no saved copy" in no_copy
 
+    def test_missing_publication_date(self):
+        assert check_health(226, 211, None) == []  # a CSV input has no date
+        [problem] = check_health(226, 211, None, expect_date=True)
+        assert "no publication date" in problem
+
+    def test_unreadable_pages(self):
+        [problem] = check_health(226, 211, None, unreadable_pages=["glm-5-3"])
+        assert "1 Artificial Analysis page(s) could not be read (glm-5-3)" in problem
+
     def test_pages_lost_sizes(self):
         [problem] = check_health(226, 211, None, lost_sizes=["glm-5-3", "deepseek-v4-pro"])
         assert "2 Artificial Analysis page(s)" in problem
@@ -237,3 +265,11 @@ def test_crashing_strategy_logged_and_skipped(mock_name, caplog):
     params, source = resolve_model_params("some-model-7b", use_network=False)
     assert (params, source) == (None, "UNKNOWN")
     assert "name_parsing resolution crashed for some-model-7b" in caplog.text
+
+
+def test_unreleased_models_left_out_and_reranked():
+    df = pd.DataFrame({"rank": [1, 2, 3], "model_name": ["a-70b", "qwen-max-0919", "b-7b"]})
+    kept, left_out = drop_unreleased(df)
+    assert left_out == ["qwen-max-0919"]
+    assert list(kept["model_name"]) == ["a-70b", "b-7b"]
+    assert list(kept["rank"]) == [1, 2]

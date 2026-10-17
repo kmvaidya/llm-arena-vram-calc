@@ -33,7 +33,7 @@ from openpyxl.utils import get_column_letter
 # Add parent directory to path so imports work when running directly
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from known_models import MODEL_OVERRIDES
+from known_models import MODEL_OVERRIDES, NOT_RELEASED
 from measurements import MEASUREMENTS
 from scrapers import aa_resolver
 from scrapers.aa_resolver import (
@@ -48,6 +48,7 @@ from vram_calculator import (
     BANDWIDTH_EFFICIENCY,
     BYTES_PER_GIB,
     CONTEXT_TOKENS,
+    FIT_HEADROOM,
     FIT_PRECISIONS,
     FITS_ON_GPUS,
     FIXED_MS_PER_TOKEN,
@@ -64,10 +65,11 @@ from vram_calculator import (
     Hardware,
     add_all_vram_and_gpu_columns,
     decode_tokens_per_s,
+    fits,
     hardware_speed,
     kv_cache_gib,
+    needed_gib,
     node_label,
-    node_serving_gib,
     serving_gib,
 )
 
@@ -97,63 +99,54 @@ AA_LIST_MAX_AGE_DAYS = 3       # an outage of a day or two is not worth an issue
 # Parameter resolution
 # ---------------------------------------------------------------------------
 
+# Name parts that mark a release, mode or reasoning effort of a model rather
+# than another model: dates ("0905", "june-2024"), context lengths ("128k"),
+# role, mode and precision tags
+_RELEASE_PART = re.compile(
+    r"\d{4}|\d{6}|\d{8}|\d+k|instruct|chat|it|hf|preview|exp|experimental|latest|"
+    r"thinking|non|no|reasoning|turbo|instant|max|xhigh|high|low|minimal|"
+    r"bf16|fp8|nvfp4|mxfp4|fp4|int4|"
+    r"january|february|march|april|may|june|july|august|september|october|november|december"
+)
+
+
+def _normalize_override(name: str) -> str:
+    """Lowercase with "-" between parts, so "Command R+" reads "command-r-plus"."""
+    return re.sub(r"[\s\-_]+", "-", name.lower().replace("+", "-plus-")).strip("-")
+
+
 def resolve_from_overrides(model_name: str) -> ModelParams | None:
     """
     Strategy 1: Look up model in the small MODEL_OVERRIDES corrections dict.
 
-    Only contains models where automated resolution gives wrong/no answers.
-    Tries case-insensitive exact match first, then normalized substring match
-    with safeguards to avoid false positives on distilled variants.
+    A key matches the name exactly, or as its start followed only by
+    release parts: "kimi-k2" covers "kimi-k2-0905-preview" but not
+    "kimi-k2.6", "step-3" not "step-3.5-flash", "mimo-v2.5" not
+    "mimo-v2.5-pro".  The longest matching key wins, so new names of other
+    models fall through to the automated sources instead of taking a
+    neighbour's size.
     """
-    name_lower = model_name.lower()
-
-    # Build case-insensitive lookup (lazy, rebuilt each call — dict is small)
-    overrides_lower = {k.lower(): k for k in MODEL_OVERRIDES}
-
-    # Exact match (case-insensitive)
-    if name_lower in overrides_lower:
-        orig_key = overrides_lower[name_lower]
-        total, active, arch = MODEL_OVERRIDES[orig_key]
-        return {
-            "total_params_b": total,
-            "active_params_b": active,
-            "architecture": arch,
-        }
-
-    # Normalized substring match — normalize separators so "Command R+" matches
-    # "command-r-plus" and "GLM-4.5-Air" matches "glm-4.5-air".
-    def _normalize(s):
-        return re.sub(r'[\s\-_]+', '-', s.lower()).replace('+', '-plus-').strip('-')
-
-    name_norm = _normalize(model_name)
-
-    # Skip substring matching if the name contains a size indicator (like
-    # "Qwen3-8B" in "DeepSeek-R1-0528-Qwen3-8B") — that suggests a
-    # different/distilled model. Let name parsing handle it instead.
-    has_size_in_name = bool(re.search(
-        r'(?:^|-)(\d+(?:\.\d+)?)b(?:-|$)',
-        name_norm, re.IGNORECASE
-    ))
-    if has_size_in_name:
-        return None
-
-    best_match = None
-    best_len = 0
+    name = _normalize_override(model_name)
+    best_key = None
     for key in MODEL_OVERRIDES:
-        key_norm = _normalize(key)
-        if key_norm in name_norm and len(key_norm) > best_len:
-            best_match = key
-            best_len = len(key_norm)
+        key_norm = _normalize_override(key)
+        if not name.startswith(key_norm):
+            continue
+        rest = name[len(key_norm):]
+        if rest and not (rest.startswith("-")
+                         and all(_RELEASE_PART.fullmatch(part) for part in rest[1:].split("-"))):
+            continue
+        if best_key is None or len(key_norm) > len(_normalize_override(best_key)):
+            best_key = key
 
-    if best_match:
-        total, active, arch = MODEL_OVERRIDES[best_match]
-        return {
-            "total_params_b": total,
-            "active_params_b": active,
-            "architecture": arch,
-        }
-
-    return None
+    if best_key is None:
+        return None
+    total, active, arch = MODEL_OVERRIDES[best_key]
+    return {
+        "total_params_b": total,
+        "active_params_b": active,
+        "architecture": arch,
+    }
 
 
 def resolve_from_name(model_name: str) -> ModelParams | None:
@@ -277,6 +270,17 @@ def resolve_model_params(model_name: str, use_network: bool = True, aa_lookup: d
         return result, source
 
     return None, "UNKNOWN"
+
+
+def drop_unreleased(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+    """Leave out models whose weights were never released, and rank the rest 1, 2, ..."""
+    unreleased = df["model_name"].str.lower().isin(NOT_RELEASED)
+    if not unreleased.any():
+        return df, []
+    left_out = list(df.loc[unreleased, "model_name"])
+    df = df[~unreleased].reset_index(drop=True)
+    df["rank"] = range(1, len(df) + 1)
+    return df, left_out
 
 
 def _is_plausible(params: ModelParams) -> bool:
@@ -413,15 +417,15 @@ class HardwareRow:
 
     @property
     def bandwidth_label(self) -> str:
-        tb_s = f"{self.hardware.bandwidth_gbs / 1000:.3g} TB/s"
+        tb_s = f"{self.hardware.bandwidth_for(self.gpu_count) / 1000:.3g} TB/s"
         return tb_s if self.gpu_count == 1 else f"{self.gpu_count} × {tb_s}"
 
     def needed_gib(self, single_serving_gib: float) -> float:
         """Memory a model needs here, from its single-GPU serving memory."""
-        return single_serving_gib if self.gpu_count == 1 else node_serving_gib(single_serving_gib)
+        return needed_gib(single_serving_gib, self.gpu_count)
 
     def fits(self, single_serving_gib: float) -> bool:
-        return self.needed_gib(single_serving_gib) <= self.hardware.usable_gib * self.gpu_count
+        return fits(self.hardware, single_serving_gib, self.gpu_count)
 
 
 def _hardware_rows() -> list[HardwareRow]:
@@ -567,7 +571,7 @@ def generate_readme(
                  "for one request (see [Memory formula](#memory-formula) and "
                  "[Speed formula](#speed-formula)). *Memory* is what a model can use: the "
                  "GPU's memory, or for computers whose GPU shares system RAM, the share the "
-                 "system gives it.")
+                 f"system gives it; a model fits when it needs at most {FIT_HEADROOM:.0%} of it.")
     lines.append("")
     lines.extend(_generate_hardware_table(df))
     lines.append("")
@@ -678,14 +682,17 @@ def _hardware_notes() -> list[str]:
         "- **Unified memory**: the GPU shares system RAM, which is several times slower than "
         "GPU memory; the speeds show it. macOS gives the GPU 75% of RAM by default, and "
         "`sudo sysctl iogpu.wired_limit_mb=<MB>` raises that until the next restart (leave "
-        "8–16 GiB for macOS). The Ryzen AI Max+ 395 gives its GPU up to 96 GiB on Windows "
-        "(around 108 GiB on Linux), the DGX Spark about 115 GiB after its operating system.",
+        "8–16 GiB for macOS). The Ryzen AI Max+ 395 gives its GPU up to 96 GiB on Windows, and "
+        "more on Linux, where the kernel's limit can be raised (AMD's guides use about 120 GiB); "
+        "the DGX Spark about 115 GiB after its operating system.",
         f"- **{NODE_GPU_COUNT}-GPU servers** list only GPUs sold that way: GeForce cards are "
         "left out because NVIDIA's GeForce driver license bars data-center deployment, as are "
         "workstation cards, built for desktops of up to four; the RTX PRO 6000 appears as its "
         "Server Edition. Speeds are estimated for boards that link every GPU to every other "
         f"(NVLink, Infinity Fabric, Gaudi's on-board network); servers that connect GPUs over "
-        f"PCIe ({pcie}) show none, for lack of measurements.",
+        f"PCIe ({pcie}) show none, for lack of measurements. For MoE models they assume a "
+        "latency-tuned engine: the measurement behind them is TensorRT-LLM's fastest DeepSeek-R1 "
+        "setup, and default setups have run at about half that speed.",
         "- **Not listed**: rack-scale systems (GB200/GB300 NVL72, AMD Helios with MI455X), which "
         "come as 72-GPU racks, and AMD's MI440X 8-GPU platform, whose memory is not yet "
         "published. B200, B300 and Rubin show the memory an HGX board gives each GPU; Rubin's "
@@ -727,20 +734,30 @@ def _memory_formula_section() -> list[str]:
         "2 billion bytes, or 1.86 GiB.",
         "- **Bytes per parameter** are those of real files: quantized checkpoints also store "
         "scale factors and usually keep the embeddings and output layer in 16-bit, so 4-bit "
-        "files of 30B-and-up models come to 0.56–0.61 bytes per parameter rather than 0.5, "
+        "files of 30B-and-up models come to 0.56–0.64 bytes per parameter rather than 0.5, "
         "and 8-bit files to 1.00–1.07.",
+        "- **Released precision**: many current models are published only in 8-bit or 4-bit "
+        "(DeepSeek, GLM-5, Kimi, gpt-oss). For them the BF16 column describes weights nobody "
+        "publishes, and the lower column holds their full quality.",
         "- **MoE models** count all their parameters: every expert must sit in memory, even "
         "though each token uses only a few.",
         f"- **KV cache**: the attention keys and values kept for every token in context, "
         f"reserved for one {CONTEXT_TOKENS:,}-token conversation. It does not shrink when the "
-        "weights are quantized and depends on the attention design, from about 70 KiB per "
-        "token for DeepSeek's MLA to 320 KiB for Llama 3.3 70B, which this tool does not know "
-        f"per model; {KV_BYTES_PER_TOKEN // 1024} KiB is a safe middle. Longer contexts and "
-        "several users at once need more.",
+        "weights are quantized, and depends on the attention design: 20–100 KiB per token for "
+        "most current MoE models (DeepSeek's and Kimi's MLA, hybrid and sliding-window "
+        "attention), 190–370 KiB for models such as Qwen3-235B, GLM-4.6 and Llama 3.3 70B, "
+        "and 500 KiB for Llama 3.1 405B. This tool does not know it per model; "
+        f"{KV_BYTES_PER_TOKEN // 1024} KiB is a middle value, generous for the newest models and "
+        "short for the oldest large ones. Longer contexts and several users at once need more.",
         f"- **{RUNTIME_GIB:g} GiB per GPU** covers the CUDA or Metal context, the framework and "
         f"activations. Split across {NODE_GPU_COUNT} GPUs, a model needs it on each.",
+        f"- **{FIT_HEADROOM:.0%}**: a model fits when it needs at most {FIT_HEADROOM:.0%} of the "
+        "memory. GPUs report a little less than their label (an L40S with ECC on shows 45 of 48 "
+        "GiB), and engines want headroom: vLLM uses 90% unless told otherwise "
+        f"(`--gpu-memory-utilization {FIT_HEADROOM:g}`).",
         f"- Example: a 70B dense model at FP8 needs 70 × {fp8_gib:.3g} + {kv_cache_gib(70):g} + "
-        f"{RUNTIME_GIB:g} = {example:.1f} GiB, so it fits an H100 ({h100.usable_gib:g} GiB).",
+        f"{RUNTIME_GIB:g} = {example:.1f} GiB, so it fits an H100 "
+        f"({FIT_HEADROOM * h100.usable_gib:g} of {h100.usable_gib:g} GiB).",
     ]
 
 
@@ -767,8 +784,9 @@ def _speed_formula_section() -> list[str]:
         "```",
         "",
         "- **Active parameters** are all the parameters of a dense model, and only those used "
-        "per token for an MoE model (37B of DeepSeek V3's 671B). MoE models also keep their "
-        f"attention and shared layers at higher precision, hence ×{MOE_BYTES_FACTOR:g}.",
+        "per token for an MoE model (37B of DeepSeek V3's 671B). MoE models read somewhat "
+        "more per token than that (the router, and shared layers that quantized files keep at "
+        f"higher precision); ×{MOE_BYTES_FACTOR:g} is fitted on the measurements.",
         f"- **{efficiency:g}**: software reads weights at about {efficiency:.0%} of the "
         "memory's peak bandwidth.",
         f"- **Fixed cost per token** (starting the work for every layer, synchronising, "
@@ -783,20 +801,20 @@ def _speed_formula_section() -> list[str]:
         f"token: {example_gb:.1f} ÷ ({efficiency:g} × {h100.bandwidth_gbs:,.0f} GB/s) = "
         f"{example_ms:.1f} ms, plus {gpu_ms[0]:g} ms, so about {example:.0f} tokens/s.",
         "- **Assumes** one request, a short context (a long context's KV cache is read for "
-        "every token too, about 20% slower at 8K tokens for a small MoE model), no speculative "
-        "decoding or multi-token prediction (which can add 2–3×), and an engine suited to the "
-        "hardware: vLLM, SGLang or TensorRT-LLM on data-center GPUs, where llama.cpp runs "
-        "30–55% below these estimates.",
+        "every token too: a small MoE model runs about 20% slower at 8K tokens and half as "
+        "fast at 32K), no speculative decoding or multi-token prediction (typically 1.5–2.5× "
+        "faster), and an engine suited to the hardware: vLLM, SGLang or TensorRT-LLM on "
+        "data-center GPUs, where llama.cpp runs 30–55% below these estimates for small models.",
         "- **Reading the prompt** is a separate cost the tables do not estimate, limited by "
-        "compute rather than memory (about 2 × active parameters calculations per prompt "
-        "token). It is where computers whose GPU shares system RAM fall furthest behind: "
-        "llama.cpp reads a 7B model's prompt at about 440 tokens/s on an M4 Pro, 1,700 on a "
-        "Ryzen AI Max+ 395, 3,200 on an M5 Max and 3,300 on a DGX Spark, against 14,800 on "
-        "an RTX 4090 ([Apple](https://github.com/ggml-org/llama.cpp/discussions/4167), "
+        "compute rather than memory (about 2 × active parameters floating-point operations "
+        "per prompt token). It is where computers whose GPU shares system RAM fall furthest "
+        "behind: llama.cpp reads a 7B model's prompt at about 1,700 tokens/s on a Ryzen AI "
+        "Max+ 395, 3,200 on an M5 Max and 3,300 on a DGX Spark, against 14,800 on an RTX 4090 "
+        "([Apple](https://github.com/ggml-org/llama.cpp/discussions/4167), "
         "[Vulkan](https://github.com/ggml-org/llama.cpp/discussions/10879), "
-        "[CUDA](https://github.com/ggml-org/llama.cpp/discussions/15013)). With a 70B model, "
-        "a 10,000-token prompt takes seconds on data-center GPUs and can take minutes on "
-        "a Mac.",
+        "[CUDA](https://github.com/ggml-org/llama.cpp/discussions/15013)). A 10,000-token "
+        "prompt to a 70B model takes about half a minute on an M5 Max or a DGX Spark and a "
+        "minute on the Ryzen, against a few seconds on data-center GPUs.",
         "",
         "#### How close are the estimates?",
         "",
@@ -804,7 +822,9 @@ def _speed_formula_section() -> list[str]:
         "(`arena_enrichment/measurements.py`): the median estimate is within "
         f"{median:.0%} of the measurement, and {within_20:.0%} are within ±20%. The constants "
         "were chosen with these same measurements, so this shows the formula fits them rather "
-        "than proving it on new hardware. A selection:",
+        "than proving it on new hardware. Most are of small models: large models have few "
+        "measurements, and large dense models on a Mac none from llama-bench (LM Studio users "
+        "report speeds 25–50% below these estimates). A selection:",
         "",
         "| Hardware | Model | Engine | Measured | Estimate |",
         "|----------|-------|--------|----------|----------|",
@@ -815,9 +835,9 @@ def _speed_formula_section() -> list[str]:
                          f"| {float(f'{m.tokens_per_s:.3g}'):g} tok/s | {_format_speed(estimate).lstrip('~')} |")
     lines.append("")
     lines.append("The largest misses are llama.cpp on data-center GPUs (the A100, H100 and "
-                 "MI300X run 30–55% below the estimate) and an early-2025 SGLang run of "
-                 "DeepSeek-R1 on 8× H200 at less than half the estimate; reported DeepSeek "
-                 "speeds have varied widely between engine versions.")
+                 "MI300X run 30–55% below the estimate with a 7B model) and an early-2025 SGLang "
+                 "run of DeepSeek-R1 on 8× H200 at less than half the estimate; reported "
+                 "DeepSeek speeds have varied widely between engine versions and settings.")
     return lines
 
 
@@ -958,9 +978,11 @@ def check_health(
     total: int,
     resolved: int,
     leaderboard_date: str | None,
+    expect_date: bool = False,
     aa_list_problem: bool = False,
     aa_list_age_days: float | None = None,
     lost_sizes: list[str] | None = None,
+    unreadable_pages: list[str] | None = None,
 ) -> list[str]:
     """
     What is wrong with this run's data, in plain words with where to look.
@@ -969,6 +991,12 @@ def check_health(
     failed; the daily workflow turns a non-empty list into an issue.
     """
     problems = []
+    if expect_date and leaderboard_date is None:
+        problems.append(
+            "The leaderboard download has no publication date (column `leaderboard_publish_date`), "
+            "so a leaderboard that stops updating would go unnoticed. Check the dataset's columns "
+            "against `_fetch_hf_leaderboard` in `arena_enrichment/scrapers/arena_scraper.py`."
+        )
     data_age = _days_since(leaderboard_date)
     if data_age is not None and data_age > LEADERBOARD_STALE_DAYS:
         problems.append(
@@ -989,6 +1017,13 @@ def check_health(
             f"Only {resolved} of {total} models ({resolved / total:.0%}) have parameter counts, "
             f"below the {MIN_RESOLVED_SHARE:.0%} minimum. The run log lists the unresolved models; "
             "add their sizes to `arena_enrichment/known_models.py`."
+        )
+    if unreadable_pages:
+        problems.append(
+            f"{len(unreadable_pages)} Artificial Analysis page(s) could not be read "
+            f"({', '.join(sorted(unreadable_pages))}): the site blocked the request or the pages "
+            "lost their specifications table. Open one in a browser, then check `_fetch_single_model` "
+            "in `arena_enrichment/scrapers/aa_resolver.py`."
         )
     if lost_sizes:
         problems.append(
@@ -1052,6 +1087,10 @@ def main() -> None:
     # Ensure sorted by rank
     if "rank" in df.columns and df["rank"].notna().any():
         df = df.sort_values("rank").reset_index(drop=True)
+
+    df, left_out = drop_unreleased(df)
+    if left_out:
+        print(f"  Left out (weights never released): {', '.join(left_out)}")
 
     # Step 2: Resolve parameter counts
     print("\nStep 2: Resolving model parameters...")
@@ -1149,9 +1188,11 @@ def main() -> None:
         total=len(df),
         resolved=len(df) - len(unresolved),
         leaderboard_date=leaderboard_date,
+        expect_date=args.input is None,
         aa_list_problem=aa_list_problem,
         aa_list_age_days=aa_list_age,
         lost_sizes=sorted(aa_resolver.LOST_SIZES),
+        unreadable_pages=sorted(aa_resolver.UNREADABLE_PAGES),
     )
     for problem in problems:
         print(f"HEALTH: {problem}")

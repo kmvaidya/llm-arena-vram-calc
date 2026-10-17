@@ -12,7 +12,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
   - Artificial Analysis pages found by guessing the page name, for models missing from the list
   - Results with more active than total parameters are rejected
 - **Compute** the memory each model needs at BF16, FP8 and INT4, in GiB (weights, a 16K-token KV cache and the runtime), and its single-request generation speed from the hardware's memory bandwidth, on one device or an 8-GPU server. The formulas are in the root README; the speed formula is checked against published measurements in `measurements.py`
-- **Flag** which models fit on each device: consumer GPUs (RTX 4090, RTX 5090), computers whose GPU shares system RAM (Macs, DGX Spark, Ryzen AI Max+ 395, counting the share the system gives the GPU), workstations (Radeon AI PRO R9700, RTX PRO 6000, DGX Station) and data-center GPUs (NVIDIA A100 to Rubin, AMD MI300X to MI355X, Intel Gaudi 3), and on 8-GPU servers of the GPUs sold that way (the list is `HARDWARE` in `vram_calculator.py`)
+- **Flag** which models fit on each device: consumer GPUs (RTX 5060 Ti 16 GB to RTX 5090), computers whose GPU shares system RAM (Macs, DGX Spark, Ryzen AI Max+ 395, counting the share the system gives the GPU), workstations (Radeon AI PRO R9700, RTX PRO 6000, DGX Station) and data-center GPUs (NVIDIA A100 to Rubin, AMD MI300X to MI355X, Intel Gaudi 3), and on 8-GPU servers of the GPUs sold that way (the list is `HARDWARE` in `vram_calculator.py`)
 - **Output** enriched CSV, formatted XLSX, and auto-updated README.md tables
 
 ## Installation
@@ -40,9 +40,10 @@ A GitHub Actions workflow runs daily at 06:00 UTC to fetch the latest leaderboar
 
 When something goes wrong the workflow keeps one issue open, titled "Leaderboard update failed", and closes it on the next good run. A failed download or a crash leaves the tables as they were. A source that degrades still publishes, and the issue lists what the run's health check found, with where to look:
 
-- the Arena leaderboard has not been published for more than 21 days (its longest gap so far is 19);
+- the Arena leaderboard has not been published for more than 21 days (its longest gap so far is 19), or the download no longer says when it was published;
 - the Artificial Analysis model list could not be read and the saved copy is more than 3 days old;
 - fewer than 85% of models have parameter counts (add the missing ones to `known_models.py`);
-- Artificial Analysis pages that showed parameter counts no longer do, which usually means the page layout changed (the cached counts are used meanwhile).
+- Artificial Analysis pages that showed parameter counts no longer do, which usually means the page layout changed (the cached counts are used meanwhile);
+- Artificial Analysis pages block the request or lack the specifications table every model page has.
 
 The hardware list (`HARDWARE` in `vram_calculator.py`) and the speed measurements (`measurements.py`) are maintained by hand: add new hardware as it ships.

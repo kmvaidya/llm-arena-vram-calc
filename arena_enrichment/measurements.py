@@ -4,7 +4,15 @@ formula in vram_calculator.py.
 
 Each entry describes the model the way the estimate sees it: active
 parameters, dense or MoE, and the precision class of its weights (BF16,
-8-bit as FP8, 4-bit as INT4).  Collected 2026-10 from the sources given.
+8-bit as FP8, 4-bit as INT4).  Collected 2026-10 from the sources given, and
+checked against them.
+
+Only runs with a known engine and current software are kept: llama-bench's
+generation figure (tg128 or tg32), or an engine benchmark at batch size 1
+without speculative decoding.  Left out: the 2023 llama.cpp build behind
+the older rows of the Apple discussion (the same Macs run 20-33% faster on
+current builds), and LM Studio figures that do not say how they were timed
+(an M5 Max running a 70B model at half the bandwidth llama-bench reaches).
 """
 
 from __future__ import annotations
@@ -21,7 +29,6 @@ LLAMA_CPP_SPARK = "https://github.com/ggml-org/llama.cpp/blob/master/benches/dgx
 LMSYS_SPARK = "https://lmsys.org/blog/2025-10-13-nvidia-dgx-spark/"
 STRIX_HALO = "https://github.com/lhl/strix-halo-testing"
 STRIX_HALO_FORUM = "https://community.frame.work/t/amd-strix-halo-ryzen-ai-max-395-gpu-llm-performance-tests/72521"
-M5_MAX = "https://jmlab.net/projects/m5-macbook-benchmark-pipeline/"
 QWEN_SPEED = "https://qwen.readthedocs.io/en/v2.5/benchmark/speed_benchmark.html"
 TRT_LLM_H200 = ("https://developer.nvidia.com/blog/"
                 "boost-llama-3-3-70b-inference-throughput-3x-with-nvidia-tensorrt-llm-speculative-decoding")
@@ -76,33 +83,17 @@ MEASUREMENTS: list[Measurement] = [
                 "vLLM", QWEN_SPEED),
     Measurement("A100 80GB", "Qwen2.5-32B GPTQ-Int4", 32.5, "dense", "INT4", 2039, "gpu", 1, 55.83,
                 "vLLM", QWEN_SPEED),
-    # Apple Silicon, llama.cpp
-    Measurement("M4 Pro", "Llama-2-7B F16", 6.74, "dense", "BF16", 273, "apple", 1, 17.18,
-                "llama.cpp", LLAMA_CPP_APPLE),
-    Measurement("M4 Pro", "Llama-2-7B Q4_0", 6.74, "dense", "INT4", 273, "apple", 1, 50.74,
-                "llama.cpp", LLAMA_CPP_APPLE),
-    Measurement("M4 Max", "Llama-2-7B F16", 6.74, "dense", "BF16", 546, "apple", 1, 31.64,
-                "llama.cpp", LLAMA_CPP_APPLE),
-    Measurement("M4 Max", "Llama-2-7B Q8_0", 6.74, "dense", "FP8", 546, "apple", 1, 54.05,
-                "llama.cpp", LLAMA_CPP_APPLE),
-    Measurement("M4 Max", "Llama-2-7B Q4_0", 6.74, "dense", "INT4", 546, "apple", 1, 83.06,
-                "llama.cpp", LLAMA_CPP_APPLE),
+    # Apple Silicon, llama.cpp (current builds)
     Measurement("M5 Max", "Llama-2-7B F16", 6.74, "dense", "BF16", 614, "apple", 1, 37.11,
                 "llama.cpp", LLAMA_CPP_APPLE),
     Measurement("M5 Max", "Llama-2-7B Q8_0", 6.74, "dense", "FP8", 614, "apple", 1, 72.42,
                 "llama.cpp", LLAMA_CPP_APPLE, in_readme=True),
     Measurement("M5 Max", "Llama-2-7B Q4_0", 6.74, "dense", "INT4", 614, "apple", 1, 119.92,
-                "llama.cpp", LLAMA_CPP_APPLE),
+                "llama.cpp", LLAMA_CPP_APPLE, in_readme=True),
     Measurement("M5 Ultra", "Llama-2-7B F16", 6.74, "dense", "BF16", 1229, "apple", 1, 73.60,
                 "llama.cpp", LLAMA_CPP_APPLE, in_readme=True),
     Measurement("M5 Ultra", "Llama-2-7B Q4_0", 6.74, "dense", "INT4", 1229, "apple", 1, 179.10,
                 "llama.cpp", LLAMA_CPP_APPLE),
-    Measurement("M3 Ultra", "Llama-2-7B F16", 6.74, "dense", "BF16", 819, "apple", 1, 39.78,
-                "llama.cpp", LLAMA_CPP_APPLE),
-    Measurement("M5 Max", "Llama-3.3-70B Q4_K_M", 70.6, "dense", "INT4", 614, "apple", 1, 7.5,
-                "llama.cpp (LM Studio)", M5_MAX, in_readme=True),
-    Measurement("M5 Max", "Mistral-Small-24B Q4_K_M", 23.6, "dense", "INT4", 614, "apple", 1, 22.4,
-                "llama.cpp (LM Studio)", M5_MAX),
     # DGX Spark and Ryzen AI Max+ 395
     Measurement("DGX Spark", "Qwen2.5-Coder-7B Q8_0", 7.62, "dense", "FP8", 273, "gpu", 1, 29.43,
                 "llama.cpp", LLAMA_CPP_SPARK),
@@ -126,9 +117,9 @@ MEASUREMENTS: list[Measurement] = [
     Measurement("DGX Spark", "gpt-oss-20b MXFP4", 3.6, "moe", "INT4", 273, "gpu", 1, 83.43,
                 "llama.cpp", LLAMA_CPP_SPARK),
     Measurement("M3 Ultra", "gpt-oss-20b MXFP4", 3.6, "moe", "INT4", 819, "apple", 1, 115.52,
-                "llama.cpp", LLAMA_CPP_GPT_OSS),
+                "llama.cpp", LLAMA_CPP_GPT_OSS, in_readme=True),
     Measurement("RTX PRO 6000", "gpt-oss-120b MXFP4", 5.1, "moe", "INT4", 1792, "gpu", 1, 196.31,
-                "llama.cpp", LLAMA_CPP_GPT_OSS_120B),
+                "llama.cpp", LLAMA_CPP_GPT_OSS),
     Measurement("DGX Spark", "gpt-oss-120b MXFP4", 5.1, "moe", "INT4", 273, "gpu", 1, 58.72,
                 "llama.cpp", LLAMA_CPP_SPARK, in_readme=True),
     Measurement("GH200", "gpt-oss-120b MXFP4", 5.1, "moe", "INT4", 4900, "gpu", 1, 209.01,
@@ -137,13 +128,12 @@ MEASUREMENTS: list[Measurement] = [
                 "llama.cpp", LLAMA_CPP_GPT_OSS),
     Measurement("Ryzen AI Max+ 395", "gpt-oss-120b MXFP4", 5.1, "moe", "INT4", 256, "gpu", 1, 50.05,
                 "llama.cpp (Vulkan)", STRIX_HALO, in_readme=True),
-    Measurement("M5 Max", "gpt-oss-120b MXFP4", 5.1, "moe", "INT4", 614, "apple", 1, 65.9,
-                "llama.cpp (LM Studio)", M5_MAX, in_readme=True),
-    Measurement("DGX Spark", "Qwen3-30B-A3B Q8_0", 3.3, "moe", "FP8", 273, "gpu", 1, 61.06,
+    Measurement("DGX Spark", "Qwen3-Coder-30B-A3B Q8_0", 3.3, "moe", "FP8", 273, "gpu", 1, 61.06,
                 "llama.cpp", LLAMA_CPP_SPARK),
     Measurement("Ryzen AI Max+ 395", "Qwen3-30B-A3B Q4_K_XL", 3.3, "moe", "INT4", 256, "gpu", 1, 72.0,
                 "llama.cpp (Vulkan)", STRIX_HALO_FORUM),
-    Measurement("DGX Spark", "GLM-4.7-Flash Q8_0", 3.0, "moe", "FP8", 273, "gpu", 1, 48.68,
+    # 3.9B active counting embeddings and output layer, as Qwen3-30B-A3B's 3.3B does
+    Measurement("DGX Spark", "GLM-4.7-Flash Q8_0", 3.9, "moe", "FP8", 273, "gpu", 1, 48.68,
                 "llama.cpp", LLAMA_CPP_SPARK),
     # 8-GPU servers, one request split across the GPUs
     Measurement("8x A100", "Llama-2-70B BF16", 69.0, "dense", "BF16", 2039, "gpu", 8, 62.5,

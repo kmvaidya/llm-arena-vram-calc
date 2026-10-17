@@ -72,6 +72,12 @@ MISSING_PARAMS_MAX_AGE_DAYS = 7
 # run.  Counts do not disappear from a page, so this most likely means the
 # page layout changed; the run's health check reports them
 LOST_SIZES: set[str] = set()
+# Pages that answered with a bot block (403) or without the specifications
+# table every model page has, even one without parameter counts
+UNREADABLE_PAGES: set[str] = set()
+# A fresh model list this much smaller than the saved one is a misread page,
+# not AA dropping models, and is not saved
+MIN_LIST_SHARE = 0.5
 
 AA_LEADERBOARD_URL = "https://artificialanalysis.ai/leaderboards/models"
 AA_MODEL_BASE_URL = "https://artificialanalysis.ai/models"
@@ -197,6 +203,9 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
         })
     except requests.RequestException as e:
         raise AAUnavailable(f"{url}: {e}") from e
+    if resp.status_code == 403:
+        UNREADABLE_PAGES.add(slug)
+        raise AAUnavailable(f"{url}: status 403")
     if resp.status_code == 429 or resp.status_code >= 500:
         raise AAUnavailable(f"{url}: status {resp.status_code}")
     if resp.status_code != 200:
@@ -205,7 +214,8 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
     soup = BeautifulSoup(resp.text, "lxml")
     table = soup.select_one("table.text-sm")
     if not table:
-        return None
+        UNREADABLE_PAGES.add(slug)
+        raise AAUnavailable(f"{url}: no specifications table")
 
     total_b = None
     active_b = None
@@ -299,24 +309,27 @@ def model_list_age_days() -> float | None:
 
 
 def _load_params_cache() -> dict[str, dict[str, Any]]:
-    """Load the cached model page results, keyed by AA slug."""
+    """
+    Load the cached model page results, keyed by AA slug.  An unreadable
+    file raises rather than reading as empty, which the next save would
+    write back over every cached size.
+    """
     if not os.path.exists(PARAMS_CACHE_FILE):
         return {}
-    try:
-        with open(PARAMS_CACHE_FILE, encoding="utf-8") as f:
-            data: dict[str, dict[str, Any]] = json.load(f)
-        return data
-    except (json.JSONDecodeError, OSError) as e:
-        logger.warning(f"Params cache load failed: {e}")
-        return {}
+    with open(PARAMS_CACHE_FILE, encoding="utf-8") as f:
+        data: dict[str, dict[str, Any]] = json.load(f)
+    return data
 
 
 def _save_params_cache(cache: dict[str, dict[str, Any]]) -> None:
     """Persist the model page results, sorted so daily diffs stay small."""
     os.makedirs(os.path.dirname(PARAMS_CACHE_FILE), exist_ok=True)
-    with open(PARAMS_CACHE_FILE, "w", encoding="utf-8") as f:
+    # Write a copy and swap it in, so an interrupted run leaves the old file
+    partial = PARAMS_CACHE_FILE + ".partial"
+    with open(partial, "w", encoding="utf-8") as f:
         json.dump(cache, f, indent=2, sort_keys=True)
         f.write("\n")
+    os.replace(partial, PARAMS_CACHE_FILE)
 
 
 def _age_days(checked: str | None) -> float:
@@ -412,6 +425,7 @@ def _build_lookup(raw_models: list[dict[str, Any]]) -> dict[str, AAEntry]:
     empty parameter fields, which resolve_from_aa fills from the model page.
     """
     lookup: dict[str, AAEntry] = {}
+    entries: list[AAEntry] = []
 
     for m in raw_models:
         name = m.get("name") or ""
@@ -429,10 +443,16 @@ def _build_lookup(raw_models: list[dict[str, Any]]) -> dict[str, AAEntry]:
             "architecture": None,
         }
 
-        # Index under the name and the slug for flexible matching
-        lookup[_normalize(name)] = entry
-        if slug:
-            lookup[_normalize(slug)] = entry
+        entries.append(entry)
+
+    # Index under the slug and the name; when one model's name normalizes
+    # to another's slug, the name wins, so the result does not depend on
+    # the order of AA's list
+    for entry in entries:
+        if entry["slug"]:
+            lookup[_normalize(entry["slug"])] = entry
+    for entry in entries:
+        lookup[_normalize(entry["name"])] = entry
 
     return lookup
 
@@ -455,20 +475,39 @@ def get_aa_models(max_age_hours: float = DEFAULT_MAX_AGE_HOURS, force_refresh: b
             logger.info(f"Using cached AA data ({len(cached)} entries, fetched {fetched_at})")
             return cached, False
 
-    # Fetch fresh data
-    raw_models = _fetch_all_via_rsc()
-    if not raw_models:
-        # Fall back to stale cache if available
-        cached, fetched_at = _load_cache()
-        if cached:
+    # Fetch fresh data; fall back to the saved list when the fetch fails or
+    # finds far fewer models than last time
+    lookup = _build_lookup(_fetch_all_via_rsc())
+    cached, fetched_at = _load_cache()
+    if cached and len(lookup) < len(cached) * MIN_LIST_SHARE:
+        if lookup:
+            logger.warning(f"AA model list has {len(lookup)} entries against {len(cached)} "
+                           f"last time; keeping the saved list ({fetched_at})")
+        else:
             logger.warning(f"RSC fetch failed, using stale cache ({fetched_at})")
-            return cached, True
+        return cached, True
+    if not lookup:
         logger.warning("No AA data available (fetch failed, no cache)")
         return {}, True
 
-    lookup = _build_lookup(raw_models)
     _save_cache(lookup)
     return lookup, False
+
+
+# Name parts that mark a release, mode or reasoning effort of a model rather
+# than another model: dates, context lengths, role, mode and precision tags
+_SAME_MODEL_PART = (
+    r"\d{4}|\d{6}|\d{8}|\d+k|instruct|chat|it|hf|preview|exp|experimental|latest|"
+    r"thinking|nonthinking|reasoning|nonreasoning|turbo|instant|max|xhigh|high|low|minimal|"
+    r"bf16|fp8|nvfp4|mxfp4|fp4|int4|"
+    r"january|february|march|april|may|june|july|august|september|october|november|december"
+)
+_SAME_MODEL_SUFFIX = re.compile(f"(?:{_SAME_MODEL_PART})+")
+
+
+def _same_model_suffix(rest: str) -> bool:
+    """Whether a normalized name part only marks a release of the same model."""
+    return bool(_SAME_MODEL_SUFFIX.fullmatch(rest))
 
 
 def resolve_from_aa(
@@ -523,27 +562,24 @@ def resolve_from_aa(
                 entry = aa_lookup[variant]
                 break
 
-    # 3. Substring matching — find the longest AA key contained in the arena name.
-    #    Require the matched key to be at least 50% of the arena name length
-    #    to avoid false positives like "qwen3" matching "qwen35397ba17b".
+    # 3. Prefix matching: the longest AA key the arena name starts with, or
+    #    else the shortest AA key that starts with the arena name, as long as
+    #    the extra part only names a release of the same model ("deepseekv3"
+    #    and "deepseekv30324"), not another model ("deepseekv31",
+    #    "deepseekv4flashvision").  Keys under half the name's length are
+    #    too short to trust.
     if not entry:
         best_key = None
-        best_len = 0
         min_key_len = max(6, len(name_norm) // 2)
         for key in aa_lookup:
-            if len(key) >= min_key_len and len(key) > best_len and key in name_norm:
+            if (len(key) >= min_key_len and name_norm.startswith(key)
+                    and _same_model_suffix(name_norm[len(key):])
+                    and (not best_key or len(key) > len(best_key))):
                 best_key = key
-                best_len = len(key)
-        # Also try the reverse: an AA key that starts with the arena name
-        # ("deepseekv3" → "deepseekv30324").  A key merely containing it can be
-        # another model: "glm45air" is inside "intellect3basedonglm45air".
-        if not best_key:
+        if not best_key and len(name_norm) >= min_key_len:
             for key in aa_lookup:
-                if (
-                    len(name_norm) >= min_key_len
-                    and key.startswith(name_norm)
-                    and (not best_key or len(key) < len(best_key))
-                ):
+                if (key.startswith(name_norm) and _same_model_suffix(key[len(name_norm):])
+                        and (not best_key or len(key) < len(best_key))):
                     best_key = key
         if best_key:
             entry = aa_lookup[best_key]

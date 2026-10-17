@@ -54,7 +54,7 @@ MOE_BYTES_FACTOR = 1.15
 FIXED_MS_PER_TOKEN = {
     ("gpu", "dense"): 1.0,
     ("gpu", "moe"): 2.0,
-    ("apple", "dense"): 3.0,
+    ("apple", "dense"): 1.0,
     ("apple", "moe"): 5.0,
 }
 SYNC_MS_PER_TOKEN = {"dense": 3.0, "moe": 6.0}
@@ -65,6 +65,12 @@ FIT_PRECISIONS = ["BF16", "FP8", "INT4"]
 # GPUs in a standard server node (HGX/DGX-style), the usual way to serve
 # models too large for one GPU: weights are split across the node's GPUs
 NODE_GPU_COUNT = 8
+
+# A model fits when it needs at most this share of the usable memory: the
+# memory a GPU reports is a little below its label (an L40S with ECC on
+# shows 45 of 48 GiB), and engines want headroom (vLLM uses 90% by default
+# and runs these fits at 0.95)
+FIT_HEADROOM = 0.95
 
 TIERS = ["Consumer GPU", "Unified memory", "Workstation", "Data center GPU"]
 
@@ -87,8 +93,10 @@ class Hardware:
     # license bars data-center deployment), nor are workstation cards, which
     # are built for desktops with up to four cards
     in_8gpu_servers: bool = False
-    # Its name in an 8-GPU server, when that differs (RTX PRO 6000 Server Edition)
+    # Its name and bandwidth in an 8-GPU server, when they differ (the RTX
+    # PRO 6000 Server Edition runs its memory at 1,597 GB/s)
     server_name: str = ""
+    server_bandwidth_gbs: float | None = None
     # The 8-GPU board links every GPU to every other (NVLink switch, AMD
     # Infinity Fabric, Gaudi's on-board Ethernet).  Single-request speed is
     # measured on such boards; PCIe servers have no data to go on
@@ -103,6 +111,12 @@ class Hardware:
         """Memory a model can use, in GiB."""
         return self.usable_memory_gb if self.usable_memory_gb is not None else self.memory_gb
 
+    def bandwidth_for(self, gpu_count: int) -> float:
+        """One GPU's peak bandwidth, GB/s, alone or in an 8-GPU server."""
+        if gpu_count > 1 and self.server_bandwidth_gbs is not None:
+            return self.server_bandwidth_gbs
+        return self.bandwidth_gbs
+
 
 def _mac(key: str, name: str, ram_gb: int, bandwidth_gbs: float) -> Hardware:
     """An Apple Silicon Mac: macOS lets the GPU use 75% of RAM unless raised."""
@@ -116,13 +130,16 @@ def _mac(key: str, name: str, ram_gb: int, bandwidth_gbs: float) -> Hardware:
 #
 # Checked 2026-10 against vendor pages and datasheets, memory and bandwidth
 # both.  B200, B300 and Rubin list what an 8-GPU HGX board gives each GPU
-# (B200 180 of 192 GB, B300 about 270 of 288 GB; Rubin about 250 GB and
+# (B200 180 of 192 GB, B300 about 268 of 288 GB; Rubin about 250 GB and
 # 16 TB/s from NVIDIA's US HGX page of 2026-10-15, while other NVIDIA pages
 # list 288 GB and 22 TB/s).  DGX Station counts its 252 GB of GPU memory;
 # its 496 GB of CPU memory runs at 396 GB/s.  Left out: rack-scale-only parts
 # (GB200/GB300 NVL72, MI455X in AMD Helios), which come as 72-GPU racks, and
 # AMD's MI440X 8-GPU platform, whose memory is not yet published.
 HARDWARE: list[Hardware] = [
+    Hardware("rtx_5060_ti", "RTX 5060 Ti 16 GB", "Consumer GPU", 16, 448),
+    Hardware("rtx_5080", "RTX 5080", "Consumer GPU", 16, 960),
+    Hardware("rtx_3090", "RTX 3090", "Consumer GPU", 24, 936, native_fp8=False),
     Hardware("rtx_4090", "RTX 4090", "Consumer GPU", 24, 1008, reference=True),
     Hardware("rtx_5090", "RTX 5090", "Consumer GPU", 32, 1792, reference=True),
     _mac("m5_pro_64", "Mac mini / MacBook Pro, M5 Pro 64 GB", 64, 307),
@@ -136,7 +153,7 @@ HARDWARE: list[Hardware] = [
     Hardware("r9700", "Radeon AI PRO R9700", "Workstation", 32, 640),
     Hardware("rtx_pro_6000", "RTX PRO 6000 Blackwell", "Workstation", 96, 1792,
              in_8gpu_servers=True, server_name="RTX PRO 6000 Blackwell Server Edition",
-             reference=True),
+             server_bandwidth_gbs=1597, reference=True),
     Hardware("dgx_station", "DGX Station (GB300)", "Workstation", 252, 7100),
     Hardware("l40s", "L40S", "Data center GPU", 48, 864, in_8gpu_servers=True, reference=True),
     Hardware("h100", "H100 SXM", "Data center GPU", 80, 3350,
@@ -156,7 +173,7 @@ HARDWARE: list[Hardware] = [
              in_8gpu_servers=True, gpu_fabric=True),
     Hardware("mi325x", "MI325X", "Data center GPU", 256, 6000,
              in_8gpu_servers=True, gpu_fabric=True),
-    Hardware("b300", "B300", "Data center GPU", 288, 8000, usable_memory_gb=270,
+    Hardware("b300", "B300", "Data center GPU", 288, 8000, usable_memory_gb=268,
              in_8gpu_servers=True, gpu_fabric=True, reference=True),
     Hardware("mi355x", "MI350X / MI355X", "Data center GPU", 288, 8000,
              in_8gpu_servers=True, gpu_fabric=True),
@@ -219,6 +236,17 @@ def node_serving_gib(single_serving_gib: float) -> float:
     return single_serving_gib + RUNTIME_GIB * (NODE_GPU_COUNT - 1)
 
 
+def needed_gib(single_serving_gib: float, gpu_count: int = 1) -> float:
+    """The memory a model needs on one GPU or an 8-GPU server, from the single-GPU figure."""
+    return single_serving_gib if gpu_count == 1 else node_serving_gib(single_serving_gib)
+
+
+def fits(hardware: Hardware, single_serving_gib: float, gpu_count: int = 1) -> bool:
+    """Whether a model fits one device or an 8-GPU server of it, with FIT_HEADROOM."""
+    return (needed_gib(single_serving_gib, gpu_count)
+            <= hardware.usable_gib * gpu_count * FIT_HEADROOM)
+
+
 def decode_tokens_per_s(
     active_params_b: float,
     architecture: str,
@@ -271,7 +299,7 @@ def hardware_speed(
         return None
     return decode_tokens_per_s(
         model["active_params_b"], model["architecture"], precision,
-        hardware.bandwidth_gbs, hardware.platform, gpu_count,
+        hardware.bandwidth_for(gpu_count), hardware.platform, gpu_count,
     )
 
 
@@ -321,7 +349,7 @@ def compute_gpu_fit_columns(df: pd.DataFrame) -> pd.DataFrame:
             serving_col = f"vram_{p_lower}_serving_gib"
             fit_col = f"fits_{hardware.key}_{p_lower}"
             df[fit_col] = df[serving_col].apply(
-                lambda x, usable=hardware.usable_gib: bool(x <= usable) if pd.notna(x) else None
+                lambda x, hw=hardware: fits(hw, x) if pd.notna(x) else None
             )
 
     return df
@@ -360,7 +388,7 @@ def _find_best_gpu(serving: float) -> str:
 def _fits_on_gpu(serving: float) -> Hardware | None:
     """The smallest reference GPU that fits, or None when no single one does."""
     for gpu in FITS_ON_GPUS:
-        if serving <= gpu.usable_gib:
+        if fits(gpu, serving):
             return gpu
     return None
 
@@ -403,7 +431,7 @@ def _find_best_node(serving: float) -> str:
 def _fits_on_node(serving: float) -> Hardware | None:
     """The smallest reference 8-GPU node that fits, or None."""
     for gpu in FITS_ON_NODES:
-        if node_serving_gib(serving) <= gpu.usable_gib * NODE_GPU_COUNT:
+        if fits(gpu, serving, NODE_GPU_COUNT):
             return gpu
     return None
 

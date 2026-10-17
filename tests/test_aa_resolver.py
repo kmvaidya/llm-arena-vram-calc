@@ -287,6 +287,19 @@ class TestFetchSingleModel:
         mock_get.return_value = MagicMock(status_code=404, text="")
         assert _fetch_single_model("no-such-model") is None
 
+    @pytest.mark.parametrize("response", [
+        MagicMock(status_code=403, text="Just a moment..."),
+        MagicMock(status_code=200, text="<html><body>Checking your browser</body></html>"),
+    ])
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_blocked_or_changed_page_is_unreadable(self, mock_get, response, monkeypatch):
+        # Not "a model without sizes": that would be cached for a week
+        monkeypatch.setattr(aa_resolver, "UNREADABLE_PAGES", set())
+        mock_get.return_value = response
+        with pytest.raises(AAUnavailable):
+            _fetch_single_model("glm-5-3")
+        assert {"glm-5-3"} == aa_resolver.UNREADABLE_PAGES
+
     @pytest.mark.parametrize("status", [429, 500, 503])
     @patch("scrapers.aa_resolver.requests.get")
     def test_server_trouble_raises(self, mock_get, status):
@@ -354,6 +367,14 @@ class TestGetModelParams:
     def test_outage_keeps_expired_params(self, mock_fetch, params_cache):
         self._write(params_cache, "m", _days_ago(90), self.PARAMS)
         assert get_model_params("m") == self.PARAMS
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_corrupt_cache_raises_instead_of_wiping(self, mock_fetch, params_cache):
+        params_cache.write_text('{"m": {"total_params_b": 1')  # an interrupted write
+        with pytest.raises(json.JSONDecodeError):
+            get_model_params("other")
+        mock_fetch.assert_not_called()
+        assert params_cache.read_text() == '{"m": {"total_params_b": 1'
 
     @patch("scrapers.aa_resolver._fetch_single_model", side_effect=AAUnavailable("down"))
     def test_outage_without_params_raises_and_caches_nothing(self, mock_fetch, params_cache):
@@ -479,3 +500,49 @@ class TestModelListCache:
         lookup, stale = aa_resolver.get_aa_models(force_refresh=True)
         assert stale
         assert lookup["glm53"]["slug"] == "glm-5-3"
+
+    @patch("scrapers.aa_resolver._fetch_all_via_rsc")
+    def test_shrunken_list_not_saved(self, mock_fetch, list_cache):
+        many = [{"name": f"Model {i}", "slug": f"model-{i}"} for i in range(10)]
+        aa_resolver._save_cache(_build_lookup(many))
+        mock_fetch.return_value = many[:2]  # a misread page
+        lookup, stale = aa_resolver.get_aa_models(force_refresh=True)
+        assert stale
+        assert len(lookup) == 10
+        assert len(json.loads(list_cache.read_text())["models"]) == 10
+
+
+class TestLookupAndPrefixMatching:
+    def test_name_wins_over_another_models_slug(self):
+        # "GLM-5.3" and a variant whose slug normalizes the same way: the
+        # result must not depend on the list's order
+        models = [{"name": "GLM-5.3", "slug": "glm-5-3-base"},
+                  {"name": "GLM 5.3 Vision", "slug": "glm-5-3"}]
+        for order in (models, models[::-1]):
+            assert _build_lookup(order)["glm53"]["name"] == "GLM-5.3"
+
+    def _lookup(self, *names):
+        return _build_lookup([{"name": n, "slug": ""} for n in names])
+
+    @patch("scrapers.aa_resolver.get_model_params", return_value={
+        "total_params_b": 671.0, "active_params_b": 37.0, "architecture": "moe"})
+    def test_release_of_the_same_model_matches(self, mock_params):
+        lookup = _build_lookup([{"name": "DeepSeek V3 0324", "slug": "deepseek-v3-0324"},
+                                {"name": "DeepSeek V3.1", "slug": "deepseek-v3-1"}])
+        assert resolve_from_aa("deepseek-v3", aa_lookup=lookup, fetch_params=True)
+        mock_params.assert_called_once_with("deepseek-v3-0324")
+
+    @patch("scrapers.aa_resolver.get_model_params")
+    def test_other_versions_and_variants_do_not_match(self, mock_params):
+        lookup = _build_lookup([{"name": "DeepSeek V3.1", "slug": "deepseek-v3-1"},
+                                {"name": "DeepSeek V4 Flash Vision", "slug": "deepseek-v4-flash-vision"},
+                                {"name": "DeepSeek V4", "slug": "deepseek-v4"}])
+        for name in ("deepseek-v3", "deepseek-v4-flash", "deepseek-v4.1-flash-max"):
+            assert resolve_from_aa(name, aa_lookup=lookup, fetch_params=True) is None, name
+        mock_params.assert_not_called()
+
+    def test_precision_tag_is_the_same_model(self):
+        lookup = _build_lookup([{"name": "NVIDIA Nemotron 3 Ultra 550B A55B", "slug": "n3u"}])
+        lookup["nvidianemotron3ultra550ba55b"]["total_params_b"] = 550.0
+        result = resolve_from_aa("nvidia-nemotron-3-ultra-550b-a55b-nvfp4", aa_lookup=lookup)
+        assert result["total_params_b"] == 550.0

@@ -76,9 +76,10 @@ class TestFindBestGpu:
     def test_tiny_model(self):
         assert _find_best_gpu(5) == "RTX 4090"
 
-    def test_rtx_4090_holds_24_gib(self):
-        assert _find_best_gpu(24) == "RTX 4090"
-        assert _find_best_gpu(24.1) == "RTX 5090"
+    def test_rtx_4090_holds_95_percent_of_24_gib(self):
+        # A model fits within FIT_HEADROOM of the memory: 22.8 of 24 GiB
+        assert _find_best_gpu(22.7) == "RTX 4090"
+        assert _find_best_gpu(22.9) == "RTX 5090"
 
     def test_fits_l40s(self):
         assert _find_best_gpu(40) == "L40S"
@@ -91,16 +92,17 @@ class TestFindBestGpu:
         assert _find_best_gpu(81) == "RTX PRO 6000 Blackwell"
 
     def test_fits_h200(self):
-        assert _find_best_gpu(140) == "H200 SXM / NVL"
+        assert _find_best_gpu(133) == "H200 SXM / NVL"
+        assert _find_best_gpu(135) == "B200"  # over 95% of 141 GiB
 
     def test_fits_b200(self):
         assert _find_best_gpu(160) == "B200"
 
     def test_fits_b300(self):
-        assert _find_best_gpu(270) == "B300"
+        assert _find_best_gpu(254) == "B300"  # 95% of 268 GiB is 254.6
 
     def test_multi_gpu(self):
-        assert _find_best_gpu(271) == "MULTI-GPU"
+        assert _find_best_gpu(255) == "MULTI-GPU"
 
 
 class TestFindBestNode:
@@ -109,12 +111,12 @@ class TestFindBestNode:
         assert _find_best_node(10) == "8x L40S"
 
     def test_every_gpu_carries_its_runtime(self):
-        # 8x L40S holds 384 GiB, less 7 more runtimes (10.5 GiB)
-        assert _find_best_node(373) == "8x L40S"
-        assert _find_best_node(374) == "8x H100 SXM"
+        # 8x L40S holds 364.8 GiB (95% of 384), less 7 more runtimes (10.5 GiB)
+        assert _find_best_node(354) == "8x L40S"
+        assert _find_best_node(355) == "8x H100 SXM"
 
     def test_deepseek_v3_at_fp8_fits_rtx_pro_server(self):
-        # 667.9 + 10.5 GiB: over 8x H100's 640, within 8x RTX PRO 6000's 768
+        # 667.9 + 10.5 GiB: over 95% of 8x H100's 640, within 95% of 8x RTX PRO 6000's 768
         assert _find_best_node(serving_gib(671, "FP8")) == "8x RTX PRO 6000 Blackwell Server Edition"
 
     def test_names_h200_not_gaudi(self):
@@ -122,7 +124,7 @@ class TestFindBestNode:
         assert _find_best_node(900) == "8x H200 SXM"
 
     def test_fits_b200_node(self):
-        assert _find_best_node(1400) == "8x B200"
+        assert _find_best_node(1350) == "8x B200"  # 1,360.5 of 1,368 GiB
 
     def test_1_6t_model_at_fp8_fits_b300_node(self):
         assert _find_best_node(serving_gib(1600, "FP8")) == "8x B300"
@@ -156,7 +158,7 @@ class TestHardwareList:
 
     def test_hgx_boards_give_less_than_the_package(self):
         assert _hw("b200").usable_memory_gb == 180
-        assert _hw("b300").usable_memory_gb == 270
+        assert _hw("b300").usable_memory_gb == 268
 
     def test_nodes_exclude_desktop_hardware(self):
         # GeForce cards (license bars data-center use), unified-memory
@@ -192,10 +194,12 @@ class TestDecodeTokensPerS:
         # 37 x 1.06 x 1.15 = 45.1 GB / 3840 GB/s = 11.75 ms, + 2 ms
         assert decode_tokens_per_s(37, "moe", "FP8", 4800) == pytest.approx(1000 / 13.746, rel=1e-3)
 
-    def test_apple_has_a_larger_fixed_cost(self):
-        gpu = decode_tokens_per_s(6.74, "dense", "BF16", 614, "gpu")
-        apple = decode_tokens_per_s(6.74, "dense", "BF16", 614, "apple")
-        assert 1000 / apple - 1000 / gpu == pytest.approx(2.0)
+    def test_apple_has_a_larger_fixed_cost_for_moe(self):
+        # Current llama.cpp builds run dense models on Apple with the GPUs' 1 ms
+        gpu, apple = (decode_tokens_per_s(6.74, "dense", "BF16", 614, p) for p in ("gpu", "apple"))
+        assert apple == pytest.approx(gpu)
+        gpu, apple = (decode_tokens_per_s(5.1, "moe", "INT4", 614, p) for p in ("gpu", "apple"))
+        assert 1000 / apple - 1000 / gpu == pytest.approx(3.0)
 
     def test_eight_gpus_add_sync_cost(self):
         # 74.8 GB / (0.8 x 4800 x 8) = 2.44 ms, + 1 ms, + 3 ms sync
@@ -264,15 +268,16 @@ class TestAddAllColumns:
     def test_70b_fp8_fits_h100(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "big-model-70b"].iloc[0]
-        assert row["best_gpu_fp8"] == "H100 SXM"
-        assert row["best_gpu_bf16"] == "H200 SXM / NVL"
+        assert row["best_gpu_fp8"] == "H100 SXM"   # 74.6 GiB of 76
+        assert row["best_gpu_bf16"] == "B200"      # 135.9 GiB: over 95% of an H200's 141
 
     def test_huge_model_gets_a_node(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "moe-model-600b"].iloc[0]
         assert row["best_gpu_fp8"] == "MULTI-GPU"
-        assert row["best_node_fp8"] == "8x H100 SXM"   # 608 GiB of 640
-        assert row["best_node_bf16"] == "8x B200"      # 1,134 GiB: just over 8x H200
+        # 608.3 GiB: just over 95% of 8x H100's 640, so the 768 GiB PCIe server
+        assert row["best_node_fp8"] == "8x RTX PRO 6000 Blackwell Server Edition"
+        assert row["best_node_bf16"] == "8x B200"      # 1,134 GiB: over 95% of 8x H200
 
     def test_unknown_model_has_unknown_gpu(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
@@ -290,8 +295,16 @@ class TestComputeSpeedColumns:
         assert row["est_tok_s_fp8"] == pytest.approx(86.8)
         assert row["est_tok_s_bf16"] == pytest.approx(48.0)
 
-    def test_speed_on_fits_on_node(self, sample_leaderboard_df):
+    def test_speed_on_fits_on_node(self):
+        df = add_all_vram_and_gpu_columns(pd.DataFrame([
+            {"total_params_b": 1000.0, "active_params_b": 32.0, "architecture": "moe"},
+        ]))
+        row = df.iloc[0]
+        # 1,003 GiB at FP8: 8x H200.  39.0 GB / 30,720 GB/s = 1.27 ms, + 2 ms, + 6 ms sync
+        assert row["best_node_fp8"] == "8x H200 SXM"
+        assert row["est_tok_s_fp8"] == pytest.approx(107.9)
+
+    def test_no_speed_on_pcie_server(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "moe-model-600b"].iloc[0]
-        # 8x H100: 36.6 GB / 21,440 GB/s = 1.7 ms, + 2 ms, + 6 ms sync
-        assert row["est_tok_s_fp8"] == pytest.approx(103.0)
+        assert pd.isna(row["est_tok_s_fp8"])
