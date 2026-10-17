@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 ## Features
 
-- **Scrape** the Arena.ai open-source text leaderboard (API, HF Space, Playwright, or CSV input)
+- **Load** the Arena.ai open-source text leaderboard from Arena's [Hugging Face dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (or a CSV export)
 - **Resolve** total and active parameter counts via multiple strategies:
   - Small overrides dict for models with misleading names or no public metadata
   - Regex name parsing (e.g., `Qwen3-30B-A3B` → 30B total, 3B active, MoE)
@@ -26,7 +26,7 @@ playwright install chromium
 ## Usage
 
 ```bash
-# Full pipeline (scrapes arena.ai live)
+# Full pipeline (downloads the latest leaderboard)
 python enrich_arena.py --update-readme
 
 # Use a pre-downloaded CSV
@@ -38,4 +38,4 @@ python enrich_arena.py --input arena_data.csv --no-network --update-readme
 
 ## Automation
 
-A GitHub Actions workflow runs daily at 06:00 UTC to scrape the latest leaderboard and update the root README.md with fresh tables. See `.github/workflows/update-leaderboard.yml`.
+A GitHub Actions workflow runs daily at 06:00 UTC to fetch the latest leaderboard and update the root README.md with fresh tables. See `.github/workflows/update-leaderboard.yml`.

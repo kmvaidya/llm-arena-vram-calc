@@ -45,12 +45,38 @@ jobs:
           git diff --cached --quiet || git commit -m "Update leaderboard tables [automated]"
           git push
 
-      - name: Create issue on failure
+      # One open issue tracks a failure streak: later failures comment on it,
+      # and the next successful run closes it.
+      - name: Report failure in the open issue
         if: failure()
         run: |
-          gh issue create \
-            --title "Leaderboard update failed ($(date -u +%Y-%m-%d))" \
-            --body "The daily leaderboard update workflow failed.\n\n**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nPlease check the logs for details." \
-            --label "bug"
+          issue=$(gh issue list --state open --label bug --json number,title \
+            --jq '[.[] | select(.title | startswith("Leaderboard update failed"))][0].number // empty')
+          body="The daily leaderboard update failed on $(date -u +%Y-%m-%d).
+
+          **Run:** $RUN_URL
+
+          Please check the logs for details."
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body "$body"
+          else
+            gh issue create \
+              --title "Leaderboard update failed (since $(date -u +%Y-%m-%d))" \
+              --body "$body" \
+              --label "bug"
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Close the failure issue
+        if: success()
+        run: |
+          issues=$(gh issue list --state open --label bug --json number,title \
+            --jq '.[] | select(.title | startswith("Leaderboard update failed")) | .number')
+          for issue in $issues; do
+            gh issue close "$issue" --comment "The daily leaderboard update succeeded again: $RUN_URL"
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

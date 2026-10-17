@@ -2,12 +2,13 @@
 """
 Arena.ai Open-Source LLM Leaderboard Enrichment with GPU VRAM Feasibility.
 
-Scrapes the Arena.ai open-source text leaderboard, enriches each model with
+Loads the Arena.ai open-source text leaderboard (published by Arena as a
+Hugging Face dataset), enriches each model with
 parameter counts and VRAM estimates, and outputs an enriched CSV/XLSX showing
 GPU deployment feasibility. Optionally updates the repo README.md with tables.
 
 Usage:
-    python enrich_arena.py                          # Scrape live from arena.ai
+    python enrich_arena.py                          # Download the latest leaderboard
     python enrich_arena.py --input data.csv         # Use a pre-downloaded CSV
     python enrich_arena.py --update-readme          # Also update root README.md
 """
@@ -473,7 +474,7 @@ def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_s
     lines.append("# Install dependencies")
     lines.append("uv sync")
     lines.append("")
-    lines.append("# Full pipeline (scrapes arena.ai live, updates README)")
+    lines.append("# Full pipeline (downloads the latest leaderboard, updates README)")
     lines.append("uv run python arena_enrichment/enrich_arena.py --update-readme")
     lines.append("")
     lines.append("# Use a pre-downloaded CSV")

@@ -12,6 +12,7 @@ dependencies = [
     "openpyxl>=3.1",
     "beautifulsoup4>=4.12",
     "lxml>=4.9",
+    "pyarrow>=25.0.1",
 ]
 
 [project.urls]

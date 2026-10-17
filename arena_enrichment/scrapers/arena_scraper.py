@@ -1,20 +1,23 @@
 """
-Scrape the Arena.ai open-source text leaderboard.
+Load the Arena.ai open-source text leaderboard.
 
-The leaderboard at arena.ai is a Next.js app that embeds all model data as
-double-escaped JSON inside self.__next_f.push() streaming calls. The data
-includes all models (proprietary + open-source); we filter client-side to
-match the ?license=open-source URL filter.
+Since 2026-10-14 arena.ai answers scripts with a Cloudflare bot challenge, so
+the page itself can no longer be read. Arena publishes the same leaderboard
+to the Hugging Face dataset lmarena-ai/leaderboard-dataset: the
+text_style_control config is the ranking arena.ai shows by default, and its
+"latest" split holds the most recent publication. The data includes all
+models (proprietary + open-source) and every category; we keep the overall
+ranking and filter client-side to match the ?license=open-source URL filter.
 
 Approaches in order:
 1. Load from local CSV if provided
-2. Extract embedded Next.js data from page HTML (no JS rendering needed)
+2. Download the latest publication from the Hugging Face dataset
 3. Raise error with instructions
 """
 
 from __future__ import annotations
 
-import json
+import io
 import logging
 import re
 from typing import Any
@@ -25,6 +28,17 @@ import requests
 logger = logging.getLogger(__name__)
 
 ARENA_URL = "https://arena.ai/leaderboard/text?license=open-source"
+
+HF_DATASET_URL = (
+    "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset/resolve/main/"
+    "text_style_control/latest-00000-of-00001.parquet"
+)
+
+# Dataset columns this module reads
+HF_COLUMNS = [
+    "model_name", "organization", "license", "rating", "rating_lower",
+    "rating_upper", "vote_count", "category",
+]
 
 EXPECTED_COLUMNS = [
     "rank", "model_name", "arena_score", "ci_lower", "ci_upper",
@@ -37,7 +51,7 @@ PROPRIETARY_LICENSES = {"Proprietary"}
 
 def scrape_arena_leaderboard(input_csv: str | None = None) -> pd.DataFrame:
     """
-    Scrape or load the Arena.ai open-source leaderboard.
+    Download or load the Arena.ai open-source leaderboard.
 
     Args:
         input_csv: Optional path to a pre-downloaded CSV file.
@@ -49,140 +63,70 @@ def scrape_arena_leaderboard(input_csv: str | None = None) -> pd.DataFrame:
     if input_csv:
         return _load_from_csv(input_csv)
 
-    df = _scrape_arena_html()
+    df = _fetch_hf_leaderboard()
     if df is not None:
         return df
 
     raise RuntimeError(
-        "Could not scrape arena.ai leaderboard.\n"
+        "Could not download the Arena.ai leaderboard from Hugging Face.\n"
         "Please download the leaderboard as CSV and use: --input arena_data.csv\n"
-        "\nExport the table from https://arena.ai/leaderboard/text"
-        "?license=open-source as CSV.\n"
+        f"\nExport the table from {ARENA_URL} as CSV.\n"
     )
 
 
-def _scrape_arena_html() -> pd.DataFrame | None:
+def _fetch_hf_leaderboard() -> pd.DataFrame | None:
     """
-    Fetch the arena.ai leaderboard page and extract model data from the
-    embedded Next.js payload.
+    Download the latest leaderboard publication from Hugging Face and reduce
+    it to the open-source models of the overall text ranking.
 
-    The page embeds all leaderboard entries as double-escaped JSON inside
-    self.__next_f.push() calls. The entries are in a single array containing
-    all models (proprietary + open-source). We parse this array and filter
-    to open-source licenses only.
+    The dataset ranks all models together, so we re-rank the open-source ones
+    sequentially, best rating first, as arena.ai does for its license filter.
     """
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/131.0.0.0 Safari/537.36"
-        ),
-        "Accept": "text/html,application/xhtml+xml",
-    }
-
     try:
-        logger.info(f"Fetching {ARENA_URL}")
-        resp = requests.get(ARENA_URL, headers=headers, timeout=20)
+        logger.info(f"Fetching {HF_DATASET_URL}")
+        resp = requests.get(HF_DATASET_URL, timeout=60)
         if resp.status_code != 200:
-            logger.warning(f"arena.ai returned status {resp.status_code}")
+            logger.warning(f"Hugging Face returned status {resp.status_code}")
             return None
     except requests.RequestException as e:
-        logger.warning(f"Failed to fetch arena.ai: {e}")
-        return None
-
-    html = resp.text
-
-    # The leaderboard data is embedded as double-escaped JSON:
-    #   \"entries\":[{\"rank\":1,\"modelDisplayName\":\"...\", ...}]
-    # Find the entries array and unescape it.
-    entries = _extract_entries_from_nextjs(html)
-    if not entries:
-        logger.warning("Could not find leaderboard entries in page HTML")
-        return None
-
-    logger.info(f"Extracted {len(entries)} total models from arena.ai")
-
-    # Filter to open-source only
-    open_source = [
-        e for e in entries
-        if e.get("license", "Proprietary") not in PROPRIETARY_LICENSES
-    ]
-    logger.info(f"Filtered to {len(open_source)} open-source models")
-
-    if not open_source:
-        return None
-
-    # Convert to DataFrame with sequential open-source ranks
-    rows = []
-    for i, entry in enumerate(open_source, start=1):
-        rows.append({
-            "rank": i,
-            "model_name": entry.get("modelDisplayName", ""),
-            "arena_score": entry.get("rating"),
-            "ci_lower": entry.get("ratingLower"),
-            "ci_upper": entry.get("ratingUpper"),
-            "votes": entry.get("votes"),
-            "organization": entry.get("modelOrganization", ""),
-            "license": entry.get("license", ""),
-        })
-
-    df = pd.DataFrame(rows, columns=EXPECTED_COLUMNS)
-    logger.info(f"Built DataFrame with {len(df)} open-source models")
-    return df
-
-
-def _extract_entries_from_nextjs(html: str) -> list[dict[str, Any]] | None:
-    """
-    Extract the leaderboard entries array from Next.js embedded data.
-
-    Arena.ai uses Next.js streaming which embeds data as double-escaped JSON
-    inside self.__next_f.push() calls. The entries are in a pattern like:
-        \\"entries\\":[{\\"rank\\":1,...},...]
-    """
-    # Find the start of the entries array
-    marker = '\\"entries\\":['
-    idx = html.find(marker)
-    if idx < 0:
-        return None
-
-    # Start after the marker, at the opening [
-    arr_start = idx + len(marker) - 1  # points to '['
-
-    # Extract a generous chunk and unescape the double-escaped JSON
-    chunk = html[arr_start:arr_start + 500000]
-    unescaped = chunk.replace('\\"', '"')
-
-    # Find the matching closing bracket
-    depth = 0
-    end = -1
-    for i, c in enumerate(unescaped):
-        if c == '[':
-            depth += 1
-        elif c == ']':
-            depth -= 1
-            if depth == 0:
-                end = i + 1
-                break
-
-    if end < 0:
-        logger.warning("Could not find end of entries array")
+        logger.warning(f"Failed to fetch the leaderboard dataset: {e}")
         return None
 
     try:
-        entries = json.loads(unescaped[:end])
-    except json.JSONDecodeError as e:
-        logger.warning(f"Failed to parse entries JSON: {e}")
+        data = pd.read_parquet(io.BytesIO(resp.content))
+    except (ValueError, OSError) as e:
+        logger.warning(f"Failed to read the leaderboard dataset: {e}")
         return None
 
-    # Validate that it looks like leaderboard data
-    if not entries or not isinstance(entries, list):
-        return None
-    sample = entries[0]
-    if "modelDisplayName" not in sample or "rating" not in sample:
-        logger.warning("Entries don't look like leaderboard data")
+    missing = [c for c in HF_COLUMNS if c not in data.columns]
+    if missing:
+        logger.warning(f"Leaderboard dataset is missing columns: {missing}")
         return None
 
-    return entries
+    overall = data[data["category"] == "overall"]
+    if "leaderboard_publish_date" in overall.columns:
+        logger.info(f"Leaderboard published {overall['leaderboard_publish_date'].max()}")
+    logger.info(f"Loaded {len(overall)} models from the overall ranking")
+
+    # A model without a license is treated as proprietary
+    licenses = overall["license"].fillna("Proprietary")
+    open_source = overall[~licenses.isin(PROPRIETARY_LICENSES)]
+    logger.info(f"Filtered to {len(open_source)} open-source models")
+
+    if open_source.empty:
+        return None
+
+    df = open_source.sort_values("rating", ascending=False, kind="stable").rename(columns={
+        "rating": "arena_score",
+        "rating_lower": "ci_lower",
+        "rating_upper": "ci_upper",
+        "vote_count": "votes",
+    })
+    df["rank"] = range(1, len(df) + 1)
+    df["votes"] = df["votes"].round().astype("Int64")
+    df = df[EXPECTED_COLUMNS].reset_index(drop=True)
+    logger.info(f"Built DataFrame with {len(df)} open-source models")
+    return df
 
 
 # ---------------------------------------------------------------------------
