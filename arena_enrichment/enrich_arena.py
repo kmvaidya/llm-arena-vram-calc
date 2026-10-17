@@ -37,6 +37,7 @@ from known_models import MODEL_OVERRIDES, NOT_RELEASED
 from measurements import MEASUREMENTS
 from scrapers import aa_resolver
 from scrapers.aa_resolver import (
+    RELEASE_TAGS,
     AAUnavailable,
     ModelParams,
     get_aa_models,
@@ -99,20 +100,15 @@ AA_LIST_MAX_AGE_DAYS = 3       # an outage of a day or two is not worth an issue
 # Parameter resolution
 # ---------------------------------------------------------------------------
 
-# Name parts that mark a release, mode or reasoning effort of a model rather
-# than another model: dates ("0905", "june-2024"), context lengths ("128k"),
-# role, mode and precision tags
-_RELEASE_PART = re.compile(
-    r"\d{4}|\d{6}|\d{8}|\d+k|instruct|chat|it|hf|preview|exp|experimental|latest|"
-    r"thinking|non|no|reasoning|turbo|instant|max|xhigh|high|low|minimal|"
-    r"bf16|fp8|nvfp4|mxfp4|fp4|int4|"
-    r"january|february|march|april|may|june|july|august|september|october|november|december"
-)
+_RELEASE_PART = re.compile(RELEASE_TAGS)
 
 
 def _normalize_override(name: str) -> str:
     """Lowercase with "-" between parts, so "Command R+" reads "command-r-plus"."""
     return re.sub(r"[\s\-_]+", "-", name.lower().replace("+", "-plus-")).strip("-")
+
+
+_OVERRIDE_KEYS = {_normalize_override(key): key for key in MODEL_OVERRIDES}
 
 
 def resolve_from_overrides(model_name: str) -> ModelParams | None:
@@ -127,21 +123,20 @@ def resolve_from_overrides(model_name: str) -> ModelParams | None:
     neighbour's size.
     """
     name = _normalize_override(model_name)
-    best_key = None
-    for key in MODEL_OVERRIDES:
-        key_norm = _normalize_override(key)
+    best = None
+    for key_norm in _OVERRIDE_KEYS:
         if not name.startswith(key_norm):
             continue
         rest = name[len(key_norm):]
         if rest and not (rest.startswith("-")
                          and all(_RELEASE_PART.fullmatch(part) for part in rest[1:].split("-"))):
             continue
-        if best_key is None or len(key_norm) > len(_normalize_override(best_key)):
-            best_key = key
+        if best is None or len(key_norm) > len(best):
+            best = key_norm
 
-    if best_key is None:
+    if best is None:
         return None
-    total, active, arch = MODEL_OVERRIDES[best_key]
+    total, active, arch = MODEL_OVERRIDES[_OVERRIDE_KEYS[best]]
     return {
         "total_params_b": total,
         "active_params_b": active,
@@ -571,7 +566,8 @@ def generate_readme(
                  "for one request (see [Memory formula](#memory-formula) and "
                  "[Speed formula](#speed-formula)). *Memory* is what a model can use: the "
                  "GPU's memory, or for computers whose GPU shares system RAM, the share the "
-                 f"system gives it; a model fits when it needs at most {FIT_HEADROOM:.0%} of it.")
+                 f"system gives it. A model fits a GPU when it needs at most {FIT_HEADROOM:.0%} "
+                 "of its memory.")
     lines.append("")
     lines.extend(_generate_hardware_table(df))
     lines.append("")
@@ -751,10 +747,11 @@ def _memory_formula_section() -> list[str]:
         "short for the oldest large ones. Longer contexts and several users at once need more.",
         f"- **{RUNTIME_GIB:g} GiB per GPU** covers the CUDA or Metal context, the framework and "
         f"activations. Split across {NODE_GPU_COUNT} GPUs, a model needs it on each.",
-        f"- **{FIT_HEADROOM:.0%}**: a model fits when it needs at most {FIT_HEADROOM:.0%} of the "
-        "memory. GPUs report a little less than their label (an L40S with ECC on shows 45 of 48 "
-        "GiB), and engines want headroom: vLLM uses 90% unless told otherwise "
-        f"(`--gpu-memory-utilization {FIT_HEADROOM:g}`).",
+        f"- **{FIT_HEADROOM:.0%}**: a model fits a GPU when it needs at most {FIT_HEADROOM:.0%} of "
+        "its memory. GPUs report a little less than their label (an L40S with ECC on shows 45 of "
+        "48 GiB), and engines want headroom: vLLM uses 90% unless told otherwise "
+        f"(`--gpu-memory-utilization {FIT_HEADROOM:g}`). On computers whose GPU shares system RAM "
+        "the whole share the system gives the GPU counts, as it already leaves the system its own.",
         f"- Example: a 70B dense model at FP8 needs 70 × {fp8_gib:.3g} + {kv_cache_gib(70):g} + "
         f"{RUNTIME_GIB:g} = {example:.1f} GiB, so it fits an H100 "
         f"({FIT_HEADROOM * h100.usable_gib:g} of {h100.usable_gib:g} GiB).",
@@ -1095,6 +1092,9 @@ def main() -> None:
     # Step 2: Resolve parameter counts
     print("\nStep 2: Resolving model parameters...")
     use_network = not args.no_network
+
+    # A corrupt page cache would fail every lookup quietly: stop here instead
+    aa_resolver.validate_params_cache()
 
     # Pre-load AA model cache (one network request, or from disk)
     aa_lookup = None

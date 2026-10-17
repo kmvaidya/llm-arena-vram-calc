@@ -40,7 +40,6 @@ MODEL_OVERRIDES: dict[str, ModelOverride] = {
 
     # === AA maps to wrong variant or wrong data ===
     "Phi-4": (14, 14, "dense"),             # AA has multimodal 5.6B, arena means text 14B
-    "phi-4": (14, 14, "dense"),
     "deepseek-llm-67b-chat": (67, 67, "dense"),  # AA incorrectly lists as 7B
     # AA lists the 552B backbone; the checkpoint adds 196B of Engram memory,
     # a vision encoder and a draft model, all loaded by default
@@ -70,8 +69,7 @@ MODEL_OVERRIDES: dict[str, ModelOverride] = {
     "mistral-small-2506": (24, 24, "dense"),   # Mistral-Small-3.2-24B-Instruct-2506
     "mistral-large-2411": (122.6, 122.6, "dense"),  # Mistral-Large-Instruct-2411
     "deepseek-v2.5-1210": (235.7, 21, "moe"),  # DeepSeek-V2.5-1210
-    "openchat-3.5": (7.24, 7.24, "dense"),     # Mistral-7B fine-tune
-    "openchat-3.5-0106": (7.24, 7.24, "dense"),
+    "openchat-3.5": (7.24, 7.24, "dense"),     # Mistral-7B fine-tune (and its 0106 release)
     "snowflake-arctic-instruct": (478.6, 17, "moe"),  # Snowflake/snowflake-arctic-instruct
 }
 

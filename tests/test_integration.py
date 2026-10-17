@@ -257,7 +257,7 @@ class TestFullPipeline:
         assert "+ 1.5 GiB per GPU" in readme
         assert "| FP8 | 1.06 | 0.987 | FP8, GGUF Q8_0, MLX 8-bit |" in readme
         assert "70 × 0.987 + 4 + 1.5 = 74.6 GiB, so it fits an H100 (76 of 80 GiB)" in readme
-        assert "a model fits when it needs at most 95% of the memory" in readme
+        assert "a model fits a GPU when it needs at most 95% of its memory" in readme
         assert "For them the BF16 column describes weights nobody publishes" in readme
 
         assert "### Speed formula" in readme

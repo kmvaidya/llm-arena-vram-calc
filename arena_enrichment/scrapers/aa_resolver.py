@@ -299,6 +299,16 @@ def _save_cache(models_dict: dict[str, AAEntry]) -> None:
     logger.info(f"Cache saved: {len(models_dict)} models → {CACHE_FILE}")
 
 
+def _model_count(lookup: dict[str, AAEntry]) -> int:
+    """Models in a lookup, which indexes each under its name and its slug."""
+    return len({entry["slug"] or entry["name"] for entry in lookup.values()})
+
+
+def validate_params_cache() -> None:
+    """Raise if the committed page cache cannot be read, before a run relies on it."""
+    _load_params_cache()
+
+
 def model_list_age_days() -> float | None:
     """Days since the saved model list was fetched, or None when there is none."""
     _, fetched_at = _load_cache()
@@ -446,8 +456,10 @@ def _build_lookup(raw_models: list[dict[str, Any]]) -> dict[str, AAEntry]:
         entries.append(entry)
 
     # Index under the slug and the name; when one model's name normalizes
-    # to another's slug, the name wins, so the result does not depend on
-    # the order of AA's list
+    # to another's slug, the name wins, and among names (or slugs) that
+    # normalize alike, the open-weights model with the last slug, so the
+    # result does not depend on the order of AA's list
+    entries.sort(key=lambda e: (e["is_open_weights"], e["slug"]))
     for entry in entries:
         if entry["slug"]:
             lookup[_normalize(entry["slug"])] = entry
@@ -479,10 +491,10 @@ def get_aa_models(max_age_hours: float = DEFAULT_MAX_AGE_HOURS, force_refresh: b
     # finds far fewer models than last time
     lookup = _build_lookup(_fetch_all_via_rsc())
     cached, fetched_at = _load_cache()
-    if cached and len(lookup) < len(cached) * MIN_LIST_SHARE:
+    if cached and _model_count(lookup) < _model_count(cached) * MIN_LIST_SHARE:
         if lookup:
-            logger.warning(f"AA model list has {len(lookup)} entries against {len(cached)} "
-                           f"last time; keeping the saved list ({fetched_at})")
+            logger.warning(f"AA model list has {_model_count(lookup)} models against "
+                           f"{_model_count(cached)} last time; keeping the saved list ({fetched_at})")
         else:
             logger.warning(f"RSC fetch failed, using stale cache ({fetched_at})")
         return cached, True
@@ -495,19 +507,31 @@ def get_aa_models(max_age_hours: float = DEFAULT_MAX_AGE_HOURS, force_refresh: b
 
 
 # Name parts that mark a release, mode or reasoning effort of a model rather
-# than another model: dates, context lengths, role, mode and precision tags
-_SAME_MODEL_PART = (
-    r"\d{4}|\d{6}|\d{8}|\d+k|instruct|chat|it|hf|preview|exp|experimental|latest|"
-    r"thinking|nonthinking|reasoning|nonreasoning|turbo|instant|max|xhigh|high|low|minimal|"
+# than another model: dates ("0905", "june-2024"), context lengths ("128k"),
+# role, mode and precision tags.  Shared with the overrides in enrich_arena.
+RELEASE_TAGS = (
+    r"\d{4}|\d{6}|\d{8}|\d+k|instruct|chat|it|hf|preview|exp|experimental|latest|terminus|"
+    r"thinking|non|no|reasoning|turbo|instant|max|xhigh|high|low|minimal|"
     r"bf16|fp8|nvfp4|mxfp4|fp4|int4|"
     r"january|february|march|april|may|june|july|august|september|october|november|december"
 )
-_SAME_MODEL_SUFFIX = re.compile(f"(?:{_SAME_MODEL_PART})+")
+# Tags that, added to a name, can also name another model ("Qwen3-Max",
+# "Qwen-Turbo"), so an AA name longer than the Arena name may not add them
+_MODEL_TAGS = {"max", "turbo"}
+_RELEASE_SUFFIX = re.compile(f"(?:{RELEASE_TAGS})+")
+_RELEASE_SUFFIX_NOT_MODEL = re.compile(
+    "(?:" + "|".join(t for t in RELEASE_TAGS.split("|") if t not in _MODEL_TAGS) + ")+"
+)
 
 
-def _same_model_suffix(rest: str) -> bool:
-    """Whether a normalized name part only marks a release of the same model."""
-    return bool(_SAME_MODEL_SUFFIX.fullmatch(rest))
+def _same_model_suffix(rest: str, may_name_a_model: bool = True) -> bool:
+    """
+    Whether a normalized name part only marks a release of the same model.
+    With may_name_a_model False, parts like "max" that can also name another
+    model do not count.
+    """
+    pattern = _RELEASE_SUFFIX if may_name_a_model else _RELEASE_SUFFIX_NOT_MODEL
+    return bool(pattern.fullmatch(rest))
 
 
 def resolve_from_aa(
@@ -578,7 +602,8 @@ def resolve_from_aa(
                 best_key = key
         if not best_key and len(name_norm) >= min_key_len:
             for key in aa_lookup:
-                if (key.startswith(name_norm) and _same_model_suffix(key[len(name_norm):])
+                if (key.startswith(name_norm)
+                        and _same_model_suffix(key[len(name_norm):], may_name_a_model=False)
                         and (not best_key or len(key) < len(best_key))):
                     best_key = key
         if best_key:
@@ -655,9 +680,17 @@ def resolve_single_from_aa(model_name: str) -> ModelParams | None:
             if candidate not in slugs_to_try:
                 slugs_to_try.append(candidate)
 
+    # A guess that cannot be read does not stop the others
+    unavailable = None
     for slug in slugs_to_try:
-        result = get_model_params(slug)
+        try:
+            result = get_model_params(slug)
+        except AAUnavailable as e:
+            unavailable = e
+            continue
         if result:
             return result
 
+    if unavailable is not None:
+        raise unavailable
     return None

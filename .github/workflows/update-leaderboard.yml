@@ -68,8 +68,13 @@ jobs:
         if: failure()
         run: |
           details="Please check the run's log for details."
-          if [ "$PUBLISHED" = "success" ] && [ -s "$RUNNER_TEMP/health.md" ]; then
-            details="The tables were updated, but:
+          if [ -s "$RUNNER_TEMP/health.md" ]; then
+            if [ "$PUBLISHED" = "success" ]; then
+              details="The tables were updated, but:"
+            else
+              details="The tables were not updated; check the run's log. The run also found:"
+            fi
+            details="$details
 
           $(cat "$RUNNER_TEMP/health.md")"
           fi

@@ -66,10 +66,11 @@ FIT_PRECISIONS = ["BF16", "FP8", "INT4"]
 # models too large for one GPU: weights are split across the node's GPUs
 NODE_GPU_COUNT = 8
 
-# A model fits when it needs at most this share of the usable memory: the
+# A model fits a GPU when it needs at most this share of its memory: the
 # memory a GPU reports is a little below its label (an L40S with ECC on
 # shows 45 of 48 GiB), and engines want headroom (vLLM uses 90% by default
-# and runs these fits at 0.95)
+# and runs these fits at 0.95).  Unified-memory computers get their whole
+# usable figure, which already leaves the system its share
 FIT_HEADROOM = 0.95
 
 TIERS = ["Consumer GPU", "Unified memory", "Workstation", "Data center GPU"]
@@ -110,6 +111,11 @@ class Hardware:
     def usable_gib(self) -> float:
         """Memory a model can use, in GiB."""
         return self.usable_memory_gb if self.usable_memory_gb is not None else self.memory_gb
+
+    @property
+    def fit_gib(self) -> float:
+        """The most a model may need to fit, in GiB."""
+        return self.usable_gib * (1.0 if self.tier == "Unified memory" else FIT_HEADROOM)
 
     def bandwidth_for(self, gpu_count: int) -> float:
         """One GPU's peak bandwidth, GB/s, alone or in an 8-GPU server."""
@@ -243,8 +249,7 @@ def needed_gib(single_serving_gib: float, gpu_count: int = 1) -> float:
 
 def fits(hardware: Hardware, single_serving_gib: float, gpu_count: int = 1) -> bool:
     """Whether a model fits one device or an 8-GPU server of it, with FIT_HEADROOM."""
-    return (needed_gib(single_serving_gib, gpu_count)
-            <= hardware.usable_gib * gpu_count * FIT_HEADROOM)
+    return needed_gib(single_serving_gib, gpu_count) <= hardware.fit_gib * gpu_count
 
 
 def decode_tokens_per_s(

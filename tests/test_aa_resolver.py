@@ -546,3 +546,41 @@ class TestLookupAndPrefixMatching:
         lookup["nvidianemotron3ultra550ba55b"]["total_params_b"] = 550.0
         result = resolve_from_aa("nvidia-nemotron-3-ultra-550b-a55b-nvfp4", aa_lookup=lookup)
         assert result["total_params_b"] == 550.0
+
+
+class TestSecondReviewFixes:
+    def test_corrupt_cache_is_reported_before_the_run(self, monkeypatch, tmp_path):
+        path = tmp_path / "aa_params.json"
+        path.write_text("<<<<<<< HEAD")
+        monkeypatch.setattr(aa_resolver, "PARAMS_CACHE_FILE", str(path))
+        with pytest.raises(json.JSONDecodeError):
+            aa_resolver.validate_params_cache()
+
+    @patch("scrapers.aa_resolver.get_model_params")
+    def test_unreadable_guess_does_not_stop_the_others(self, mock_params):
+        params = {"total_params_b": 357.0, "active_params_b": 32.0, "architecture": "moe"}
+        mock_params.side_effect = [AAUnavailable("403"), params]
+        assert resolve_single_from_aa("glm-4.6-thinking") == params
+        assert [c.args[0] for c in mock_params.call_args_list] == ["glm-4.6-thinking", "glm-4.6"]
+
+    @patch("scrapers.aa_resolver.get_model_params", side_effect=AAUnavailable("403"))
+    def test_all_guesses_unreadable_raises(self, mock_params):
+        with pytest.raises(AAUnavailable):
+            resolve_single_from_aa("glm-4.6")
+
+    @patch("scrapers.aa_resolver.get_model_params")
+    def test_longer_aa_name_may_not_add_max(self, mock_params):
+        # Qwen3.8-Max is another model; "GPT-OSS-120B (high)" is the same one
+        lookup = _build_lookup([{"name": "Qwen3.8 Max", "slug": "qwen3-8-max"},
+                                {"name": "GPT-OSS-120B (high)", "slug": "gpt-oss-120b-high"}])
+        assert resolve_from_aa("qwen3.8", aa_lookup=lookup, fetch_params=True) is None
+        mock_params.return_value = {"total_params_b": 117.0, "active_params_b": 5.1,
+                                    "architecture": "moe"}
+        assert resolve_from_aa("gpt-oss-120b", aa_lookup=lookup, fetch_params=True)
+        mock_params.assert_called_once_with("gpt-oss-120b-high")
+
+    def test_names_alike_resolve_the_same_whatever_the_order(self):
+        models = [{"name": "GLM 5.3", "slug": "glm-5-3-a", "isOpenWeights": True},
+                  {"name": "GLM-5.3", "slug": "glm-5-3-b", "isOpenWeights": False}]
+        winners = {_build_lookup(order)["glm53"]["slug"] for order in (models, models[::-1])}
+        assert winners == {"glm-5-3-a"}  # the open-weights one

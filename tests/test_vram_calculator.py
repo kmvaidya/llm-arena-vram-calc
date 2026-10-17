@@ -9,6 +9,7 @@ from vram_calculator import (
     add_all_vram_and_gpu_columns,
     compute_vram_columns,
     decode_tokens_per_s,
+    fits,
     hardware_speed,
     kv_cache_gib,
     node_label,
@@ -155,6 +156,13 @@ class TestHardwareList:
         for hw in HARDWARE:
             if hw.tier == "Unified memory":
                 assert hw.usable_memory_gb < hw.memory_gb
+
+    def test_unified_memory_needs_no_extra_headroom(self):
+        # 48 GiB is already what macOS gives the GPU of a 64 GB Mac
+        mac = _hw("m5_pro_64")
+        assert fits(mac, 48) and not fits(mac, 48.1)
+        h100 = _hw("h100")
+        assert fits(h100, 76) and not fits(h100, 76.1)
 
     def test_hgx_boards_give_less_than_the_package(self):
         assert _hw("b200").usable_memory_gb == 180
