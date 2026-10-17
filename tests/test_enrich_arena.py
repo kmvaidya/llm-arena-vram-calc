@@ -1,7 +1,13 @@
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
-from enrich_arena import resolve_from_name, resolve_from_overrides, resolve_model_params
+from enrich_arena import (
+    check_health,
+    resolve_from_name,
+    resolve_from_overrides,
+    resolve_model_params,
+)
 
 # ── resolve_from_overrides ────────────────────────────────────────────────
 
@@ -192,3 +198,42 @@ class TestResolveModelParams:
         with patch("enrich_arena.resolve_single_from_aa", return_value=None):
             resolve_model_params("m", use_network=True, aa_lookup={"x": {}})
         assert mock_aa.call_args.kwargs["fetch_params"] is True
+
+
+# ── check_health ──────────────────────────────────────────────────────────
+
+def _published(days_ago):
+    return str((datetime.now(UTC) - timedelta(days=days_ago)).date())
+
+
+class TestCheckHealth:
+    def test_healthy_run(self):
+        assert check_health(226, 211, _published(2)) == []
+
+    def test_stalled_leaderboard(self):
+        assert check_health(226, 211, _published(19)) == []
+        [problem] = check_health(226, 211, _published(22))
+        assert "last published 22 days ago" in problem
+
+    def test_too_few_sizes(self):
+        assert check_health(100, 85, None) == []
+        [problem] = check_health(100, 84, None)
+        assert "Only 84 of 100 models (84%)" in problem
+
+    def test_model_list_unreadable(self):
+        [old_copy] = check_health(226, 211, None, aa_list_problem=True, aa_list_age_days=4.2)
+        assert "the last good copy is 4 days old" in old_copy
+        [no_copy] = check_health(226, 211, None, aa_list_problem=True)
+        assert "there is no saved copy" in no_copy
+
+    def test_pages_lost_sizes(self):
+        [problem] = check_health(226, 211, None, lost_sizes=["glm-5-3", "deepseek-v4-pro"])
+        assert "2 Artificial Analysis page(s)" in problem
+        assert "(deepseek-v4-pro, glm-5-3)" in problem
+
+
+@patch("enrich_arena.resolve_from_name", side_effect=KeyError("bug"))
+def test_crashing_strategy_logged_and_skipped(mock_name, caplog):
+    params, source = resolve_model_params("some-model-7b", use_network=False)
+    assert (params, source) == (None, "UNKNOWN")
+    assert "name_parsing resolution crashed for some-model-7b" in caplog.text

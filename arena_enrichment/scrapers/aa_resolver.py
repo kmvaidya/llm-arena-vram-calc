@@ -3,7 +3,8 @@ Resolve model parameter counts from Artificial Analysis.
 
 Fetches the model list from artificialanalysis.ai via the React Server
 Component stream (one HTTP request returns every model's name and slug), and
-caches it locally as JSON so repeated runs avoid hitting the site.
+keeps the last good copy in the repository (data/aa_models.json), so a day
+the list cannot be read still matches names to pages.
 
 Since April 2026 the list no longer carries parameter counts, so those come
 from each model's page (its Technical Specifications table).  Page results
@@ -54,18 +55,23 @@ class AAUnavailable(Exception):
 
 logger = logging.getLogger(__name__)
 
-CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache")
-CACHE_FILE = os.path.join(CACHE_DIR, "aa_models.json")
-DEFAULT_MAX_AGE_HOURS = 24
+# Both caches are committed by the daily job
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+# The model list (names and page slugs)
+CACHE_FILE = os.path.join(DATA_DIR, "aa_models.json")
+DEFAULT_MAX_AGE_HOURS = 20  # under a day, so each daily run reads a fresh list
 
-# Model page results, committed so each run only fetches pages it lacks
-PARAMS_CACHE_FILE = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "data", "aa_params.json"
-)
+# Model page results, so each run only fetches pages it lacks
+PARAMS_CACHE_FILE = os.path.join(DATA_DIR, "aa_params.json")
 # Days before a page is fetched again: sizes rarely change, while a page
 # without them may gain them once AA finishes its write-up
 PARAMS_MAX_AGE_DAYS = 30
 MISSING_PARAMS_MAX_AGE_DAYS = 7
+
+# Pages that showed parameter counts before but not when read again in this
+# run.  Counts do not disappear from a page, so this most likely means the
+# page layout changed; the run's health check reports them
+LOST_SIZES: set[str] = set()
 
 AA_LEADERBOARD_URL = "https://artificialanalysis.ai/leaderboards/models"
 AA_MODEL_BASE_URL = "https://artificialanalysis.ai/models"
@@ -270,16 +276,26 @@ def _load_cache() -> tuple[dict[str, AAEntry] | None, str | None]:
 
 
 def _save_cache(models_dict: dict[str, AAEntry]) -> None:
-    """Persist the processed model lookup dict to disk."""
-    os.makedirs(CACHE_DIR, exist_ok=True)
+    """Persist the processed model lookup dict to disk, sorted so daily diffs stay small."""
+    os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
     data = {
         "fetched_at": datetime.now(UTC).isoformat(),
         "model_count": len(models_dict),
         "models": models_dict,
     }
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=2, sort_keys=True)
+        f.write("\n")
     logger.info(f"Cache saved: {len(models_dict)} models → {CACHE_FILE}")
+
+
+def model_list_age_days() -> float | None:
+    """Days since the saved model list was fetched, or None when there is none."""
+    _, fetched_at = _load_cache()
+    try:
+        return (datetime.now(UTC) - datetime.fromisoformat(fetched_at or "")).total_seconds() / 86400
+    except (ValueError, TypeError):
+        return None
 
 
 def _load_params_cache() -> dict[str, dict[str, Any]]:
@@ -330,6 +346,8 @@ def get_model_params(slug: str) -> ModelParams | None:
     PARAMS_MAX_AGE_DAYS (MISSING_PARAMS_MAX_AGE_DAYS when the page had no
     parameter count).  If the page cannot be read, an expired count is still
     better than none and is returned; without one, AAUnavailable is raised.
+    A page that no longer shows counts it showed before keeps them too (see
+    LOST_SIZES).
     """
     cache = _load_params_cache()
     hit = cache.get(slug)
@@ -345,6 +363,13 @@ def get_model_params(slug: str) -> ModelParams | None:
         if hit is not None and hit.get("total_params_b") is not None:
             return _params_from_cache_entry(hit)
         raise
+
+    if params is None and hit is not None and hit.get("total_params_b") is not None:
+        # The entry stays expired, so every run checks the page again and
+        # reports it until the reader is fixed
+        logger.warning(f"AA page {slug} no longer shows parameter counts; keeping the cached ones")
+        LOST_SIZES.add(slug)
+        return _params_from_cache_entry(hit)
 
     cache[slug] = {
         "total_params_b": params["total_params_b"] if params else None,

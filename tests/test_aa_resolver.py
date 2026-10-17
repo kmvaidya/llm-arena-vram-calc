@@ -341,6 +341,15 @@ class TestGetModelParams:
         assert get_model_params("m") is None
         mock_fetch.assert_called_once_with("m")
 
+    @patch("scrapers.aa_resolver._fetch_single_model", return_value=None)
+    def test_page_that_lost_its_sizes_keeps_them(self, mock_fetch, params_cache, monkeypatch):
+        monkeypatch.setattr(aa_resolver, "LOST_SIZES", set())
+        self._write(params_cache, "m", _days_ago(31), self.PARAMS)
+        assert get_model_params("m") == self.PARAMS
+        assert {"m"} == aa_resolver.LOST_SIZES
+        # Left expired, so the next run reads the page again
+        assert json.loads(params_cache.read_text())["m"]["checked"] == _days_ago(31)
+
     @patch("scrapers.aa_resolver._fetch_single_model", side_effect=AAUnavailable("down"))
     def test_outage_keeps_expired_params(self, mock_fetch, params_cache):
         self._write(params_cache, "m", _days_ago(90), self.PARAMS)
@@ -444,3 +453,29 @@ class TestReverseMatching:
 
     def test_key_merely_containing_arena_name_does_not(self):
         assert resolve_from_aa("glm-4.5-air", aa_lookup=self._lookup()) is None
+
+
+class TestModelListCache:
+    @pytest.fixture
+    def list_cache(self, monkeypatch, tmp_path):
+        path = tmp_path / "aa_models.json"
+        monkeypatch.setattr(aa_resolver, "CACHE_FILE", str(path))
+        return path
+
+    def test_saved_sorted_with_age(self, list_cache):
+        lookup = _build_lookup([{"name": "Zeta 1", "slug": "zeta-1"},
+                                {"name": "Alpha 2", "slug": "alpha-2"}])
+        aa_resolver._save_cache(lookup)
+        keys = list(json.loads(list_cache.read_text())["models"])
+        assert keys == sorted(keys)
+        assert aa_resolver.model_list_age_days() < 0.01
+
+    def test_age_without_list(self, list_cache):
+        assert aa_resolver.model_list_age_days() is None
+
+    @patch("scrapers.aa_resolver._fetch_all_via_rsc", return_value=[])
+    def test_failed_fetch_falls_back_to_saved_list(self, mock_fetch, list_cache):
+        aa_resolver._save_cache(_build_lookup([{"name": "GLM-5.3", "slug": "glm-5-3"}]))
+        lookup, stale = aa_resolver.get_aa_models(force_refresh=True)
+        assert stale
+        assert lookup["glm53"]["slug"] == "glm-5-3"

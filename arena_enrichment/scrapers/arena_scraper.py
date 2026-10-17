@@ -20,6 +20,7 @@ from __future__ import annotations
 import io
 import logging
 import re
+import time
 from typing import Any
 
 import pandas as pd
@@ -33,6 +34,10 @@ HF_DATASET_URL = (
     "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset/resolve/main/"
     "text_style_control/latest-00000-of-00001.parquet"
 )
+
+# Seconds to wait before each retry of a failed download: a passing outage
+# should not fail the daily run
+DOWNLOAD_RETRY_DELAYS = (10, 30)
 
 # Dataset columns this module reads
 HF_COLUMNS = [
@@ -83,18 +88,12 @@ def _fetch_hf_leaderboard() -> pd.DataFrame | None:
     The dataset ranks all models together, so we re-rank the open-source ones
     sequentially, best rating first, as arena.ai does for its license filter.
     """
-    try:
-        logger.info(f"Fetching {HF_DATASET_URL}")
-        resp = requests.get(HF_DATASET_URL, timeout=60)
-        if resp.status_code != 200:
-            logger.warning(f"Hugging Face returned status {resp.status_code}")
-            return None
-    except requests.RequestException as e:
-        logger.warning(f"Failed to fetch the leaderboard dataset: {e}")
+    content = _download(HF_DATASET_URL)
+    if content is None:
         return None
 
     try:
-        data = pd.read_parquet(io.BytesIO(resp.content))
+        data = pd.read_parquet(io.BytesIO(content))
     except (ValueError, OSError) as e:
         logger.warning(f"Failed to read the leaderboard dataset: {e}")
         return None
@@ -131,6 +130,26 @@ def _fetch_hf_leaderboard() -> pd.DataFrame | None:
     df.attrs["leaderboard_date"] = str(published) if pd.notna(published) else None
     logger.info(f"Built DataFrame with {len(df)} open-source models")
     return df
+
+
+def _download(url: str) -> bytes | None:
+    """The file at url, retrying network errors, rate limits and server errors."""
+    for delay in (0, *DOWNLOAD_RETRY_DELAYS):
+        if delay:
+            logger.info(f"Retrying in {delay} s")
+            time.sleep(delay)
+        try:
+            logger.info(f"Fetching {url}")
+            resp = requests.get(url, timeout=60)
+        except requests.RequestException as e:
+            logger.warning(f"Failed to fetch the leaderboard dataset: {e}")
+            continue
+        if resp.status_code == 200:
+            return resp.content
+        logger.warning(f"Hugging Face returned status {resp.status_code}")
+        if resp.status_code != 429 and resp.status_code < 500:
+            return None
+    return None
 
 
 # ---------------------------------------------------------------------------

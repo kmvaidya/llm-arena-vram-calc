@@ -19,6 +19,7 @@ import argparse
 import logging
 import os
 import re
+import statistics
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -34,7 +35,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from known_models import MODEL_OVERRIDES
 from measurements import MEASUREMENTS
+from scrapers import aa_resolver
 from scrapers.aa_resolver import (
+    AAUnavailable,
     ModelParams,
     get_aa_models,
     resolve_from_aa,
@@ -81,8 +84,13 @@ REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 # Number of models to show directly in README (rest goes in <details>)
 README_TOP_N = 50
 
-# Arena publishes every few days; older data means the source has stalled
-LEADERBOARD_STALE_DAYS = 14
+# Arena publishes every few days, and has gone up to 19 days between
+# publications (2024-08 to 2026-10); older data means the source has stalled
+LEADERBOARD_STALE_DAYS = 21
+# Health checks: the daily run still publishes when one fails, and the
+# workflow opens an issue listing the problems
+MIN_RESOLVED_SHARE = 0.85      # models with parameter counts, ~93% in 2026-10
+AA_LIST_MAX_AGE_DAYS = 3       # an outage of a day or two is not worth an issue
 
 
 # ---------------------------------------------------------------------------
@@ -254,8 +262,12 @@ def resolve_model_params(model_name: str, use_network: bool = True, aa_lookup: d
     for source, strategy in strategies:
         try:
             result = strategy()
-        except Exception as e:
+        except AAUnavailable as e:
             logger.debug(f"{source} resolution failed for {model_name}: {e}")
+            continue
+        except Exception:
+            # A bug or an unexpected page, not an outage: say so in the log
+            logger.warning(f"{source} resolution crashed for {model_name}", exc_info=True)
             continue
         if not result:
             continue
@@ -489,8 +501,8 @@ def _speed_accuracy() -> tuple[list[tuple[Any, float]], float, float]:
                                 m.bandwidth_gbs, m.platform, m.gpu_count))
         for m in MEASUREMENTS
     ]
-    errors = sorted(abs(estimate / m.tokens_per_s - 1) for m, estimate in pairs)
-    median = errors[len(errors) // 2] if len(errors) % 2 else sum(errors[len(errors) // 2 - 1:len(errors) // 2 + 1]) / 2
+    errors = [abs(estimate / m.tokens_per_s - 1) for m, estimate in pairs]
+    median = statistics.median(errors)
     within_20 = sum(e <= 0.2 for e in errors) / len(errors)
     return pairs, median, within_20
 
@@ -938,6 +950,56 @@ def print_console_summary(df: pd.DataFrame, resolution_counts: dict[str, int]) -
 # Main pipeline
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
+
+def check_health(
+    total: int,
+    resolved: int,
+    leaderboard_date: str | None,
+    aa_list_problem: bool = False,
+    aa_list_age_days: float | None = None,
+    lost_sizes: list[str] | None = None,
+) -> list[str]:
+    """
+    What is wrong with this run's data, in plain words with where to look.
+
+    The run publishes regardless, on the last good data where a source
+    failed; the daily workflow turns a non-empty list into an issue.
+    """
+    problems = []
+    data_age = _days_since(leaderboard_date)
+    if data_age is not None and data_age > LEADERBOARD_STALE_DAYS:
+        problems.append(
+            f"The Arena leaderboard was last published {data_age} days ago ({leaderboard_date}). "
+            "Check that Arena still updates the Hugging Face dataset lmarena-ai/leaderboard-dataset "
+            "read by `arena_enrichment/scrapers/arena_scraper.py`."
+        )
+    if aa_list_problem:
+        copy = (f"the last good copy is {aa_list_age_days:.0f} days old"
+                if aa_list_age_days is not None else "there is no saved copy")
+        problems.append(
+            f"The Artificial Analysis model list could not be read, and {copy}. Check "
+            "`_extract_models_from_rsc` in `arena_enrichment/scrapers/aa_resolver.py` against "
+            "https://artificialanalysis.ai/leaderboards/models."
+        )
+    if total and resolved / total < MIN_RESOLVED_SHARE:
+        problems.append(
+            f"Only {resolved} of {total} models ({resolved / total:.0%}) have parameter counts, "
+            f"below the {MIN_RESOLVED_SHARE:.0%} minimum. The run log lists the unresolved models; "
+            "add their sizes to `arena_enrichment/known_models.py`."
+        )
+    if lost_sizes:
+        problems.append(
+            f"{len(lost_sizes)} Artificial Analysis page(s) no longer show parameter counts "
+            f"({', '.join(sorted(lost_sizes))}); the cached counts are used meanwhile. If several "
+            "pages are affected, the page layout changed: check `_fetch_single_model` in "
+            "`arena_enrichment/scrapers/aa_resolver.py`."
+        )
+    return problems
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Enrich Arena.ai leaderboard with VRAM estimates"
@@ -967,6 +1029,12 @@ def main() -> None:
         help="Output directory (default: arena_enrichment/output/)",
         default=OUTPUT_DIR,
     )
+    parser.add_argument(
+        "--health-file",
+        help="Write the run's health problems here, one Markdown list item each "
+             "(empty when healthy)",
+        default=None,
+    )
     args = parser.parse_args()
 
     # Step 1: Get the leaderboard data
@@ -991,7 +1059,8 @@ def main() -> None:
 
     # Pre-load AA model cache (one network request, or from disk)
     aa_lookup = None
-    aa_is_stale = False
+    aa_list_problem = False
+    aa_list_age = None
     if use_network:
         print("  Loading Artificial Analysis model database...")
         aa_lookup, aa_is_stale = get_aa_models(force_refresh=args.refresh_cache)
@@ -999,6 +1068,8 @@ def main() -> None:
         if aa_is_stale:
             fallback = "using the last cached list" if aa_lookup else "no cached list either"
             print(f"  WARNING: AA model list fetch failed, {fallback}")
+            aa_list_age = aa_resolver.model_list_age_days() if aa_lookup else None
+            aa_list_problem = aa_list_age is None or aa_list_age > AA_LIST_MAX_AGE_DAYS
 
     resolution_log: list[dict[str, Any]] = []
     resolution_counts: dict[str, int] = {}
@@ -1057,7 +1128,7 @@ def main() -> None:
     if args.update_readme:
         print("\nStep 5: Updating README.md...")
         readme_content = generate_readme(
-            df, resolution_counts, aa_is_stale=aa_is_stale, leaderboard_date=leaderboard_date
+            df, resolution_counts, aa_is_stale=aa_list_problem, leaderboard_date=leaderboard_date
         )
         readme_path = os.path.join(REPO_ROOT, "README.md")
         with open(readme_path, "w", encoding="utf-8") as f:
@@ -1073,6 +1144,20 @@ def main() -> None:
         print(f"Unresolved models ({len(unresolved)}):")
         for r in unresolved:
             print(f"  - {r['model_name']}")
+
+    problems = check_health(
+        total=len(df),
+        resolved=len(df) - len(unresolved),
+        leaderboard_date=leaderboard_date,
+        aa_list_problem=aa_list_problem,
+        aa_list_age_days=aa_list_age,
+        lost_sizes=sorted(aa_resolver.LOST_SIZES),
+    )
+    for problem in problems:
+        print(f"HEALTH: {problem}")
+    if args.health_file:
+        with open(args.health_file, "w", encoding="utf-8") as f:
+            f.writelines(f"- {problem}\n" for problem in problems)
 
 
 if __name__ == "__main__":

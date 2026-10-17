@@ -4,11 +4,17 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 import requests
+from scrapers import arena_scraper
 from scrapers.arena_scraper import (
     EXPECTED_COLUMNS,
     _fetch_hf_leaderboard,
     scrape_arena_leaderboard,
 )
+
+
+@pytest.fixture(autouse=True)
+def no_retry_wait(monkeypatch):
+    monkeypatch.setattr(arena_scraper.time, "sleep", lambda seconds: None)
 
 
 def _row(name, rating, license="MIT", category="overall", votes=1000.0):
@@ -85,6 +91,26 @@ class TestFetchHfLeaderboard:
            side_effect=requests.ConnectionError("network down"))
     def test_request_exception_returns_none(self, mock_get):
         assert _fetch_hf_leaderboard() is None
+
+    @patch("scrapers.arena_scraper.requests.get")
+    def test_server_error_retried(self, mock_get):
+        mock_get.side_effect = [_response(status_code=503), requests.ConnectionError("reset"),
+                                _response(_parquet(SAMPLE_ROWS))]
+        df = _fetch_hf_leaderboard()
+        assert list(df["model_name"]) == ["open-first", "open-second"]
+        assert mock_get.call_count == 3
+
+    @patch("scrapers.arena_scraper.requests.get")
+    def test_gives_up_after_retries(self, mock_get):
+        mock_get.return_value = _response(status_code=429)
+        assert _fetch_hf_leaderboard() is None
+        assert mock_get.call_count == 1 + len(arena_scraper.DOWNLOAD_RETRY_DELAYS)
+
+    @patch("scrapers.arena_scraper.requests.get")
+    def test_missing_file_not_retried(self, mock_get):
+        mock_get.return_value = _response(status_code=404)
+        assert _fetch_hf_leaderboard() is None
+        assert mock_get.call_count == 1
 
     @patch("scrapers.arena_scraper.requests.get")
     def test_unreadable_file_returns_none(self, mock_get):

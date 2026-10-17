@@ -1,0 +1,3354 @@
+{
+  "fetched_at": "2026-10-17T19:43:31.715865+00:00",
+  "model_count": 372,
+  "models": {
+    "agnes25probeta": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Agnes 2.5 Pro Beta",
+      "slug": "agnes-2-5-pro-beta",
+      "total_params_b": null
+    },
+    "apertus70binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Apertus 70B Instruct",
+      "slug": "apertus-70b-instruct",
+      "total_params_b": null
+    },
+    "apertus8binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Apertus 8B Instruct",
+      "slug": "apertus-8b-instruct",
+      "total_params_b": null
+    },
+    "apodex11": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Apodex 1.1",
+      "slug": "apodex-1-1",
+      "total_params_b": null
+    },
+    "aprielv1615bthinker": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Apriel-v1.6-15B-Thinker",
+      "slug": "apriel-v1-6-15b-thinker",
+      "total_params_b": null
+    },
+    "axk2": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "A.X-K2",
+      "slug": "a-x-k2",
+      "total_params_b": null
+    },
+    "beam10": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Beam 1.0",
+      "slug": "reflection-beam",
+      "total_params_b": null
+    },
+    "celeris1": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": false,
+      "name": "Celeris-1",
+      "slug": "celeris-1",
+      "total_params_b": null
+    },
+    "claudefable51": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Max, Default Fallback)",
+      "slug": "claude-fable-5-1",
+      "total_params_b": null
+    },
+    "claudefable51high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (High, Default Fallback)",
+      "slug": "claude-fable-5-1-high",
+      "total_params_b": null
+    },
+    "claudefable51high,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (High, Default Fallback)",
+      "slug": "claude-fable-5-1-high",
+      "total_params_b": null
+    },
+    "claudefable51low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Low, Default Fallback)",
+      "slug": "claude-fable-5-1-low",
+      "total_params_b": null
+    },
+    "claudefable51low,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Low, Default Fallback)",
+      "slug": "claude-fable-5-1-low",
+      "total_params_b": null
+    },
+    "claudefable51max,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Max, Default Fallback)",
+      "slug": "claude-fable-5-1",
+      "total_params_b": null
+    },
+    "claudefable51medium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Medium, Default Fallback)",
+      "slug": "claude-fable-5-1-medium",
+      "total_params_b": null
+    },
+    "claudefable51medium,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Medium, Default Fallback)",
+      "slug": "claude-fable-5-1-medium",
+      "total_params_b": null
+    },
+    "claudefable51xhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Xhigh, Default Fallback)",
+      "slug": "claude-fable-5-1-xhigh",
+      "total_params_b": null
+    },
+    "claudefable51xhigh,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Fable 5.1 (Xhigh, Default Fallback)",
+      "slug": "claude-fable-5-1-xhigh",
+      "total_params_b": null
+    },
+    "claudehaiku55": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Haiku 5.5 (Max)",
+      "slug": "claude-haiku-5-5",
+      "total_params_b": null
+    },
+    "claudehaiku55high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Haiku 5.5 (High)",
+      "slug": "claude-haiku-5-5-high",
+      "total_params_b": null
+    },
+    "claudehaiku55low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Haiku 5.5 (Low)",
+      "slug": "claude-haiku-5-5-low",
+      "total_params_b": null
+    },
+    "claudehaiku55max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Haiku 5.5 (Max)",
+      "slug": "claude-haiku-5-5",
+      "total_params_b": null
+    },
+    "claudehaiku55medium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Haiku 5.5 (Medium)",
+      "slug": "claude-haiku-5-5-medium",
+      "total_params_b": null
+    },
+    "claudehaiku55xhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Haiku 5.5 (Xhigh)",
+      "slug": "claude-haiku-5-5-xhigh",
+      "total_params_b": null
+    },
+    "claudeopus55": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Max, Default Fallback)",
+      "slug": "claude-opus-5-5",
+      "total_params_b": null
+    },
+    "claudeopus55high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (High, Default Fallback)",
+      "slug": "claude-opus-5-5-high",
+      "total_params_b": null
+    },
+    "claudeopus55high,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (High, Default Fallback)",
+      "slug": "claude-opus-5-5-high",
+      "total_params_b": null
+    },
+    "claudeopus55low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Low, Default Fallback)",
+      "slug": "claude-opus-5-5-low",
+      "total_params_b": null
+    },
+    "claudeopus55low,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Low, Default Fallback)",
+      "slug": "claude-opus-5-5-low",
+      "total_params_b": null
+    },
+    "claudeopus55max,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Max, Default Fallback)",
+      "slug": "claude-opus-5-5",
+      "total_params_b": null
+    },
+    "claudeopus55medium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Medium, Default Fallback)",
+      "slug": "claude-opus-5-5-medium",
+      "total_params_b": null
+    },
+    "claudeopus55medium,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Medium, Default Fallback)",
+      "slug": "claude-opus-5-5-medium",
+      "total_params_b": null
+    },
+    "claudeopus55xhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Xhigh, Default Fallback)",
+      "slug": "claude-opus-5-5-xhigh",
+      "total_params_b": null
+    },
+    "claudeopus55xhigh,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Opus 5.5 (Xhigh, Default Fallback)",
+      "slug": "claude-opus-5-5-xhigh",
+      "total_params_b": null
+    },
+    "claudesonnet55": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Max, Default Fallback)",
+      "slug": "claude-sonnet-5-5",
+      "total_params_b": null
+    },
+    "claudesonnet55high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (High, Default Fallback)",
+      "slug": "claude-sonnet-5-5-high",
+      "total_params_b": null
+    },
+    "claudesonnet55high,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (High, Default Fallback)",
+      "slug": "claude-sonnet-5-5-high",
+      "total_params_b": null
+    },
+    "claudesonnet55low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Low, Default Fallback)",
+      "slug": "claude-sonnet-5-5-low",
+      "total_params_b": null
+    },
+    "claudesonnet55low,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Low, Default Fallback)",
+      "slug": "claude-sonnet-5-5-low",
+      "total_params_b": null
+    },
+    "claudesonnet55max,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Max, Default Fallback)",
+      "slug": "claude-sonnet-5-5",
+      "total_params_b": null
+    },
+    "claudesonnet55medium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Medium, Default Fallback)",
+      "slug": "claude-sonnet-5-5-medium",
+      "total_params_b": null
+    },
+    "claudesonnet55medium,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Medium, Default Fallback)",
+      "slug": "claude-sonnet-5-5-medium",
+      "total_params_b": null
+    },
+    "claudesonnet55xhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Xhigh, Default Fallback)",
+      "slug": "claude-sonnet-5-5-xhigh",
+      "total_params_b": null
+    },
+    "claudesonnet55xhigh,defaultfallback": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Claude Sonnet 5.5 (Xhigh, Default Fallback)",
+      "slug": "claude-sonnet-5-5-xhigh",
+      "total_params_b": null
+    },
+    "cogitov21reasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Cogito v2.1 (Reasoning)",
+      "slug": "cogito-v2-1-reasoning",
+      "total_params_b": null
+    },
+    "commanda": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Command A",
+      "slug": "command-a",
+      "total_params_b": null
+    },
+    "commanda+": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 192000,
+      "is_open_weights": true,
+      "name": "Command A+",
+      "slug": "command-a-plus",
+      "total_params_b": null
+    },
+    "commandaplus": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 192000,
+      "is_open_weights": true,
+      "name": "Command A+",
+      "slug": "command-a-plus",
+      "total_params_b": null
+    },
+    "deephermes3llama318bpreview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "DeepHermes 3 - Llama-3.1 8B Preview (Non-reasoning)",
+      "slug": "deephermes-3-llama-3-1-8b-preview",
+      "total_params_b": null
+    },
+    "deephermes3llama318bpreviewnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "DeepHermes 3 - Llama-3.1 8B Preview (Non-reasoning)",
+      "slug": "deephermes-3-llama-3-1-8b-preview",
+      "total_params_b": null
+    },
+    "deephermes3mistral24bpreview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "DeepHermes 3 - Mistral 24B Preview (Non-reasoning)",
+      "slug": "deephermes-3-mistral-24b-preview",
+      "total_params_b": null
+    },
+    "deephermes3mistral24bpreviewnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "DeepHermes 3 - Mistral 24B Preview (Non-reasoning)",
+      "slug": "deephermes-3-mistral-24b-preview",
+      "total_params_b": null
+    },
+    "deepseekv41flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4.1 Flash (Max)",
+      "slug": "deepseek-v4-1-flash",
+      "total_params_b": null
+    },
+    "deepseekv41flashmax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4.1 Flash (Max)",
+      "slug": "deepseek-v4-1-flash",
+      "total_params_b": null
+    },
+    "deepseekv41flashnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4.1 Flash (Non-reasoning)",
+      "slug": "deepseek-v4-1-flash-non-reasoning",
+      "total_params_b": null
+    },
+    "deepseekv4flashvision": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "DeepSeek V4 Flash Vision (Max)",
+      "slug": "deepseek-v4-flash-vision",
+      "total_params_b": null
+    },
+    "deepseekv4flashvisionmax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "DeepSeek V4 Flash Vision (Max)",
+      "slug": "deepseek-v4-flash-vision",
+      "total_params_b": null
+    },
+    "deepseekv4pro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4 Pro 0813 (Max)",
+      "slug": "deepseek-v4-pro",
+      "total_params_b": null
+    },
+    "deepseekv4pro0813max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4 Pro 0813 (Max)",
+      "slug": "deepseek-v4-pro",
+      "total_params_b": null
+    },
+    "deepseekv4pro0813nonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4 Pro 0813 (Non-reasoning)",
+      "slug": "deepseek-v4-pro-non-reasoning",
+      "total_params_b": null
+    },
+    "deepseekv4prononreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4 Pro 0813 (Non-reasoning)",
+      "slug": "deepseek-v4-pro-non-reasoning",
+      "total_params_b": null
+    },
+    "diffusiongemma26ba4b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "DiffusionGemma 26B A4B",
+      "slug": "diffusiongemma-26b-a4b",
+      "total_params_b": null
+    },
+    "doubaoseedcode": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Doubao Seed Code",
+      "slug": "doubao-seed-code",
+      "total_params_b": null
+    },
+    "ernie45300ba47b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "ERNIE 4.5 300B A47B",
+      "slug": "ernie-4-5-300b-a47b",
+      "total_params_b": null
+    },
+    "ernie50thinkingpreview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "ERNIE 5.0 Thinking Preview",
+      "slug": "ernie-5-0-thinking-preview",
+      "total_params_b": null
+    },
+    "exaone4012b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 64000,
+      "is_open_weights": true,
+      "name": "Exaone 4.0 1.2B (Non-reasoning)",
+      "slug": "exaone-4-0-1-2b",
+      "total_params_b": null
+    },
+    "exaone4012bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 64000,
+      "is_open_weights": true,
+      "name": "Exaone 4.0 1.2B (Non-reasoning)",
+      "slug": "exaone-4-0-1-2b",
+      "total_params_b": null
+    },
+    "exaone4012breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 64000,
+      "is_open_weights": true,
+      "name": "Exaone 4.0 1.2B (Reasoning)",
+      "slug": "exaone-4-0-1-2b-reasoning",
+      "total_params_b": null
+    },
+    "exaone4032b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131000,
+      "is_open_weights": true,
+      "name": "EXAONE 4.0 32B (Non-reasoning)",
+      "slug": "exaone-4-0-32b",
+      "total_params_b": null
+    },
+    "exaone4032bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131000,
+      "is_open_weights": true,
+      "name": "EXAONE 4.0 32B (Non-reasoning)",
+      "slug": "exaone-4-0-32b",
+      "total_params_b": null
+    },
+    "exaone4032breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131000,
+      "is_open_weights": true,
+      "name": "EXAONE 4.0 32B (Reasoning)",
+      "slug": "exaone-4-0-32b-reasoning",
+      "total_params_b": null
+    },
+    "exaone4533b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "EXAONE 4.5 33B (Reasoning)",
+      "slug": "exaone-4-5-33b",
+      "total_params_b": null
+    },
+    "exaone4533bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "EXAONE 4.5 33B (Non-reasoning)",
+      "slug": "exaone-4-5-33b-non-reasoning",
+      "total_params_b": null
+    },
+    "exaone4533breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "EXAONE 4.5 33B (Reasoning)",
+      "slug": "exaone-4-5-33b",
+      "total_params_b": null
+    },
+    "falconh1r7b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Falcon-H1R-7B",
+      "slug": "falcon-h1r-7b",
+      "total_params_b": null
+    },
+    "g9v339a5b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "G9v3-39A5B",
+      "slug": "g9v3-39a5b",
+      "total_params_b": null
+    },
+    "g9v33b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "G9v3-3B",
+      "slug": "g9v3-3b",
+      "total_params_b": null
+    },
+    "gemini31propreview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 3.1 Pro Preview",
+      "slug": "gemini-3-1-pro-preview",
+      "total_params_b": null
+    },
+    "gemini35flashlite": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 3.5 Flash-Lite",
+      "slug": "gemini-3-5-flash-lite",
+      "total_params_b": null
+    },
+    "gemini38flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 3.8 Flash (High)",
+      "slug": "gemini-3-8-flash",
+      "total_params_b": null
+    },
+    "gemini38flashhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 3.8 Flash (High)",
+      "slug": "gemini-3-8-flash",
+      "total_params_b": null
+    },
+    "gemini38flashlow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 3.8 Flash (Low)",
+      "slug": "gemini-3-8-flash-low",
+      "total_params_b": null
+    },
+    "gemini38flashmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 3.8 Flash (Medium)",
+      "slug": "gemini-3-8-flash-medium",
+      "total_params_b": null
+    },
+    "gemini3deepthink": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Gemini 3 Deep Think",
+      "slug": "gemini-3-deep-think",
+      "total_params_b": null
+    },
+    "gemini4argon": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Argon (High)",
+      "slug": "gemini-4-argon",
+      "total_params_b": null
+    },
+    "gemini4argonhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Argon (High)",
+      "slug": "gemini-4-argon",
+      "total_params_b": null
+    },
+    "gemma3270m": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "Gemma 3 270M",
+      "slug": "gemma-3-270m",
+      "total_params_b": null
+    },
+    "gemma412b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Gemma 4 12B (Reasoning)",
+      "slug": "gemma-4-12b",
+      "total_params_b": null
+    },
+    "gemma412bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Gemma 4 12B (Non-reasoning)",
+      "slug": "gemma-4-12b-non-reasoning",
+      "total_params_b": null
+    },
+    "gemma412breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Gemma 4 12B (Reasoning)",
+      "slug": "gemma-4-12b",
+      "total_params_b": null
+    },
+    "gemma426ba4b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Gemma 4 26B A4B (Reasoning)",
+      "slug": "gemma-4-26b-a4b",
+      "total_params_b": null
+    },
+    "gemma426ba4bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Gemma 4 26B A4B (Non-reasoning)",
+      "slug": "gemma-4-26b-a4b-non-reasoning",
+      "total_params_b": null
+    },
+    "gemma426ba4breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Gemma 4 26B A4B (Reasoning)",
+      "slug": "gemma-4-26b-a4b",
+      "total_params_b": null
+    },
+    "gemma431b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Gemma 4 31B (Reasoning)",
+      "slug": "gemma-4-31b",
+      "total_params_b": null
+    },
+    "gemma431bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Gemma 4 31B (Non-reasoning)",
+      "slug": "gemma-4-31b-non-reasoning",
+      "total_params_b": null
+    },
+    "gemma431breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Gemma 4 31B (Reasoning)",
+      "slug": "gemma-4-31b",
+      "total_params_b": null
+    },
+    "gemma4e2b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Gemma 4 E2B (Reasoning)",
+      "slug": "gemma-4-e2b",
+      "total_params_b": null
+    },
+    "gemma4e2bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Gemma 4 E2B (Non-reasoning)",
+      "slug": "gemma-4-e2b-non-reasoning",
+      "total_params_b": null
+    },
+    "gemma4e2breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Gemma 4 E2B (Reasoning)",
+      "slug": "gemma-4-e2b",
+      "total_params_b": null
+    },
+    "gemma4e4b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Gemma 4 E4B (Reasoning)",
+      "slug": "gemma-4-e4b",
+      "total_params_b": null
+    },
+    "gemma4e4bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Gemma 4 E4B (Non-reasoning)",
+      "slug": "gemma-4-e4b-non-reasoning",
+      "total_params_b": null
+    },
+    "gemma4e4breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Gemma 4 E4B (Reasoning)",
+      "slug": "gemma-4-e4b",
+      "total_params_b": null
+    },
+    "glm53": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "GLM-5.3 (Max)",
+      "slug": "glm-5-3",
+      "total_params_b": null
+    },
+    "glm53flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "GLM-5.3-Flash",
+      "slug": "glm-5-3-flash",
+      "total_params_b": null
+    },
+    "glm53low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "GLM-5.3 (Low)",
+      "slug": "glm-5-3-low",
+      "total_params_b": null
+    },
+    "glm53max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "GLM-5.3 (Max)",
+      "slug": "glm-5-3",
+      "total_params_b": null
+    },
+    "gpt53codex": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 400000,
+      "is_open_weights": false,
+      "name": "GPT-5.3 Codex (Xhigh)",
+      "slug": "gpt-5-3-codex",
+      "total_params_b": null
+    },
+    "gpt53codexxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 400000,
+      "is_open_weights": false,
+      "name": "GPT-5.3 Codex (Xhigh)",
+      "slug": "gpt-5-3-codex",
+      "total_params_b": null
+    },
+    "gpt55instant0626": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 400000,
+      "is_open_weights": false,
+      "name": "GPT-5.5 Instant (June 2026)",
+      "slug": "gpt-5-5-instant-06-26",
+      "total_params_b": null
+    },
+    "gpt55instantjune2026": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 400000,
+      "is_open_weights": false,
+      "name": "GPT-5.5 Instant (June 2026)",
+      "slug": "gpt-5-5-instant-06-26",
+      "total_params_b": null
+    },
+    "gpt55pro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 922000,
+      "is_open_weights": false,
+      "name": "GPT-5.5 Pro (Xhigh)",
+      "slug": "gpt-5-5-pro",
+      "total_params_b": null
+    },
+    "gpt55proxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 922000,
+      "is_open_weights": false,
+      "name": "GPT-5.5 Pro (Xhigh)",
+      "slug": "gpt-5-5-pro",
+      "total_params_b": null
+    },
+    "gpt56terra": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (Max)",
+      "slug": "gpt-5-6-terra",
+      "total_params_b": null
+    },
+    "gpt56terrahigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (High)",
+      "slug": "gpt-5-6-terra-high",
+      "total_params_b": null
+    },
+    "gpt56terralow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (Low)",
+      "slug": "gpt-5-6-terra-low",
+      "total_params_b": null
+    },
+    "gpt56terramax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (Max)",
+      "slug": "gpt-5-6-terra",
+      "total_params_b": null
+    },
+    "gpt56terramedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (Medium)",
+      "slug": "gpt-5-6-terra-medium",
+      "total_params_b": null
+    },
+    "gpt56terranonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (Non-reasoning)",
+      "slug": "gpt-5-6-terra-non-reasoning",
+      "total_params_b": null
+    },
+    "gpt56terraxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-5.6 Terra (Xhigh)",
+      "slug": "gpt-5-6-terra-xhigh",
+      "total_params_b": null
+    },
+    "gpt61sol": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Sol (Max)",
+      "slug": "gpt-6-1-sol",
+      "total_params_b": null
+    },
+    "gpt61solhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Sol (High)",
+      "slug": "gpt-6-1-sol-high",
+      "total_params_b": null
+    },
+    "gpt61sollow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Sol (Low)",
+      "slug": "gpt-6-1-sol-low",
+      "total_params_b": null
+    },
+    "gpt61solmax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Sol (Max)",
+      "slug": "gpt-6-1-sol",
+      "total_params_b": null
+    },
+    "gpt61solmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Sol (Medium)",
+      "slug": "gpt-6-1-sol-medium",
+      "total_params_b": null
+    },
+    "gpt61solxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Sol (Xhigh)",
+      "slug": "gpt-6-1-sol-xhigh",
+      "total_params_b": null
+    },
+    "gpt6astra": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Astra (Max)",
+      "slug": "gpt-6-astra",
+      "total_params_b": null
+    },
+    "gpt6astrahigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Astra (High)",
+      "slug": "gpt-6-astra-high",
+      "total_params_b": null
+    },
+    "gpt6astralow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Astra (Low)",
+      "slug": "gpt-6-astra-low",
+      "total_params_b": null
+    },
+    "gpt6astramax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Astra (Max)",
+      "slug": "gpt-6-astra",
+      "total_params_b": null
+    },
+    "gpt6astramedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Astra (Medium)",
+      "slug": "gpt-6-astra-medium",
+      "total_params_b": null
+    },
+    "gpt6astraxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Astra (Xhigh)",
+      "slug": "gpt-6-astra-xhigh",
+      "total_params_b": null
+    },
+    "gpt6luna": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (Max)",
+      "slug": "gpt-6-luna",
+      "total_params_b": null
+    },
+    "gpt6lunahigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (High)",
+      "slug": "gpt-6-luna-high",
+      "total_params_b": null
+    },
+    "gpt6lunalow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (Low)",
+      "slug": "gpt-6-luna-low",
+      "total_params_b": null
+    },
+    "gpt6lunamax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (Max)",
+      "slug": "gpt-6-luna",
+      "total_params_b": null
+    },
+    "gpt6lunamedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (Medium)",
+      "slug": "gpt-6-luna-medium",
+      "total_params_b": null
+    },
+    "gpt6lunanonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (Non-reasoning)",
+      "slug": "gpt-6-luna-non-reasoning",
+      "total_params_b": null
+    },
+    "gpt6lunaxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6 Luna (Xhigh)",
+      "slug": "gpt-6-luna-xhigh",
+      "total_params_b": null
+    },
+    "gpt6soldaybreakblue": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1050000,
+      "is_open_weights": false,
+      "name": "GPT-6 Sol (Daybreak Blue, max)",
+      "slug": "gpt-6-sol-daybreak-blue",
+      "total_params_b": null
+    },
+    "gpt6soldaybreakblue,max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1050000,
+      "is_open_weights": false,
+      "name": "GPT-6 Sol (Daybreak Blue, max)",
+      "slug": "gpt-6-sol-daybreak-blue",
+      "total_params_b": null
+    },
+    "gptoss120b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "gpt-oss-120b (High)",
+      "slug": "gpt-oss-120b",
+      "total_params_b": null
+    },
+    "gptoss120bhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "gpt-oss-120b (High)",
+      "slug": "gpt-oss-120b",
+      "total_params_b": null
+    },
+    "gptoss120blow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "gpt-oss-120b (Low)",
+      "slug": "gpt-oss-120b-low",
+      "total_params_b": null
+    },
+    "gptoss20b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "gpt-oss-20b (High)",
+      "slug": "gpt-oss-20b",
+      "total_params_b": null
+    },
+    "gptoss20bhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "gpt-oss-20b (High)",
+      "slug": "gpt-oss-20b",
+      "total_params_b": null
+    },
+    "gptoss20blow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "gpt-oss-20b (Low)",
+      "slug": "gpt-oss-20b-low",
+      "total_params_b": null
+    },
+    "granite40350m": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32768,
+      "is_open_weights": true,
+      "name": "Granite 4.0 350M",
+      "slug": "granite-4-0-350m",
+      "total_params_b": null
+    },
+    "granite40h1b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Granite 4.0 H 1B",
+      "slug": "granite-4-0-h-nano-1b",
+      "total_params_b": null
+    },
+    "granite40h350m": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32768,
+      "is_open_weights": true,
+      "name": "Granite 4.0 H 350M",
+      "slug": "granite-4-0-h-350m",
+      "total_params_b": null
+    },
+    "granite40hnano1b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Granite 4.0 H 1B",
+      "slug": "granite-4-0-h-nano-1b",
+      "total_params_b": null
+    },
+    "granite40hsmall": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Granite 4.0 H Small",
+      "slug": "granite-4-0-h-small",
+      "total_params_b": null
+    },
+    "granite40micro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Granite 4.0 Micro",
+      "slug": "granite-4-0-micro",
+      "total_params_b": null
+    },
+    "granite4230b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "Granite 4.2 30B",
+      "slug": "granite-4-2-30b",
+      "total_params_b": null
+    },
+    "granite423b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "Granite 4.2 3B",
+      "slug": "granite-4-2-3b",
+      "total_params_b": null
+    },
+    "granite428b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "Granite 4.2 8B",
+      "slug": "granite-4-2-8b",
+      "total_params_b": null
+    },
+    "grok47": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 500000,
+      "is_open_weights": false,
+      "name": "Grok 4.7 (Xhigh)",
+      "slug": "grok-4-7",
+      "total_params_b": null
+    },
+    "grok47high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 500000,
+      "is_open_weights": false,
+      "name": "Grok 4.7 (High)",
+      "slug": "grok-4-7-high",
+      "total_params_b": null
+    },
+    "grok47low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 500000,
+      "is_open_weights": false,
+      "name": "Grok 4.7 (Low)",
+      "slug": "grok-4-7-low",
+      "total_params_b": null
+    },
+    "grok47xhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 500000,
+      "is_open_weights": false,
+      "name": "Grok 4.7 (Xhigh)",
+      "slug": "grok-4-7",
+      "total_params_b": null
+    },
+    "hermes4llama31405b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Hermes 4 - Llama-3.1 405B (Non-reasoning)",
+      "slug": "hermes-4-llama-3-1-405b",
+      "total_params_b": null
+    },
+    "hermes4llama31405bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Hermes 4 - Llama-3.1 405B (Non-reasoning)",
+      "slug": "hermes-4-llama-3-1-405b",
+      "total_params_b": null
+    },
+    "hermes4llama31405breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Hermes 4 - Llama-3.1 405B (Reasoning)",
+      "slug": "hermes-4-llama-3-1-405b-reasoning",
+      "total_params_b": null
+    },
+    "hermes4llama3170b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Hermes 4 - Llama-3.1 70B (Non-reasoning)",
+      "slug": "hermes-4-llama-3-1-70b",
+      "total_params_b": null
+    },
+    "hermes4llama3170bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Hermes 4 - Llama-3.1 70B (Non-reasoning)",
+      "slug": "hermes-4-llama-3-1-70b",
+      "total_params_b": null
+    },
+    "hermes4llama3170breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Hermes 4 - Llama-3.1 70B (Reasoning)",
+      "slug": "hermes-4-llama-3-1-70b-reasoning",
+      "total_params_b": null
+    },
+    "hy3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Hy3",
+      "slug": "hy3",
+      "total_params_b": null
+    },
+    "hyperclovaxseedthink32b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "HyperCLOVA X SEED Think (32B)",
+      "slug": "hyperclova-x-seed-think-32b",
+      "total_params_b": null
+    },
+    "hypernova60b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "HyperNova 60B 2605 (High, Based on gpt-oss-120b)",
+      "slug": "hypernova-60b",
+      "total_params_b": null
+    },
+    "hypernova60b2605high,basedongptoss120b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "HyperNova 60B 2605 (High, Based on gpt-oss-120b)",
+      "slug": "hypernova-60b",
+      "total_params_b": null
+    },
+    "inkling": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Inkling (Xhigh)",
+      "slug": "inkling",
+      "total_params_b": null
+    },
+    "inklingsmall": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Inkling Small",
+      "slug": "inkling-small",
+      "total_params_b": null
+    },
+    "inklingxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Inkling (Xhigh)",
+      "slug": "inkling",
+      "total_params_b": null
+    },
+    "intellect3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131100,
+      "is_open_weights": true,
+      "name": "INTELLECT-3 (Based on GLM-4.5-Air)",
+      "slug": "intellect-3",
+      "total_params_b": null
+    },
+    "intellect3basedonglm45air": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131100,
+      "is_open_weights": true,
+      "name": "INTELLECT-3 (Based on GLM-4.5-Air)",
+      "slug": "intellect-3",
+      "total_params_b": null
+    },
+    "jamba17large": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Jamba 1.7 Large",
+      "slug": "jamba-1-7-large",
+      "total_params_b": null
+    },
+    "jamba17mini": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 258000,
+      "is_open_weights": true,
+      "name": "Jamba 1.7 Mini",
+      "slug": "jamba-1-7-mini",
+      "total_params_b": null
+    },
+    "jambareasoning3b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262000,
+      "is_open_weights": true,
+      "name": "Jamba Reasoning 3B",
+      "slug": "jamba-reasoning-3b",
+      "total_params_b": null
+    },
+    "jt35bflash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "JT-35B-Flash",
+      "slug": "jt-35b-flash",
+      "total_params_b": null
+    },
+    "jt41flash236ba21b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": false,
+      "name": "JT-4.1 Flash 236B A21B (Reasoning)",
+      "slug": "jt-4-1-flash-236b-a21b",
+      "total_params_b": null
+    },
+    "jt41flash236ba21bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": false,
+      "name": "JT-4.1 Flash 236B A21B (Non-reasoning)",
+      "slug": "jt-4-1-flash-236b-a21b-non-reasoning",
+      "total_params_b": null
+    },
+    "jt41flash236ba21breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": false,
+      "name": "JT-4.1 Flash 236B A21B (Reasoning)",
+      "slug": "jt-4-1-flash-236b-a21b",
+      "total_params_b": null
+    },
+    "jtmini": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "JT-MINI",
+      "slug": "jt-mini",
+      "total_params_b": null
+    },
+    "k2horizon09b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "K2 Horizon 0.9B",
+      "slug": "k2-horizon-0-9b",
+      "total_params_b": null
+    },
+    "k2horizon375ba23b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": true,
+      "name": "K2 Horizon 375B A23B",
+      "slug": "k2-horizon-375b-a23b",
+      "total_params_b": null
+    },
+    "k2horizon37b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": true,
+      "name": "K2 Horizon 3.7B",
+      "slug": "k2-horizon-3-7b",
+      "total_params_b": null
+    },
+    "k2horizon7b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": true,
+      "name": "K2 Horizon 7B",
+      "slug": "k2-horizon-7b",
+      "total_params_b": null
+    },
+    "k2horizonmova36ba4b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": true,
+      "name": "K2 Horizon MoVA 36B A4B",
+      "slug": "k2-horizon-mova-36b-a4b",
+      "total_params_b": null
+    },
+    "k2thinkv2": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "K2 Think V2",
+      "slug": "k2-think-v2",
+      "total_params_b": null
+    },
+    "k2v2": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 512000,
+      "is_open_weights": true,
+      "name": "K2-V2 (High)",
+      "slug": "k2-v2",
+      "total_params_b": null
+    },
+    "k2v2high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 512000,
+      "is_open_weights": true,
+      "name": "K2-V2 (High)",
+      "slug": "k2-v2",
+      "total_params_b": null
+    },
+    "k2v2low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 512000,
+      "is_open_weights": true,
+      "name": "K2-V2 (Low)",
+      "slug": "k2-v2-low",
+      "total_params_b": null
+    },
+    "k2v2medium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 512000,
+      "is_open_weights": true,
+      "name": "K2-V2 (Medium)",
+      "slug": "k2-v2-medium",
+      "total_params_b": null
+    },
+    "katcoderprov2": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "KAT Coder Pro V2",
+      "slug": "kat-coder-pro-v2",
+      "total_params_b": null
+    },
+    "kexaone200803": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "K-EXAONE 2.0 0803",
+      "slug": "k-exaone-2-0-0803",
+      "total_params_b": null
+    },
+    "kimik27code": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Kimi K2.7 Code",
+      "slug": "kimi-k2-7-code",
+      "total_params_b": null
+    },
+    "kimik3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Kimi K3 (Max)",
+      "slug": "kimi-k3",
+      "total_params_b": null
+    },
+    "kimik3low": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Kimi K3 (Low)",
+      "slug": "kimi-k3-low",
+      "total_params_b": null
+    },
+    "kimik3max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Kimi K3 (Max)",
+      "slug": "kimi-k3",
+      "total_params_b": null
+    },
+    "kimilinear48ba3binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Kimi Linear 48B A3B Instruct",
+      "slug": "kimi-linear-48b-a3b-instruct",
+      "total_params_b": null
+    },
+    "lfm224ba2b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32768,
+      "is_open_weights": true,
+      "name": "LFM2 24B A2B",
+      "slug": "lfm2-24b-a2b",
+      "total_params_b": null
+    },
+    "lfm2512binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "LFM2.5-1.2B-Instruct",
+      "slug": "lfm2-5-1-2b-instruct",
+      "total_params_b": null
+    },
+    "lfm2512bthinking": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "LFM2.5-1.2B-Thinking",
+      "slug": "lfm2-5-1-2b-thinking",
+      "total_params_b": null
+    },
+    "lfm2526b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "LFM2.5-2.6B",
+      "slug": "lfm2-5-2-6b",
+      "total_params_b": null
+    },
+    "lfm258ba1b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32768,
+      "is_open_weights": true,
+      "name": "LFM2.5-8B-A1B",
+      "slug": "lfm2-5-8b-a1b",
+      "total_params_b": null
+    },
+    "lfm25vl16b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "LFM2.5-VL-1.6B",
+      "slug": "lfm2-5-vl-1-6b",
+      "total_params_b": null
+    },
+    "ling30flashfin": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Ling-3.0-flash-Fin",
+      "slug": "ling-3-0-flash-fin",
+      "total_params_b": null
+    },
+    "ling30flashvl": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Ling-3.0-flash-VL",
+      "slug": "ling-3-0-flash-vl",
+      "total_params_b": null
+    },
+    "ling30tiny": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Ling 3.0 Tiny",
+      "slug": "ling-3-0-tiny",
+      "total_params_b": null
+    },
+    "ling31flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Ling 3.1 Flash",
+      "slug": "ling-3-1-flash",
+      "total_params_b": null
+    },
+    "llama31instruct405b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Llama 3.1 Instruct 405B",
+      "slug": "llama-3-1-instruct-405b",
+      "total_params_b": null
+    },
+    "llama31nemotronultra253bv1reasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Llama 3.1 Nemotron Ultra 253B v1 (Reasoning)",
+      "slug": "llama-3-1-nemotron-ultra-253b-v1-reasoning",
+      "total_params_b": null
+    },
+    "llama32instruct11bvision": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Llama 3.2 Instruct 11B (Vision)",
+      "slug": "llama-3-2-instruct-11b-vision",
+      "total_params_b": null
+    },
+    "llama32instruct90bvision": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Llama 3.2 Instruct 90B (Vision)",
+      "slug": "llama-3-2-instruct-90b-vision",
+      "total_params_b": null
+    },
+    "llama33instruct70b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Llama 3.3 Instruct 70B",
+      "slug": "llama-3-3-instruct-70b",
+      "total_params_b": null
+    },
+    "llama4maverick": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Llama 4 Maverick",
+      "slug": "llama-4-maverick",
+      "total_params_b": null
+    },
+    "llama4scout": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 10000000,
+      "is_open_weights": true,
+      "name": "Llama 4 Scout",
+      "slug": "llama-4-scout",
+      "total_params_b": null
+    },
+    "longcat20": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "LongCat 2.0",
+      "slug": "longcat-2-0",
+      "total_params_b": null
+    },
+    "longcatflashlite": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "LongCat Flash Lite",
+      "slug": "longcat-flash-lite",
+      "total_params_b": null
+    },
+    "magistralmedium12": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Magistral Medium 1.2",
+      "slug": "magistral-medium-2509",
+      "total_params_b": null
+    },
+    "magistralmedium2509": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Magistral Medium 1.2",
+      "slug": "magistral-medium-2509",
+      "total_params_b": null
+    },
+    "magistralsmall12": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Magistral Small 1.2",
+      "slug": "magistral-small-2509",
+      "total_params_b": null
+    },
+    "magistralsmall2509": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Magistral Small 1.2",
+      "slug": "magistral-small-2509",
+      "total_params_b": null
+    },
+    "mercury25": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 260000,
+      "is_open_weights": false,
+      "name": "Mercury 2.5",
+      "slug": "mercury-2-5",
+      "total_params_b": null
+    },
+    "mi:dmk25pro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Mi:dm K 2.5 Pro",
+      "slug": "mi-dm-k-2-5-pro-dec28",
+      "total_params_b": null
+    },
+    "midmk25prodec28": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Mi:dm K 2.5 Pro",
+      "slug": "mi-dm-k-2-5-pro-dec28",
+      "total_params_b": null
+    },
+    "mimov26flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "MiMo-V2.6-Flash",
+      "slug": "mimo-v2-6-flash",
+      "total_params_b": null
+    },
+    "mimov26pro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "MiMo-V2.6-Pro",
+      "slug": "mimo-v2-6-pro",
+      "total_params_b": null
+    },
+    "minicpm51b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "MiniCPM5-1B (Reasoning)",
+      "slug": "minicpm5-1b",
+      "total_params_b": null
+    },
+    "minicpm51bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "MiniCPM5-1B (Non-reasoning)",
+      "slug": "minicpm5-1b-non-reasoning",
+      "total_params_b": null
+    },
+    "minicpm51breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "MiniCPM5-1B (Reasoning)",
+      "slug": "minicpm5-1b",
+      "total_params_b": null
+    },
+    "minicpm52b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "MiniCPM5-2B",
+      "slug": "minicpm5-2b",
+      "total_params_b": null
+    },
+    "minicpmv4613b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262000,
+      "is_open_weights": true,
+      "name": "MiniCPM-V 4.6 1.3B",
+      "slug": "minicpm-v4-6-1-3b",
+      "total_params_b": null
+    },
+    "minimaxm3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "MiniMax-M3",
+      "slug": "minimax-m3",
+      "total_params_b": null
+    },
+    "ministral314b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Ministral 3 14B",
+      "slug": "ministral-3-14b",
+      "total_params_b": null
+    },
+    "ministral33b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Ministral 3 3B",
+      "slug": "ministral-3-3b",
+      "total_params_b": null
+    },
+    "ministral38b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Ministral 3 8B",
+      "slug": "ministral-3-8b",
+      "total_params_b": null
+    },
+    "mistrallarge4": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": false,
+      "name": "Mistral Large 4 Preview",
+      "slug": "mistral-large-4",
+      "total_params_b": null
+    },
+    "mistrallarge4preview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": false,
+      "name": "Mistral Large 4 Preview",
+      "slug": "mistral-large-4",
+      "total_params_b": null
+    },
+    "mistralmedium35": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Mistral Medium 3.5",
+      "slug": "mistral-medium-3-5",
+      "total_params_b": null
+    },
+    "mistralsmall4": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Mistral Small 4 (Reasoning)",
+      "slug": "mistral-small-4",
+      "total_params_b": null
+    },
+    "mistralsmall4nonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Mistral Small 4 (Non-reasoning)",
+      "slug": "mistral-small-4-non-reasoning",
+      "total_params_b": null
+    },
+    "mistralsmall4reasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Mistral Small 4 (Reasoning)",
+      "slug": "mistral-small-4",
+      "total_params_b": null
+    },
+    "molmo28b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 36864,
+      "is_open_weights": true,
+      "name": "Molmo2-8B",
+      "slug": "molmo2-8b",
+      "total_params_b": null
+    },
+    "molmo7bd": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 4096,
+      "is_open_weights": true,
+      "name": "Molmo 7B-D",
+      "slug": "molmo-7b-d",
+      "total_params_b": null
+    },
+    "motif2127b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Motif-2-12.7B-Reasoning",
+      "slug": "motif-2-12-7b",
+      "total_params_b": null
+    },
+    "motif2127breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": false,
+      "name": "Motif-2-12.7B-Reasoning",
+      "slug": "motif-2-12-7b",
+      "total_params_b": null
+    },
+    "motif3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Motif 3",
+      "slug": "motif-3",
+      "total_params_b": null
+    },
+    "museglimmer": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "Muse Glimmer (High)",
+      "slug": "muse-glimmer",
+      "total_params_b": null
+    },
+    "museglimmerhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "Muse Glimmer (High)",
+      "slug": "muse-glimmer",
+      "total_params_b": null
+    },
+    "musespark13": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Muse Spark 1.3 (Max)",
+      "slug": "muse-spark-1-3",
+      "total_params_b": null
+    },
+    "musespark13max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Muse Spark 1.3 (Max)",
+      "slug": "muse-spark-1-3",
+      "total_params_b": null
+    },
+    "musespark13xhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Muse Spark 1.3 (Xhigh)",
+      "slug": "muse-spark-1-3-xhigh",
+      "total_params_b": null
+    },
+    "musesparkopen": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Muse Spark Open (Xhigh)",
+      "slug": "muse-spark-open",
+      "total_params_b": null
+    },
+    "musesparkopenxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Muse Spark Open (Xhigh)",
+      "slug": "muse-spark-open",
+      "total_params_b": null
+    },
+    "musewonder": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "Muse Wonder (Max)",
+      "slug": "muse-wonder",
+      "total_params_b": null
+    },
+    "musewonderfull": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Muse Wonder Full (Max)",
+      "slug": "muse-wonder-full",
+      "total_params_b": null
+    },
+    "musewonderfullmax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Muse Wonder Full (Max)",
+      "slug": "muse-wonder-full",
+      "total_params_b": null
+    },
+    "musewondermax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "Muse Wonder (Max)",
+      "slug": "muse-wonder",
+      "total_params_b": null
+    },
+    "nanbeige413b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Nanbeige4.1-3B",
+      "slug": "nanbeige4-1-3b",
+      "total_params_b": null
+    },
+    "nemotron35bolt74ba9b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Nemotron 3.5 Bolt 74B-A9B",
+      "slug": "nemotron-3-5-bolt-74b-a9b",
+      "total_params_b": null
+    },
+    "nemotron35lightning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Nemotron 3.5 Lightning",
+      "slug": "nemotron-3-5-lightning",
+      "total_params_b": null
+    },
+    "nemotron35supervl": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Nemotron 3.5 Super VL",
+      "slug": "nemotron-3-5-super-vl",
+      "total_params_b": null
+    },
+    "nemotron3nanoomni30ba3b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Nemotron 3 Nano Omni 30B A3B Reasoning",
+      "slug": "nemotron-3-nano-omni-30b-a3b",
+      "total_params_b": null
+    },
+    "nemotron3nanoomni30ba3breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Nemotron 3 Nano Omni 30B A3B Reasoning",
+      "slug": "nemotron-3-nano-omni-30b-a3b",
+      "total_params_b": null
+    },
+    "nemotron3ultra550ba55breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Nemotron 3 Ultra 550B A55B (Reasoning)",
+      "slug": "nvidia-nemotron-3-ultra-550b-a55b",
+      "total_params_b": null
+    },
+    "nemotroncascade230ba3b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Nemotron Cascade 2 30B A3B",
+      "slug": "nemotron-cascade-2-30b-a3b",
+      "total_params_b": null
+    },
+    "nexn2pro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262000,
+      "is_open_weights": true,
+      "name": "Nex-N2-Pro (Based on Qwen3.5-397B-A17B)",
+      "slug": "nex-n2-pro",
+      "total_params_b": null
+    },
+    "nexn2probasedonqwen35397ba17b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262000,
+      "is_open_weights": true,
+      "name": "Nex-N2-Pro (Based on Qwen3.5-397B-A17B)",
+      "slug": "nex-n2-pro",
+      "total_params_b": null
+    },
+    "northminicode": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "North Mini Code",
+      "slug": "north-mini-code",
+      "total_params_b": null
+    },
+    "nova20lite": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (Non-reasoning)",
+      "slug": "nova-2-0-lite",
+      "total_params_b": null
+    },
+    "nova20litehigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (High)",
+      "slug": "nova-2-0-lite-reasoning",
+      "total_params_b": null
+    },
+    "nova20litelow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (Low)",
+      "slug": "nova-2-0-lite-reasoning-low",
+      "total_params_b": null
+    },
+    "nova20litemedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (Medium)",
+      "slug": "nova-2-0-lite-reasoning-medium",
+      "total_params_b": null
+    },
+    "nova20litenonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (Non-reasoning)",
+      "slug": "nova-2-0-lite",
+      "total_params_b": null
+    },
+    "nova20litereasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (High)",
+      "slug": "nova-2-0-lite-reasoning",
+      "total_params_b": null
+    },
+    "nova20litereasoninglow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (Low)",
+      "slug": "nova-2-0-lite-reasoning-low",
+      "total_params_b": null
+    },
+    "nova20litereasoningmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Lite (Medium)",
+      "slug": "nova-2-0-lite-reasoning-medium",
+      "total_params_b": null
+    },
+    "nova20omni": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Omni (Non-reasoning)",
+      "slug": "nova-2-0-omni",
+      "total_params_b": null
+    },
+    "nova20omnilow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Omni (Low)",
+      "slug": "nova-2-0-omni-reasoning-low",
+      "total_params_b": null
+    },
+    "nova20omnimedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Omni (Medium)",
+      "slug": "nova-2-0-omni-reasoning-medium",
+      "total_params_b": null
+    },
+    "nova20omninonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Omni (Non-reasoning)",
+      "slug": "nova-2-0-omni",
+      "total_params_b": null
+    },
+    "nova20omnireasoninglow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Omni (Low)",
+      "slug": "nova-2-0-omni-reasoning-low",
+      "total_params_b": null
+    },
+    "nova20omnireasoningmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Omni (Medium)",
+      "slug": "nova-2-0-omni-reasoning-medium",
+      "total_params_b": null
+    },
+    "nova20pro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Pro Preview (Non-reasoning)",
+      "slug": "nova-2-0-pro",
+      "total_params_b": null
+    },
+    "nova20propreviewlow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Pro Preview (Low)",
+      "slug": "nova-2-0-pro-reasoning-low",
+      "total_params_b": null
+    },
+    "nova20propreviewmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Pro Preview (Medium)",
+      "slug": "nova-2-0-pro-reasoning-medium",
+      "total_params_b": null
+    },
+    "nova20propreviewnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Pro Preview (Non-reasoning)",
+      "slug": "nova-2-0-pro",
+      "total_params_b": null
+    },
+    "nova20proreasoninglow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Pro Preview (Low)",
+      "slug": "nova-2-0-pro-reasoning-low",
+      "total_params_b": null
+    },
+    "nova20proreasoningmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Nova 2.0 Pro Preview (Medium)",
+      "slug": "nova-2-0-pro-reasoning-medium",
+      "total_params_b": null
+    },
+    "novamicro": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 130000,
+      "is_open_weights": false,
+      "name": "Nova Micro",
+      "slug": "nova-micro",
+      "total_params_b": null
+    },
+    "novapremier": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Nova Premier",
+      "slug": "nova-premier",
+      "total_params_b": null
+    },
+    "nvidianemotron3nano30ba3b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron 3 Nano 30B A3B (Non-reasoning)",
+      "slug": "nvidia-nemotron-3-nano-30b-a3b",
+      "total_params_b": null
+    },
+    "nvidianemotron3nano30ba3bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron 3 Nano 30B A3B (Non-reasoning)",
+      "slug": "nvidia-nemotron-3-nano-30b-a3b",
+      "total_params_b": null
+    },
+    "nvidianemotron3nano30ba3breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron 3 Nano 30B A3B (Reasoning)",
+      "slug": "nvidia-nemotron-3-nano-30b-a3b-reasoning",
+      "total_params_b": null
+    },
+    "nvidianemotron3nano4b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron 3 Nano 4B",
+      "slug": "nvidia-nemotron-3-nano-4b",
+      "total_params_b": null
+    },
+    "nvidianemotron3ultra550ba55b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Nemotron 3 Ultra 550B A55B (Reasoning)",
+      "slug": "nvidia-nemotron-3-ultra-550b-a55b",
+      "total_params_b": null
+    },
+    "nvidianemotronnano12bv2vl": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron Nano 12B v2 VL (Non-reasoning)",
+      "slug": "nvidia-nemotron-nano-12b-v2-vl",
+      "total_params_b": null
+    },
+    "nvidianemotronnano12bv2vlnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron Nano 12B v2 VL (Non-reasoning)",
+      "slug": "nvidia-nemotron-nano-12b-v2-vl",
+      "total_params_b": null
+    },
+    "nvidianemotronnano12bv2vlreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron Nano 12B v2 VL (Reasoning)",
+      "slug": "nvidia-nemotron-nano-12b-v2-vl-reasoning",
+      "total_params_b": null
+    },
+    "nvidianemotronnano9bv2": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron Nano 9B V2 (Non-reasoning)",
+      "slug": "nvidia-nemotron-nano-9b-v2",
+      "total_params_b": null
+    },
+    "nvidianemotronnano9bv2nonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron Nano 9B V2 (Non-reasoning)",
+      "slug": "nvidia-nemotron-nano-9b-v2",
+      "total_params_b": null
+    },
+    "nvidianemotronnano9bv2reasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": true,
+      "name": "NVIDIA Nemotron Nano 9B V2 (Reasoning)",
+      "slug": "nvidia-nemotron-nano-9b-v2-reasoning",
+      "total_params_b": null
+    },
+    "o3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 200000,
+      "is_open_weights": false,
+      "name": "o3",
+      "slug": "o3",
+      "total_params_b": null
+    },
+    "olmo3132binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Olmo 3.1 32B Instruct",
+      "slug": "olmo-3-1-32b-instruct",
+      "total_params_b": null
+    },
+    "olmo3132bthink": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65500,
+      "is_open_weights": true,
+      "name": "Olmo 3.1 32B Think",
+      "slug": "olmo-3-1-32b-think",
+      "total_params_b": null
+    },
+    "olmo37binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Olmo 3 7B Instruct",
+      "slug": "olmo-3-7b-instruct",
+      "total_params_b": null
+    },
+    "olmo37bthink": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Olmo 3 7B Think",
+      "slug": "olmo-3-7b-think",
+      "total_params_b": null
+    },
+    "phi4": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 16000,
+      "is_open_weights": true,
+      "name": "Phi-4",
+      "slug": "phi-4",
+      "total_params_b": null
+    },
+    "phi4mini": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Phi-4 Mini Instruct",
+      "slug": "phi-4-mini",
+      "total_params_b": null
+    },
+    "phi4miniinstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Phi-4 Mini Instruct",
+      "slug": "phi-4-mini",
+      "total_params_b": null
+    },
+    "phi4multimodal": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Phi-4 Multimodal Instruct",
+      "slug": "phi-4-multimodal",
+      "total_params_b": null
+    },
+    "phi4multimodalinstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Phi-4 Multimodal Instruct",
+      "slug": "phi-4-multimodal",
+      "total_params_b": null
+    },
+    "quasar438b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Quasar 438B (Max, Based on GLM-5.2)",
+      "slug": "quasar-438b",
+      "total_params_b": null
+    },
+    "quasar438bmax,basedonglm52": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Quasar 438B (Max, Based on GLM-5.2)",
+      "slug": "quasar-438b",
+      "total_params_b": null
+    },
+    "qwen3508b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 0.8B (Reasoning)",
+      "slug": "qwen3-5-0-8b",
+      "total_params_b": null
+    },
+    "qwen3508bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 0.8B (Non-reasoning)",
+      "slug": "qwen3-5-0-8b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen3508breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 0.8B (Reasoning)",
+      "slug": "qwen3-5-0-8b",
+      "total_params_b": null
+    },
+    "qwen35122ba10b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 122B A10B (Reasoning)",
+      "slug": "qwen3-5-122b-a10b",
+      "total_params_b": null
+    },
+    "qwen35122ba10bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 122B A10B (Non-reasoning)",
+      "slug": "qwen3-5-122b-a10b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen35122ba10breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 122B A10B (Reasoning)",
+      "slug": "qwen3-5-122b-a10b",
+      "total_params_b": null
+    },
+    "qwen352b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 2B (Reasoning)",
+      "slug": "qwen3-5-2b",
+      "total_params_b": null
+    },
+    "qwen352bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 2B (Non-reasoning)",
+      "slug": "qwen3-5-2b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen352breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 2B (Reasoning)",
+      "slug": "qwen3-5-2b",
+      "total_params_b": null
+    },
+    "qwen35397ba17b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 397B A17B (Reasoning)",
+      "slug": "qwen3-5-397b-a17b",
+      "total_params_b": null
+    },
+    "qwen35397ba17bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 397B A17B (Non-reasoning)",
+      "slug": "qwen3-5-397b-a17b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen35397ba17breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 397B A17B (Reasoning)",
+      "slug": "qwen3-5-397b-a17b",
+      "total_params_b": null
+    },
+    "qwen354b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 4B (Reasoning)",
+      "slug": "qwen3-5-4b",
+      "total_params_b": null
+    },
+    "qwen354bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 4B (Non-reasoning)",
+      "slug": "qwen3-5-4b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen354breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 4B (Reasoning)",
+      "slug": "qwen3-5-4b",
+      "total_params_b": null
+    },
+    "qwen359b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 9B (Reasoning)",
+      "slug": "qwen3-5-9b",
+      "total_params_b": null
+    },
+    "qwen359bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 9B (Non-reasoning)",
+      "slug": "qwen3-5-9b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen359breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.5 9B (Reasoning)",
+      "slug": "qwen3-5-9b",
+      "total_params_b": null
+    },
+    "qwen35omniflash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Qwen3.5 Omni Flash",
+      "slug": "qwen3-5-omni-flash",
+      "total_params_b": null
+    },
+    "qwen35omniplus": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": false,
+      "name": "Qwen3.5 Omni Plus",
+      "slug": "qwen3-5-omni-plus",
+      "total_params_b": null
+    },
+    "qwen3635ba3b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.6 35B A3B (Reasoning)",
+      "slug": "qwen3-6-35b-a3b",
+      "total_params_b": null
+    },
+    "qwen3635ba3bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.6 35B A3B (Non-reasoning)",
+      "slug": "qwen3-6-35b-a3b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen3635ba3breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3.6 35B A3B (Reasoning)",
+      "slug": "qwen3-6-35b-a3b",
+      "total_params_b": null
+    },
+    "qwen37plus": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Qwen3.7 Plus",
+      "slug": "qwen3-7-plus",
+      "total_params_b": null
+    },
+    "qwen3824ta95b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262000,
+      "is_open_weights": true,
+      "name": "Qwen3.8 2.4T A95B",
+      "slug": "qwen3-8-2-4t-a95b",
+      "total_params_b": null
+    },
+    "qwen3827b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3.8 27B (Xhigh)",
+      "slug": "qwen3-8-27b",
+      "total_params_b": null
+    },
+    "qwen3827blow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3.8 27B (Low)",
+      "slug": "qwen3-8-27b-low",
+      "total_params_b": null
+    },
+    "qwen3827bmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3.8 27B (Medium)",
+      "slug": "qwen3-8-27b-medium",
+      "total_params_b": null
+    },
+    "qwen3827bnonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3.8 27B (Non-reasoning)",
+      "slug": "qwen3-8-27b-non-reasoning",
+      "total_params_b": null
+    },
+    "qwen3827bxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3.8 27B (Xhigh)",
+      "slug": "qwen3-8-27b",
+      "total_params_b": null
+    },
+    "qwen38flashnext": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3.8-Flash-Next",
+      "slug": "qwen3-8-flash-next",
+      "total_params_b": null
+    },
+    "qwen38max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 983616,
+      "is_open_weights": false,
+      "name": "Qwen3.8 Max (0902)",
+      "slug": "qwen3-8-max",
+      "total_params_b": null
+    },
+    "qwen38max0902": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 983616,
+      "is_open_weights": false,
+      "name": "Qwen3.8 Max (0902)",
+      "slug": "qwen3-8-max",
+      "total_params_b": null
+    },
+    "qwen3codernext": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 256000,
+      "is_open_weights": true,
+      "name": "Qwen3 Coder Next",
+      "slug": "qwen3-coder-next",
+      "total_params_b": null
+    },
+    "qwen3next80ba3binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3 Next 80B A3B Instruct",
+      "slug": "qwen3-next-80b-a3b-instruct",
+      "total_params_b": null
+    },
+    "qwen3next80ba3breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Qwen3 Next 80B A3B (Reasoning)",
+      "slug": "qwen3-next-80b-a3b-reasoning",
+      "total_params_b": null
+    },
+    "qwen3omni30ba3binstruct": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Qwen3 Omni 30B A3B Instruct",
+      "slug": "qwen3-omni-30b-a3b-instruct",
+      "total_params_b": null
+    },
+    "qwen3omni30ba3breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Qwen3 Omni 30B A3B (Reasoning)",
+      "slug": "qwen3-omni-30b-a3b-reasoning",
+      "total_params_b": null
+    },
+    "r11776": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "R1 1776",
+      "slug": "r1-1776",
+      "total_params_b": null
+    },
+    "reflectionbeam": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Beam 1.0",
+      "slug": "reflection-beam",
+      "total_params_b": null
+    },
+    "rekaflash3": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Reka Flash 3",
+      "slug": "reka-flash-3",
+      "total_params_b": null
+    },
+    "ring261t": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "Ring-2.6-1T",
+      "slug": "ring-2-6-1t",
+      "total_params_b": null
+    },
+    "ringflash20": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Ring-flash-2.0",
+      "slug": "ring-flash-2-0",
+      "total_params_b": null
+    },
+    "sarvam105b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Sarvam 105B (High)",
+      "slug": "sarvam-105b",
+      "total_params_b": null
+    },
+    "sarvam105bhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Sarvam 105B (High)",
+      "slug": "sarvam-105b",
+      "total_params_b": null
+    },
+    "sarvam30b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Sarvam 30B (High)",
+      "slug": "sarvam-30b",
+      "total_params_b": null
+    },
+    "sarvam30bhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Sarvam 30B (High)",
+      "slug": "sarvam-30b",
+      "total_params_b": null
+    },
+    "solarmini4": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "Solar Mini 4",
+      "slug": "solar-mini4",
+      "total_params_b": null
+    },
+    "solaropen100breasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "Solar Open 100B (Reasoning)",
+      "slug": "solar-open-100b-reasoning",
+      "total_params_b": null
+    },
+    "solaropen2250b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Solar Open2 250B",
+      "slug": "solar-open2-250b",
+      "total_params_b": null
+    },
+    "solarpro4": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 512000,
+      "is_open_weights": false,
+      "name": "Solar Pro 4",
+      "slug": "solar-pro4",
+      "total_params_b": null
+    },
+    "step3vl10b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 65536,
+      "is_open_weights": true,
+      "name": "Step3 VL 10B",
+      "slug": "step-3-vl-10b",
+      "total_params_b": null
+    },
+    "step5": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Step 5 Preview",
+      "slug": "step-5",
+      "total_params_b": null
+    },
+    "step5preview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Step 5 Preview",
+      "slug": "step-5",
+      "total_params_b": null
+    },
+    "tinyayaglobal": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 8192,
+      "is_open_weights": true,
+      "name": "Tiny Aya Global",
+      "slug": "tiny-aya-global",
+      "total_params_b": null
+    },
+    "tri21bthink": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "Tri-21B-Think",
+      "slug": "tri-21b-think-v0-5",
+      "total_params_b": null
+    },
+    "tri21bthinkv05": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 32000,
+      "is_open_weights": true,
+      "name": "Tri-21B-Think",
+      "slug": "tri-21b-think-v0-5",
+      "total_params_b": null
+    },
+    "trinitylargethinking": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 512000,
+      "is_open_weights": true,
+      "name": "Trinity Large Thinking",
+      "slug": "trinity-large-thinking",
+      "total_params_b": null
+    }
+  }
+}

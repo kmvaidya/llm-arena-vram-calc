@@ -7,7 +7,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 - **Load** the Arena.ai open-source text leaderboard from Arena's [Hugging Face dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (or a CSV export)
 - **Resolve** total and active parameter counts via multiple strategies:
   - Small overrides dict (`known_models.py`) for models with misleading names or no public metadata
-  - Artificial Analysis: its model list maps Arena names to model pages, whose sizes are cached in `data/aa_params.json`
+  - Artificial Analysis: its model list (saved in `data/aa_models.json`) maps Arena names to model pages, whose sizes are cached in `data/aa_params.json`
   - Regex name parsing (e.g., `Qwen3-30B-A3B` → 30B total, 3B active, MoE)
   - Artificial Analysis pages found by guessing the page name, for models missing from the list
   - Results with more active than total parameters are rejected
@@ -36,4 +36,13 @@ uv run python arena_enrichment/enrich_arena.py --input arena_data.csv --no-netwo
 
 ## Automation
 
-A GitHub Actions workflow runs daily at 06:00 UTC to fetch the latest leaderboard and update the root README.md with fresh tables. It commits the outputs and the Artificial Analysis page cache, so each run only reads pages for new models. See `.github/workflows/update-leaderboard.yml`.
+A GitHub Actions workflow runs daily at 06:00 UTC to fetch the latest leaderboard and update the root README.md with fresh tables. It commits the outputs and the Artificial Analysis caches, so each run only reads pages for new models and a day the model list cannot be read uses the last good copy. See `.github/workflows/update-leaderboard.yml`.
+
+When something goes wrong the workflow keeps one issue open, titled "Leaderboard update failed", and closes it on the next good run. A failed download or a crash leaves the tables as they were. A source that degrades still publishes, and the issue lists what the run's health check found, with where to look:
+
+- the Arena leaderboard has not been published for more than 21 days (its longest gap so far is 19);
+- the Artificial Analysis model list could not be read and the saved copy is more than 3 days old;
+- fewer than 85% of models have parameter counts (add the missing ones to `known_models.py`);
+- Artificial Analysis pages that showed parameter counts no longer do, which usually means the page layout changed (the cached counts are used meanwhile).
+
+The hardware list (`HARDWARE` in `vram_calculator.py`) and the speed measurements (`measurements.py`) are maintained by hand: add new hardware as it ships.
