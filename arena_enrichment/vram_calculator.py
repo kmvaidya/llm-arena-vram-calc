@@ -1,13 +1,17 @@
 """
 Memory and speed estimates, and which hardware can serve each model.
 
-Memory, in GiB (the unit GPU and Mac memory is sold in): the weights (total
-parameters × bytes per parameter of real checkpoints), plus the KV cache for
-one long conversation, plus a fixed runtime overhead per GPU.  Speed: generation for one request, where each new
-token reads the model's active weights from memory once, so the time per
-token is those bytes over the usable bandwidth plus a fixed per-token cost.
-The constants come from published measurements (measurements.py), and the
-README's "Memory formula" and "Speed formula" sections explain them.
+Each model is sized three ways: as released (its published checkpoint, at
+full quality), and quantized to 8 or 4 bits, never bigger than the
+release: a model published in 4-bit is 4-bit in all three.
+
+Memory, in GiB (the unit GPU and Mac memory is sold in): the weights, plus
+the KV cache for one long conversation, plus a fixed runtime overhead per
+GPU.  Speed: generation for one request, where each new token reads the
+model's active weights from memory once, so the time per token is those
+bytes over the usable bandwidth plus a fixed per-token cost.  The constants
+come from published measurements (measurements.py), and the README's
+"Memory formula" and "Speed formula" sections explain them.
 """
 
 from __future__ import annotations
@@ -24,7 +28,6 @@ PRECISION_BYTES = {
     "BF16": 2.0,
     "FP8": 1.06,      # any 8-bit format: FP8, GGUF Q8_0, MLX 8-bit
     "INT4": 0.6,      # any 4-bit format: GGUF Q4_K_M, AWQ, GPTQ, NVFP4, MLX 4-bit
-    "MXFP4": 0.56,    # gpt-oss style: MXFP4 experts, the rest in 16-bit
 }
 
 # The KV cache (attention keys and values kept for every token in context)
@@ -59,8 +62,15 @@ FIXED_MS_PER_TOKEN = {
 }
 SYNC_MS_PER_TOKEN = {"dense": 3.0, "moe": 6.0}
 
-# Precisions to compute for fit columns
-FIT_PRECISIONS = ["BF16", "FP8", "INT4"]
+# The table's columns: the model as published, and quantized to 8 and 4 bits
+# (the precision class each is quantized to)
+COLUMNS = ["released", "8bit", "4bit"]
+COLUMN_LABELS = {"released": "As released", "8bit": "8-bit", "4bit": "4-bit"}
+COLUMN_PRECISION = {"8bit": "FP8", "4bit": "INT4"}
+# A release is described by its bytes per parameter: at least this many is
+# 16-bit, at least RELEASE_8BIT_MIN 8-bit, anything less 4-bit
+RELEASE_16BIT_MIN = 1.5
+RELEASE_8BIT_MIN = 0.75
 
 # GPUs in a standard server node (HGX/DGX-style), the usual way to serve
 # models too large for one GPU: weights are split across the node's GPUs
@@ -80,7 +90,7 @@ TIERS = ["Consumer GPU", "Unified memory", "Workstation", "Data center GPU"]
 class Hardware:
     """A GPU, or a computer whose GPU shares system memory, that the tables report on."""
 
-    key: str                    # column id, as in fits_<key>_<precision>
+    key: str                    # column id, as in fits_<key>_<column>
     name: str
     tier: str                   # one of TIERS
     memory_gb: float            # as the vendor states it ("80 GB", which is 80 GiB)
@@ -205,7 +215,7 @@ def weights_gib(total_params_b: float, precision: str) -> float:
 
     Args:
         total_params_b: Total parameters in billions
-        precision: One of "BF16", "FP8", "INT4", "MXFP4"
+        precision: One of "BF16", "FP8", "INT4"
 
     Returns:
         Weight memory in GiB
@@ -214,6 +224,24 @@ def weights_gib(total_params_b: float, precision: str) -> float:
     if bytes_per is None:
         raise ValueError(f"Unknown precision: {precision}")
     return total_params_b * 1e9 * bytes_per / BYTES_PER_GIB
+
+
+def release_format(bytes_per_param: float) -> str:
+    """The release format of a checkpoint with this many bytes per parameter."""
+    if bytes_per_param >= RELEASE_16BIT_MIN:
+        return "16-bit"
+    return "8-bit" if bytes_per_param >= RELEASE_8BIT_MIN else "4-bit"
+
+
+def column_weights_gib(total_params_b: float, released_gib: float | None, column: str) -> float:
+    """
+    Memory for the weights in a column, in GiB: the release's own size (16-bit
+    when unknown), or quantized to 8 or 4 bits unless the release is smaller.
+    """
+    released = released_gib if released_gib is not None else weights_gib(total_params_b, "BF16")
+    if column == "released":
+        return released
+    return min(weights_gib(total_params_b, COLUMN_PRECISION[column]), released)
 
 
 def kv_cache_gib(total_params_b: float) -> float:
@@ -228,7 +256,7 @@ def serving_gib(total_params_b: float, precision: str, gpu_count: int = 1) -> fl
 
     Args:
         total_params_b: Total parameters in billions
-        precision: One of "BF16", "FP8", "INT4", "MXFP4"
+        precision: One of "BF16", "FP8", "INT4"
         gpu_count: GPUs the model is split across (each needs its runtime)
 
     Returns:
@@ -255,7 +283,7 @@ def fits(hardware: Hardware, single_serving_gib: float, gpu_count: int = 1) -> b
 def decode_tokens_per_s(
     active_params_b: float,
     architecture: str,
-    precision: str,
+    bytes_per_param: float,
     bandwidth_gbs: float,
     platform: str = "gpu",
     gpu_count: int = 1,
@@ -273,7 +301,7 @@ def decode_tokens_per_s(
         active_params_b: Parameters used per token, in billions (all of them
             for a dense model)
         architecture: "dense" or "moe"
-        precision: One of "BF16", "FP8", "INT4", "MXFP4"
+        bytes_per_param: Bytes per parameter of the weights read
         bandwidth_gbs: Peak memory bandwidth of one GPU, GB/s
         platform: "gpu" or "apple"
         gpu_count: GPUs splitting the request (tensor parallel)
@@ -281,7 +309,7 @@ def decode_tokens_per_s(
     Returns:
         Estimated tokens per second
     """
-    gb_per_token = active_params_b * PRECISION_BYTES[precision]
+    gb_per_token = active_params_b * bytes_per_param
     if architecture == "moe":
         gb_per_token *= MOE_BYTES_FACTOR
     ms = gb_per_token / (BANDWIDTH_EFFICIENCY * bandwidth_gbs * gpu_count) * 1000
@@ -292,18 +320,22 @@ def decode_tokens_per_s(
 
 
 def hardware_speed(
-    hardware: Hardware, model: pd.Series, precision: str, gpu_count: int = 1
+    hardware: Hardware, model: pd.Series, column: str, gpu_count: int = 1
 ) -> float | None:
     """
-    Estimated generation speed of a model on a piece of hardware, or None:
-    unknown architecture, or 8 GPUs without an all-to-all GPU fabric.
+    Estimated generation speed of a model, as sized in a column, on a piece
+    of hardware, or None: unknown architecture, or 8 GPUs without an
+    all-to-all GPU fabric.
     """
     if model.get("architecture") not in ("dense", "moe") or pd.isna(model.get("active_params_b")):
         return None
     if gpu_count > 1 and not hardware.gpu_fabric:
         return None
+    # The bytes per parameter of the column's weights, as stored
+    bytes_per_param = (model[f"vram_{column}_weights_gib"] * BYTES_PER_GIB
+                       / (model["total_params_b"] * 1e9))
     return decode_tokens_per_s(
-        model["active_params_b"], model["architecture"], precision,
+        model["active_params_b"], model["architecture"], bytes_per_param,
         hardware.bandwidth_for(gpu_count), hardware.platform, gpu_count,
     )
 
@@ -312,25 +344,30 @@ def compute_vram_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add memory estimate columns to the DataFrame, in GiB.
 
-    Adds columns:
-        vram_bf16_weights_gib, vram_fp8_weights_gib, vram_int4_weights_gib
-        vram_bf16_serving_gib, vram_fp8_serving_gib, vram_int4_serving_gib
-        (serving: weights + KV cache + runtime, on one GPU)
+    Adds columns, for each of COLUMNS (released, 8bit, 4bit):
+        vram_<column>_weights_gib
+        vram_<column>_serving_gib (weights + KV cache + runtime, on one GPU)
 
     Args:
-        df: DataFrame with 'total_params_b' column
+        df: DataFrame with 'total_params_b' and, when the release is known,
+            'released_weights_gib' (the published checkpoint's size)
 
     Returns:
         DataFrame with memory columns added
     """
-    for precision in FIT_PRECISIONS:
-        p_lower = precision.lower()
-        df[f"vram_{p_lower}_weights_gib"] = df["total_params_b"].apply(
-            lambda x, p=precision: round(weights_gib(x, p), 1) if pd.notna(x) else None
-        )
-        df[f"vram_{p_lower}_serving_gib"] = df["total_params_b"].apply(
-            lambda x, p=precision: round(serving_gib(x, p), 1) if pd.notna(x) else None
-        )
+    released = df["released_weights_gib"] if "released_weights_gib" in df.columns else None
+    for column in COLUMNS:
+        weights = [
+            round(column_weights_gib(total, None if released is None or pd.isna(released[i])
+                                     else released[i], column), 1)
+            if pd.notna(total) else None
+            for i, total in df["total_params_b"].items()
+        ]
+        df[f"vram_{column}_weights_gib"] = weights
+        df[f"vram_{column}_serving_gib"] = [
+            round(w + kv_cache_gib(total) + RUNTIME_GIB, 1) if w is not None else None
+            for w, total in zip(weights, df["total_params_b"], strict=True)
+        ]
 
     return df
 
@@ -339,8 +376,8 @@ def compute_gpu_fit_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add fit boolean columns to the DataFrame.
 
-    For each piece of hardware and precision, adds a column like
-    'fits_h100_bf16' (True/False): serving memory within usable memory.
+    For each piece of hardware and column, adds a column like
+    'fits_h100_8bit' (True/False): serving memory within usable memory.
 
     Args:
         df: DataFrame with vram_*_serving_gib columns
@@ -349,10 +386,9 @@ def compute_gpu_fit_columns(df: pd.DataFrame) -> pd.DataFrame:
         DataFrame with fit columns added
     """
     for hardware in HARDWARE:
-        for precision in FIT_PRECISIONS:
-            p_lower = precision.lower()
-            serving_col = f"vram_{p_lower}_serving_gib"
-            fit_col = f"fits_{hardware.key}_{p_lower}"
+        for column in COLUMNS:
+            serving_col = f"vram_{column}_serving_gib"
+            fit_col = f"fits_{hardware.key}_{column}"
             df[fit_col] = df[serving_col].apply(
                 lambda x, hw=hardware: fits(hw, x) if pd.notna(x) else None
             )
@@ -364,7 +400,7 @@ def compute_best_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add summary columns for the smallest reference GPU that can serve each model.
 
-    Adds columns: best_gpu_bf16, best_gpu_fp8
+    Adds columns: best_gpu_released, best_gpu_8bit
 
     Args:
         df: DataFrame with vram_*_serving_gib columns
@@ -372,10 +408,9 @@ def compute_best_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with best_gpu columns added
     """
-    for precision in ["BF16", "FP8"]:
-        p_lower = precision.lower()
-        serving_col = f"vram_{p_lower}_serving_gib"
-        col_name = f"best_gpu_{p_lower}"
+    for column in ["released", "8bit"]:
+        serving_col = f"vram_{column}_serving_gib"
+        col_name = f"best_gpu_{column}"
 
         df[col_name] = df[serving_col].apply(
             lambda x: _find_best_gpu(x) if pd.notna(x) else "UNKNOWN"
@@ -407,7 +442,7 @@ def compute_best_node_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add summary columns for the smallest reference 8-GPU node that can serve each model.
 
-    Adds columns: best_node_bf16, best_node_fp8
+    Adds columns: best_node_released, best_node_8bit
 
     Args:
         df: DataFrame with vram_*_serving_gib columns
@@ -415,10 +450,9 @@ def compute_best_node_columns(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with best_node columns added
     """
-    for precision in ["BF16", "FP8"]:
-        p_lower = precision.lower()
-        serving_col = f"vram_{p_lower}_serving_gib"
-        col_name = f"best_node_{p_lower}"
+    for column in ["released", "8bit"]:
+        serving_col = f"vram_{column}_serving_gib"
+        col_name = f"best_node_{column}"
 
         df[col_name] = df[serving_col].apply(
             lambda x: _find_best_node(x) if pd.notna(x) else "UNKNOWN"
@@ -447,7 +481,7 @@ def compute_speed_columns(df: pd.DataFrame) -> pd.DataFrame:
     reference GPU that fits, else the smallest reference 8-GPU server (None
     for PCIe servers, which have no single-request data).
 
-    Adds columns: est_tok_s_bf16, est_tok_s_fp8
+    Adds columns: est_tok_s_released, est_tok_s_8bit
 
     Args:
         df: DataFrame with vram_*_serving_gib, active_params_b and
@@ -456,22 +490,21 @@ def compute_speed_columns(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with est_tok_s columns added
     """
-    for precision in ["BF16", "FP8"]:
-        p_lower = precision.lower()
-        serving_col = f"vram_{p_lower}_serving_gib"
+    for column in ["released", "8bit"]:
+        serving_col = f"vram_{column}_serving_gib"
 
-        def speed(row: pd.Series, precision: str = precision, serving_col: str = serving_col) -> float | None:
+        def speed(row: pd.Series, column: str = column, serving_col: str = serving_col) -> float | None:
             if pd.isna(row[serving_col]):
                 return None
             gpu = _fits_on_gpu(row[serving_col])
             if gpu is not None:
-                estimate = hardware_speed(gpu, row, precision)
+                estimate = hardware_speed(gpu, row, column)
             else:
                 node = _fits_on_node(row[serving_col])
-                estimate = hardware_speed(node, row, precision, NODE_GPU_COUNT) if node else None
+                estimate = hardware_speed(node, row, column, NODE_GPU_COUNT) if node else None
             return round(estimate, 1) if estimate is not None else None
 
-        df[f"est_tok_s_{p_lower}"] = df.apply(speed, axis=1)
+        df[f"est_tok_s_{column}"] = df.apply(speed, axis=1)
 
     return df
 

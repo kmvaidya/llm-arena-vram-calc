@@ -9,7 +9,9 @@ from enrich_arena import (
     resolve_from_name,
     resolve_from_overrides,
     resolve_model_params,
+    resolve_release,
 )
+from scrapers.hf_checkpoints import HFUnavailable
 
 # ── resolve_from_overrides ────────────────────────────────────────────────
 
@@ -254,6 +256,11 @@ class TestCheckHealth:
         [problem] = check_health(226, 211, None, unreadable_pages=["glm-5-3"])
         assert "1 Artificial Analysis page(s) could not be read (glm-5-3)" in problem
 
+    def test_too_few_known_releases(self):
+        assert check_health(226, 211, None, top_releases_known=(35, 50)) == []
+        [problem] = check_health(226, 211, None, top_releases_known=(34, 50))
+        assert "Only 34 of the 50 best-ranked models have a known release" in problem
+
     def test_pages_lost_sizes(self):
         [problem] = check_health(226, 211, None, lost_sizes=["glm-5-3", "deepseek-v4-pro"])
         assert "2 Artificial Analysis page(s)" in problem
@@ -273,3 +280,65 @@ def test_unreleased_models_left_out_and_reranked():
     assert left_out == ["qwen-max-0919"]
     assert list(kept["model_name"]) == ["a-70b", "b-7b"]
     assert list(kept["rank"]) == [1, 2]
+
+
+# ── resolve_release ───────────────────────────────────────────────────────
+
+GIB = 2**30
+KIMI = {"total_params_b": 1000, "active_params_b": 32, "architecture": "moe"}
+
+
+class TestResolveRelease:
+    @patch("enrich_arena.checkpoint_bytes", return_value=595_200_000_000)
+    def test_known_repository(self, mock_size):
+        release = resolve_release("kimi-k2.5-thinking", KIMI, None)
+        assert release == {"released_weights_gib": pytest.approx(595.2e9 / GIB),
+                           "release_format": "4-bit",
+                           "release_source": "huggingface:moonshotai/Kimi-K2.5"}
+        mock_size.assert_called_once_with("moonshotai/Kimi-K2.5", fetch=True)
+
+    @patch("enrich_arena.checkpoint_bytes", return_value=688_600_000_000)
+    def test_repository_from_the_aa_page(self, mock_size):
+        params = {"total_params_b": 684.5, "active_params_b": 37, "architecture": "moe",
+                  "hf_repo": "deepseek-ai/DeepSeek-V3"}
+        assert resolve_release("deepseek-v3", params, None)["release_format"] == "8-bit"
+
+    @patch("enrich_arena.hf_repo_for", return_value="zai-org/GLM-5.3")
+    @patch("enrich_arena.checkpoint_bytes", return_value=755_600_000_000)
+    def test_repository_from_the_matched_aa_entry(self, mock_size, mock_repo):
+        params = {"total_params_b": 753, "active_params_b": 40, "architecture": "moe"}
+        release = resolve_release("glm-5.3-max", params, {"glm53": {}}, use_network=False)
+        assert release["release_source"] == "huggingface:zai-org/GLM-5.3"
+        mock_size.assert_called_once_with("zai-org/GLM-5.3", fetch=False)
+
+    @patch("enrich_arena.checkpoint_bytes")
+    def test_name_tag_wins(self, mock_size):
+        params = {"total_params_b": 550, "active_params_b": 55, "architecture": "moe",
+                  "hf_repo": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16"}
+        release = resolve_release("nvidia-nemotron-3-ultra-550b-a55b-nvfp4", params, None)
+        assert release["release_format"] == "4-bit"
+        assert release["release_source"] == "name"
+        mock_size.assert_not_called()
+
+    @patch("enrich_arena.checkpoint_bytes", return_value=600_000_000_000)
+    def test_above_16_bit_counts_as_16_bit(self, mock_size):
+        # FP32 files: served in 16-bit
+        params = {"total_params_b": 100, "active_params_b": 100, "architecture": "dense",
+                  "hf_repo": "old/fp32-model"}
+        release = resolve_release("old-model", params, None)
+        assert release["release_format"] == "16-bit"
+        assert release["released_weights_gib"] == pytest.approx(200e9 / GIB)
+
+    @patch("enrich_arena.checkpoint_bytes", return_value=5_000_000_000)
+    def test_checkpoint_far_too_small_is_ignored(self, mock_size):
+        # 5 GB for 100B parameters: another model's repository
+        params = {"total_params_b": 100, "active_params_b": 100, "architecture": "dense",
+                  "hf_repo": "wrong/link"}
+        assert resolve_release("some-model", params, None)["release_format"] is None
+
+    @patch("enrich_arena.checkpoint_bytes", side_effect=HFUnavailable("down"))
+    def test_unavailable_api_leaves_release_unknown(self, mock_size):
+        assert resolve_release("kimi-k2.6", KIMI, None)["release_source"] == "unknown"
+
+    def test_no_params_no_release(self):
+        assert resolve_release("x", None, None)["release_format"] is None

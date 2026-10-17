@@ -24,7 +24,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
-from typing import Any
+from typing import Any, TypedDict
 
 import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -33,24 +33,29 @@ from openpyxl.utils import get_column_letter
 # Add parent directory to path so imports work when running directly
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from known_models import MODEL_OVERRIDES, NOT_RELEASED
+from known_models import HF_REPOS, MODEL_OVERRIDES, NOT_RELEASED
 from measurements import MEASUREMENTS
-from scrapers import aa_resolver
+from scrapers import aa_resolver, hf_checkpoints
 from scrapers.aa_resolver import (
     RELEASE_TAGS,
+    AAEntry,
     AAUnavailable,
     ModelParams,
     get_aa_models,
+    hf_repo_for,
     resolve_from_aa,
     resolve_single_from_aa,
 )
 from scrapers.arena_scraper import scrape_arena_leaderboard
+from scrapers.hf_checkpoints import HFUnavailable, checkpoint_bytes
 from vram_calculator import (
     BANDWIDTH_EFFICIENCY,
     BYTES_PER_GIB,
+    COLUMN_LABELS,
+    COLUMN_PRECISION,
+    COLUMNS,
     CONTEXT_TOKENS,
     FIT_HEADROOM,
-    FIT_PRECISIONS,
     FITS_ON_GPUS,
     FIXED_MS_PER_TOKEN,
     HARDWARE,
@@ -71,7 +76,9 @@ from vram_calculator import (
     kv_cache_gib,
     needed_gib,
     node_label,
+    release_format,
     serving_gib,
+    weights_gib,
 )
 
 logging.basicConfig(
@@ -93,6 +100,10 @@ LEADERBOARD_STALE_DAYS = 21
 # Health checks: the daily run still publishes when one fails, and the
 # workflow opens an issue listing the problems
 MIN_RESOLVED_SHARE = 0.85      # models with parameter counts, ~93% in 2026-10
+# Of the TOP_RELEASES_CHECKED best-ranked models with sizes, how many must
+# have a known release (from Hugging Face or their name)
+TOP_RELEASES_CHECKED = 50
+MIN_KNOWN_RELEASE_SHARE = 0.7
 AA_LIST_MAX_AGE_DAYS = 3       # an outage of a day or two is not worth an issue
 
 
@@ -109,6 +120,26 @@ def _normalize_override(name: str) -> str:
 
 
 _OVERRIDE_KEYS = {_normalize_override(key): key for key in MODEL_OVERRIDES}
+_HF_REPO_KEYS = {_normalize_override(key): key for key in HF_REPOS}
+
+
+def _match_known(model_name: str, keys: dict[str, str]) -> str | None:
+    """
+    The key of a known_models table that matches a name: exactly, or as its
+    start followed only by release parts.  The longest matching key wins.
+    """
+    name = _normalize_override(model_name)
+    best = None
+    for key_norm in keys:
+        if not name.startswith(key_norm):
+            continue
+        rest = name[len(key_norm):]
+        if rest and not (rest.startswith("-")
+                         and all(_RELEASE_PART.fullmatch(part) for part in rest[1:].split("-"))):
+            continue
+        if best is None or len(key_norm) > len(best):
+            best = key_norm
+    return keys[best] if best is not None else None
 
 
 def resolve_from_overrides(model_name: str) -> ModelParams | None:
@@ -122,21 +153,10 @@ def resolve_from_overrides(model_name: str) -> ModelParams | None:
     models fall through to the automated sources instead of taking a
     neighbour's size.
     """
-    name = _normalize_override(model_name)
-    best = None
-    for key_norm in _OVERRIDE_KEYS:
-        if not name.startswith(key_norm):
-            continue
-        rest = name[len(key_norm):]
-        if rest and not (rest.startswith("-")
-                         and all(_RELEASE_PART.fullmatch(part) for part in rest[1:].split("-"))):
-            continue
-        if best is None or len(key_norm) > len(best):
-            best = key_norm
-
-    if best is None:
+    key = _match_known(model_name, _OVERRIDE_KEYS)
+    if key is None:
         return None
-    total, active, arch = MODEL_OVERRIDES[_OVERRIDE_KEYS[best]]
+    total, active, arch = MODEL_OVERRIDES[key]
     return {
         "total_params_b": total,
         "active_params_b": active,
@@ -276,6 +296,76 @@ def drop_unreleased(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     df = df[~unreleased].reset_index(drop=True)
     df["rank"] = range(1, len(df) + 1)
     return df, left_out
+
+
+class Release(TypedDict):
+    """How a model was published: its weights' size and precision, and where that was found."""
+
+    released_weights_gib: float | None
+    release_format: str | None
+    release_source: str
+
+
+# A checkpoint under this many bytes per parameter belongs to another model
+# (a wrong link) and is ignored; one above 16-bit (FP32 files, extra copies)
+# is counted as 16-bit, the precision such models are served in
+MIN_RELEASE_BYTES_PER_PARAM = 0.35
+# Precision tags in a model's name, for models without a checkpoint to read
+_NAME_PRECISION = [
+    (re.compile(r"(?:^|[-_])(?:nvfp4|mxfp4|fp4|int4|awq|gptq)(?:$|[-_])", re.IGNORECASE), "INT4"),
+    (re.compile(r"(?:^|[-_])(?:fp8|int8)(?:$|[-_])", re.IGNORECASE), "FP8"),
+    (re.compile(r"(?:^|[-_])(?:bf16|fp16)(?:$|[-_])", re.IGNORECASE), "BF16"),
+]
+
+
+def resolve_release(
+    model_name: str,
+    params: ModelParams | None,
+    aa_lookup: dict[str, AAEntry] | None,
+    use_network: bool = True,
+) -> Release:
+    """
+    How a model was published: the precision its Arena name gives (an
+    "-nvfp4" build), or else the size of the weight files in its official
+    Hugging Face repository (from HF_REPOS, or the one its AA page links).
+    Unknown (and taken as 16-bit by the tables) when none is found.
+    """
+    unknown: Release = {"released_weights_gib": None, "release_format": None,
+                        "release_source": "unknown"}
+    if params is None:
+        return unknown
+    total = params["total_params_b"]
+
+    for pattern, precision in _NAME_PRECISION:
+        if pattern.search(model_name):
+            return {"released_weights_gib": weights_gib(total, precision),
+                    "release_format": release_format(PRECISION_BYTES[precision]),
+                    "release_source": "name"}
+
+    known = _match_known(model_name, _HF_REPO_KEYS)
+    repo = HF_REPOS[known] if known else params.get("hf_repo")
+    if repo is None and aa_lookup:
+        try:
+            repo = hf_repo_for(model_name, aa_lookup, fetch=use_network)
+        except AAUnavailable:
+            repo = None
+    if repo:
+        try:
+            size = checkpoint_bytes(repo, fetch=use_network)
+        except HFUnavailable:
+            size = None
+        if size:
+            bytes_per_param = size / (total * 1e9)
+            if bytes_per_param >= MIN_RELEASE_BYTES_PER_PARAM:
+                return {
+                    "released_weights_gib": min(size, weights_gib(total, "BF16") * BYTES_PER_GIB)
+                    / BYTES_PER_GIB,
+                    "release_format": release_format(bytes_per_param),
+                    "release_source": f"huggingface:{repo}",
+                }
+            logger.warning(f"Ignoring {repo} for {model_name}: {size / 1e9:.0f} GB "
+                           f"is too small for {total:g}B parameters")
+    return unknown
 
 
 def _is_plausible(params: ModelParams) -> bool:
@@ -454,8 +544,8 @@ def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
     """Build the hardware summary for the XLSX: single devices, then 8-GPU servers."""
     rows = []
     for hw_row in _hardware_rows():
-        for precision in FIT_PRECISIONS:
-            serving_col = f"vram_{precision.lower()}_serving_gib"
+        for column in COLUMNS:
+            serving_col = f"vram_{column}_serving_gib"
             if serving_col not in df.columns:
                 continue
 
@@ -464,15 +554,16 @@ def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
                 "Hardware": hw_row.label,
                 "Usable memory": hw_row.memory_label,
                 "Bandwidth": hw_row.bandwidth_label,
-                "Precision": precision,
+                "Weights": COLUMN_LABELS[column],
             }
             best = _best_fit(df, serving_col, hw_row)
             if best is not None:
-                speed = hardware_speed(hw_row.hardware, best, precision, hw_row.gpu_count)
+                speed = hardware_speed(hw_row.hardware, best, column, hw_row.gpu_count)
                 rows.append({
                     **base,
                     "Best Rank": int(best["rank"]) if pd.notna(best["rank"]) else "?",
                     "Model": best["model_name"],
+                    "Release": best["release_format"] if pd.notna(best.get("release_format")) else "?",
                     "Total Params (B)": best.get("total_params_b", "?"),
                     "Active Params (B)": best.get("active_params_b", "?"),
                     "Architecture": best.get("architecture", "?"),
@@ -484,6 +575,7 @@ def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
                     **base,
                     "Best Rank": "N/A",
                     "Model": "No model fits",
+                    "Release": "",
                     "Total Params (B)": "",
                     "Active Params (B)": "",
                     "Architecture": "",
@@ -496,7 +588,7 @@ def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
 def _speed_accuracy() -> tuple[list[tuple[Any, float]], float, float]:
     """Each measurement with its estimate, the median error, and the share within ±20%."""
     pairs = [
-        (m, decode_tokens_per_s(m.active_params_b, m.architecture, m.precision,
+        (m, decode_tokens_per_s(m.active_params_b, m.architecture, PRECISION_BYTES[m.precision],
                                 m.bandwidth_gbs, m.platform, m.gpu_count))
         for m in MEASUREMENTS
     ]
@@ -561,13 +653,15 @@ def generate_readme(
     # Table 1: Best Model Per Hardware — one row per device or 8-GPU server
     lines.append("## Best Model Per Hardware")
     lines.append("")
-    lines.append("Highest-ranked Arena model that fits each piece of hardware at each precision, "
-                 "with its Arena rank, the memory it needs and its estimated generation speed "
-                 "for one request (see [Memory formula](#memory-formula) and "
-                 "[Speed formula](#speed-formula)). *Memory* is what a model can use: the "
-                 "GPU's memory, or for computers whose GPU shares system RAM, the share the "
-                 f"system gives it. A model fits a GPU when it needs at most {FIT_HEADROOM:.0%} "
-                 "of its memory.")
+    lines.append("Highest-ranked Arena model that fits each piece of hardware, with its Arena "
+                 "rank, the memory it needs and its estimated generation speed for one request "
+                 "(see [Memory formula](#memory-formula) and [Speed formula](#speed-formula)). "
+                 "*As released* is the model as its makers published it, at full quality; *8-bit* "
+                 "and *4-bit* are quantized to fit more, unless the release is already that small: "
+                 "a model published in 4-bit counts as released in every column. *Memory* is what "
+                 "a model can use: the GPU's memory, or for computers whose GPU shares system "
+                 f"RAM, the share the system gives it. A model fits a GPU when it needs at most "
+                 f"{FIT_HEADROOM:.0%} of its memory.")
     lines.append("")
     lines.extend(_generate_hardware_table(df))
     lines.append("")
@@ -578,9 +672,12 @@ def generate_readme(
     ladder = ", ".join(g.name for g in FITS_ON_GPUS)
     lines.append("## Full Leaderboard")
     lines.append("")
-    lines.append("*GiB* columns are the memory each model needs (see [Memory formula]"
-                 f"(#memory-formula)). *Fits on* is the smallest of the most widely deployed GPUs ({ladder}) "
-                 f"that holds the model at FP8, or else an {NODE_GPU_COUNT}-GPU server of the "
+    lines.append("*Release* is the precision a model's makers published its weights in, read from "
+                 "its files on Hugging Face (*?* where none were found: 16-bit is assumed). *GiB* "
+                 "columns are the memory each model needs as released and quantized to 8 or 4 "
+                 "bits, never more than as released (see [Memory formula](#memory-formula)). "
+                 f"*Fits on* is the smallest of the most widely deployed GPUs ({ladder}) "
+                 f"that holds the model at 8-bit, or else an {NODE_GPU_COUNT}-GPU server of the "
                  "smallest of them; *Speed* is the estimated generation speed for one request "
                  "there (see [Speed formula](#speed-formula)).")
     lines.append("")
@@ -591,7 +688,8 @@ def generate_readme(
     lines.append("## Architecture")
     lines.append("")
     lines.append("**Data flow:** Arena.ai leaderboard → parameter resolution "
-                 "(4-strategy fallback) → memory and speed estimates → hardware table")
+                 "(4-strategy fallback) → release lookup (Hugging Face) → memory and speed "
+                 "estimates → hardware table")
     lines.append("")
     lines.append("The parameter resolution chain prioritizes accuracy: manual overrides "
                  "catch known errors, [Artificial Analysis](https://artificialanalysis.ai) "
@@ -640,21 +738,22 @@ def _generate_hardware_table(df: pd.DataFrame) -> list[str]:
     One row per device or 8-GPU server, one column per precision, each cell
     the best model that fits: "name (#rank, GiB needed, ~speed)".
     """
-    lines = ["| Tier | Hardware | Memory | Bandwidth | " + " | ".join(FIT_PRECISIONS) + " |",
-             "|------|----------|--------|-----------|" + "|".join("------" for _ in FIT_PRECISIONS) + "|"]
+    lines = ["| Tier | Hardware | Memory | Bandwidth | "
+             + " | ".join(COLUMN_LABELS[c] for c in COLUMNS) + " |",
+             "|------|----------|--------|-----------|" + "|".join("------" for _ in COLUMNS) + "|"]
 
     previous_tier = None
     for hw_row in _hardware_rows():
         cells = []
-        for precision in FIT_PRECISIONS:
-            serving_col = f"vram_{precision.lower()}_serving_gib"
+        for column in COLUMNS:
+            serving_col = f"vram_{column}_serving_gib"
             best = _best_fit(df, serving_col, hw_row)
             if best is None:
                 cells.append("—")
                 continue
             rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
             details = [f"#{rank}", f"{round(hw_row.needed_gib(best[serving_col])):,} GiB"]
-            speed = hardware_speed(hw_row.hardware, best, precision, hw_row.gpu_count)
+            speed = hardware_speed(hw_row.hardware, best, column, hw_row.gpu_count)
             if speed is not None:
                 details.append(_format_speed(speed))
             cells.append(f"{best['model_name']} ({', '.join(details)})")
@@ -673,8 +772,9 @@ def _hardware_notes() -> list[str]:
                        and not hw.name.startswith("Mac"))
     pcie = ", ".join(hw.server_name or hw.name for hw in NODE_GPUS if not hw.gpu_fabric)
     return [
-        f"- **8-bit without FP8 hardware** ({no_fp8}, Macs): the FP8 column means 8-bit "
-        "weights such as GGUF Q8_0 or MLX 8-bit, which need the same memory.",
+        f"- **8-bit without FP8 hardware** ({no_fp8}, Macs): 8-bit means weights such as GGUF "
+        "Q8_0 or MLX 8-bit, which need the same memory; a model released in FP8 runs in those "
+        "formats there.",
         "- **Unified memory**: the GPU shares system RAM, which is several times slower than "
         "GPU memory; the speeds show it. macOS gives the GPU 75% of RAM by default, and "
         "`sudo sysctl iogpu.wired_limit_mb=<MB>` raises that until the next restart (leave "
@@ -708,22 +808,26 @@ def _memory_formula_section() -> list[str]:
     def gib_per_billion(precision: str) -> str:
         return f"{PRECISION_BYTES[precision] * 1e9 / BYTES_PER_GIB:.3g}"
 
+    eight, four = COLUMN_PRECISION["8bit"], COLUMN_PRECISION["4bit"]
     return [
         "### Memory formula",
         "",
         "```",
-        "Memory (GiB) = total parameters (billions) × GiB per billion parameters",
+        "Memory (GiB) = weights",
         f"             + KV cache: {kv_large:g} GiB ({CONTEXT_TOKENS:,} tokens × "
         f"{KV_BYTES_PER_TOKEN // 1024} KiB; {kv_small:g} GiB under {SMALL_MODEL_PARAMS_B}B parameters)",
         f"             + {RUNTIME_GIB:g} GiB per GPU",
         "```",
         "",
-        "| Precision | Bytes per parameter | GiB per billion parameters | Files it covers |",
-        "|-----------|---------------------|----------------------------|-----------------|",
-        f"| BF16 | {PRECISION_BYTES['BF16']:g} | {gib_per_billion('BF16')} | 16-bit weights |",
-        f"| FP8 | {PRECISION_BYTES['FP8']:g} | {gib_per_billion('FP8')} | FP8, GGUF Q8_0, MLX 8-bit |",
-        f"| INT4 | {PRECISION_BYTES['INT4']:g} | {gib_per_billion('INT4')} "
-        "| GGUF Q4_K_M, AWQ, GPTQ, NVFP4, MLX 4-bit |",
+        "| Column | Weights | GiB per billion parameters | Files it covers |",
+        "|--------|---------|----------------------------|-----------------|",
+        "| As released | the published weight files on Hugging Face (2 bytes per parameter when "
+        f"none are found) | {gib_per_billion('BF16')} for 16-bit, about 0.93 for FP8, 0.52–0.60 for "
+        "4-bit | the makers' own release |",
+        f"| 8-bit | {PRECISION_BYTES[eight]:g} bytes per parameter, or the release if smaller "
+        f"| {gib_per_billion(eight)} | FP8, GGUF Q8_0, MLX 8-bit |",
+        f"| 4-bit | {PRECISION_BYTES[four]:g} bytes per parameter, or the release if smaller "
+        f"| {gib_per_billion(four)} | GGUF Q4_K_M, AWQ, GPTQ, NVFP4, MLX 4-bit |",
         "",
         "- **GiB** (1,073,741,824 bytes) is the unit GPU and Mac memory is sold in, though it is "
         "labelled GB: an \"80 GB\" H100 holds 80 GiB. A billion parameters at 2 bytes each is "
@@ -732,9 +836,11 @@ def _memory_formula_section() -> list[str]:
         "scale factors and usually keep the embeddings and output layer in 16-bit, so 4-bit "
         "files of 30B-and-up models come to 0.56–0.64 bytes per parameter rather than 0.5, "
         "and 8-bit files to 1.00–1.07.",
-        "- **Released precision**: many current models are published only in 8-bit or 4-bit "
-        "(DeepSeek, GLM-5, Kimi, gpt-oss). For them the BF16 column describes weights nobody "
-        "publishes, and the lower column holds their full quality.",
+        "- **As released**: many current models are published only in 8-bit or 4-bit "
+        "(DeepSeek, GLM-5, Kimi, gpt-oss), so their full-quality size is that of their own "
+        "files, which the tool sums from the model's Hugging Face repository (the one its "
+        "Artificial Analysis page links). Quantizing such a model further is possible; making "
+        "it bigger gains nothing, so no column exceeds the release.",
         "- **MoE models** count all their parameters: every expert must sit in memory, even "
         "though each token uses only a few.",
         f"- **KV cache**: the attention keys and values kept for every token in context, "
@@ -752,7 +858,7 @@ def _memory_formula_section() -> list[str]:
         "48 GiB), and engines want headroom: vLLM uses 90% unless told otherwise "
         f"(`--gpu-memory-utilization {FIT_HEADROOM:g}`). On computers whose GPU shares system RAM "
         "the whole share the system gives the GPU counts, as it already leaves the system its own.",
-        f"- Example: a 70B dense model at FP8 needs 70 × {fp8_gib:.3g} + {kv_cache_gib(70):g} + "
+        f"- Example: a 70B dense model at 8-bit needs 70 × {fp8_gib:.3g} + {kv_cache_gib(70):g} + "
         f"{RUNTIME_GIB:g} = {example:.1f} GiB, so it fits an H100 "
         f"({FIT_HEADROOM * h100.usable_gib:g} of {h100.usable_gib:g} GiB).",
     ]
@@ -763,7 +869,7 @@ def _speed_formula_section() -> list[str]:
     h100 = next(hw for hw in HARDWARE if hw.key == "h100")
     example_gb = 30 * PRECISION_BYTES["FP8"]
     example_ms = example_gb / (efficiency * h100.bandwidth_gbs) * 1000
-    example = decode_tokens_per_s(30, "dense", "FP8", h100.bandwidth_gbs)
+    example = decode_tokens_per_s(30, "dense", PRECISION_BYTES["FP8"], h100.bandwidth_gbs)
     gpu_ms = FIXED_MS_PER_TOKEN[("gpu", "dense")], FIXED_MS_PER_TOKEN[("gpu", "moe")]
     apple_ms = FIXED_MS_PER_TOKEN[("apple", "dense")], FIXED_MS_PER_TOKEN[("apple", "moe")]
     pairs, median, within_20 = _speed_accuracy()
@@ -780,6 +886,9 @@ def _speed_formula_section() -> list[str]:
         "Speed (tokens/s)    = 1000 ÷ time per token",
         "```",
         "",
+        "- **Bytes per parameter** are the column's: the release's own files as released, "
+        f"{PRECISION_BYTES['FP8']:g} at 8-bit and {PRECISION_BYTES['INT4']:g} at 4-bit unless the "
+        "release is smaller.",
         "- **Active parameters** are all the parameters of a dense model, and only those used "
         "per token for an MoE model (37B of DeepSeek V3's 671B). MoE models read somewhat "
         "more per token than that (the router, and shared layers that quantized files keep at "
@@ -794,7 +903,7 @@ def _speed_formula_section() -> list[str]:
         f"{SYNC_MS_PER_TOKEN['moe']:g} ms for MoE models. This is why small and MoE models "
         "fall short of their bandwidth limit on fast GPUs, and why 8 GPUs do not make one "
         "request 8× faster.",
-        f"- Example: a 30B dense model at FP8 on an H100 SXM reads {example_gb:.1f} GB per "
+        f"- Example: a 30B dense model at 8-bit on an H100 SXM reads {example_gb:.1f} GB per "
         f"token: {example_gb:.1f} ÷ ({efficiency:g} × {h100.bandwidth_gbs:,.0f} GB/s) = "
         f"{example_ms:.1f} ms, plus {gpu_ms[0]:g} ms, so about {example:.0f} tokens/s.",
         "- **Assumes** one request, a short context (a long context's KV cache is read for "
@@ -842,9 +951,10 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
     """Generate the enriched leaderboard markdown table."""
     lines = []
 
-    header = ("| Rank | Model | Score | Params (B) | Arch | GiB BF16 | GiB FP8 | GiB INT4 "
-              "| Fits on | Speed |")
-    sep = "|------|-------|-------|------------|------|-----------|----------|-----------|---------|-------|"
+    header = ("| Rank | Model | Score | Params (B) | Arch | Release | GiB as released | GiB 8-bit "
+              "| GiB 4-bit | Fits on | Speed |")
+    sep = ("|------|-------|-------|------------|------|---------|-----------------|-----------"
+           "|-----------|---------|-------|")
 
     def _format_row(row):
         rank = int(row["rank"]) if pd.notna(row.get("rank")) else "?"
@@ -864,30 +974,31 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
             arch = "Dense"
         elif arch == "MOE":
             arch = "MoE"
-        bf16_s, fp8_s, int4_s = (_format_gib(row.get(f"vram_{p.lower()}_serving_gib"))
-                                 for p in FIT_PRECISIONS)
-        # "Fits on" — show the smallest reference GPU at FP8, the most
-        # practical precision, or else the smallest reference 8-GPU node
-        best_fp8 = row.get("best_gpu_fp8", "?")
-        best_node_fp8 = row.get("best_node_fp8", "?")
-        if best_fp8 == "UNKNOWN":
+        release_s = row.get("release_format") if pd.notna(row.get("release_format")) else "?"
+        released_s, eight_s, four_s = (_format_gib(row.get(f"vram_{c}_serving_gib")) for c in COLUMNS)
+        # "Fits on" — the smallest reference GPU at 8-bit (or as released,
+        # when smaller), the most practical size, or else the smallest
+        # reference 8-GPU node
+        best_gpu = row.get("best_gpu_8bit", "?")
+        best_node = row.get("best_node_8bit", "?")
+        if best_gpu == "UNKNOWN":
             fits_s = "?"
-        elif best_fp8 != "MULTI-GPU":
-            fits_s = f"{best_fp8} (FP8)"
-        elif best_node_fp8 == "MULTI-NODE":
+        elif best_gpu != "MULTI-GPU":
+            fits_s = best_gpu
+        elif best_node == "MULTI-NODE":
             fits_s = "Multi-node"
         else:
-            fits_s = f"{best_node_fp8} (FP8)"
+            fits_s = best_node
         # Speed — one request on the "Fits on" hardware; none for PCIe servers
-        tok_s = row.get("est_tok_s_fp8")
+        tok_s = row.get("est_tok_s_8bit")
         if pd.notna(tok_s):
             speed_s = _format_speed(tok_s)
-        elif best_fp8 == "UNKNOWN":
+        elif best_gpu == "UNKNOWN":
             speed_s = "?"
         else:
             speed_s = "—"
-        return (f"| {rank} | {name} | {score} | {params_s} | {arch} | {bf16_s} | {fp8_s} "
-                f"| {int4_s} | {fits_s} | {speed_s} |")
+        return (f"| {rank} | {name} | {score} | {params_s} | {arch} | {release_s} | {released_s} "
+                f"| {eight_s} | {four_s} | {fits_s} | {speed_s} |")
 
     # Top N rows shown directly
     top_df = df.head(README_TOP_N)
@@ -934,18 +1045,17 @@ def print_console_summary(df: pd.DataFrame, resolution_counts: dict[str, int]) -
     print(f"  - From AA single scrape:    {resolution_counts.get('aa_single_scrape', 0)}")
     print(f"  - Unresolved:               {resolution_counts.get('UNKNOWN', 0)}")
 
-    for precision in ["BF16", "FP8"]:
-        p_lower = precision.lower()
-        serving_col = f"vram_{p_lower}_serving_gib"
+    for column in ["released", "8bit"]:
+        serving_col = f"vram_{column}_serving_gib"
         if serving_col not in df.columns:
             continue
 
-        print(f"\n=== Best Model Per Hardware ({precision} serving) ===")
+        print(f"\n=== Best Model Per Hardware ({COLUMN_LABELS[column]}) ===")
         for hw_row in _hardware_rows():
             display, gpu_vram = hw_row.label, hw_row.memory_label
             best = _best_fit(df, serving_col, hw_row)
             if best is not None:
-                speed = hardware_speed(hw_row.hardware, best, precision, hw_row.gpu_count)
+                speed = hardware_speed(hw_row.hardware, best, column, hw_row.gpu_count)
                 speed_s = f", {_format_speed(speed)}" if speed is not None else ""
                 rank = int(best["rank"]) if pd.notna(best["rank"]) else "?"
                 name = best["model_name"]
@@ -980,6 +1090,7 @@ def check_health(
     aa_list_age_days: float | None = None,
     lost_sizes: list[str] | None = None,
     unreadable_pages: list[str] | None = None,
+    top_releases_known: tuple[int, int] | None = None,
 ) -> list[str]:
     """
     What is wrong with this run's data, in plain words with where to look.
@@ -1015,6 +1126,16 @@ def check_health(
             f"below the {MIN_RESOLVED_SHARE:.0%} minimum. The run log lists the unresolved models; "
             "add their sizes to `arena_enrichment/known_models.py`."
         )
+    if top_releases_known is not None:
+        known, checked = top_releases_known
+        if checked and known / checked < MIN_KNOWN_RELEASE_SHARE:
+            problems.append(
+                f"Only {known} of the {checked} best-ranked models have a known release "
+                f"(below {MIN_KNOWN_RELEASE_SHARE:.0%}), so the others are taken as 16-bit. Check "
+                "that Artificial Analysis pages still link their Hugging Face weights (the \"Model "
+                "weights\" row read by `_fetch_single_model`) and that "
+                "`arena_enrichment/scrapers/hf_checkpoints.py` can read the Hugging Face API."
+            )
     if unreadable_pages:
         problems.append(
             f"{len(unreadable_pages)} Artificial Analysis page(s) could not be read "
@@ -1030,6 +1151,12 @@ def check_health(
             "`arena_enrichment/scrapers/aa_resolver.py`."
         )
     return problems
+
+
+def _top_releases_known(df: pd.DataFrame) -> tuple[int, int]:
+    """How many of the best-ranked models with sizes have a known release, of how many."""
+    top = df[df["total_params_b"].notna()].head(TOP_RELEASES_CHECKED)
+    return int(top["release_format"].notna().sum()), len(top)
 
 
 def main() -> None:
@@ -1093,8 +1220,9 @@ def main() -> None:
     print("\nStep 2: Resolving model parameters...")
     use_network = not args.no_network
 
-    # A corrupt page cache would fail every lookup quietly: stop here instead
+    # A corrupt cache would fail every lookup quietly: stop here instead
     aa_resolver.validate_params_cache()
+    hf_checkpoints.validate_cache()
 
     # Pre-load AA model cache (one network request, or from disk)
     aa_lookup = None
@@ -1133,12 +1261,19 @@ def main() -> None:
             df.at[idx, "architecture"] = None
         df.at[idx, "resolution_source"] = source
 
+        release = resolve_release(model_name, params, aa_lookup, use_network=use_network)
+        df.at[idx, "released_weights_gib"] = release["released_weights_gib"]
+        df.at[idx, "release_format"] = release["release_format"]
+        df.at[idx, "release_source"] = release["release_source"]
+
         resolution_log.append({
             "model_name": model_name,
             "total_params_b": params["total_params_b"] if params else None,
             "active_params_b": params["active_params_b"] if params else None,
             "architecture": params["architecture"] if params else None,
             "resolution_source": source,
+            "release_format": release["release_format"],
+            "release_source": release["release_source"],
         })
 
         if (idx + 1) % 20 == 0 or idx == len(df) - 1:
@@ -1193,6 +1328,7 @@ def main() -> None:
         aa_list_age_days=aa_list_age,
         lost_sizes=sorted(aa_resolver.LOST_SIZES),
         unreadable_pages=sorted(aa_resolver.UNREADABLE_PAGES),
+        top_releases_known=_top_releases_known(df) if use_network else None,
     )
     for problem in problems:
         print(f"HEALTH: {problem}")

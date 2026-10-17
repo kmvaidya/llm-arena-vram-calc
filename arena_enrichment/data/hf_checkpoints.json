@@ -1,0 +1,350 @@
+{
+  "CohereForAI/c4ai-command-a-03-2025": {
+    "bytes": 222115221536,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M1-80k": {
+    "bytes": 912211851456,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M2": {
+    "bytes": 230134264792,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M2-1": {
+    "bytes": null,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M2.1": {
+    "bytes": 230134264792,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M2.5": {
+    "bytes": 230134264560,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M2.7": {
+    "bytes": 230134260592,
+    "checked": "2026-10-17"
+  },
+  "MiniMaxAI/MiniMax-M3": {
+    "bytes": 854176398808,
+    "checked": "2026-10-17"
+  },
+  "PrimeIntellect/INTELLECT-3": {
+    "bytes": 213706747392,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3-235B-A22B": {
+    "bytes": 470191875096,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+    "bytes": 470191875040,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3-235B-A22B-Thinking-2507": {
+    "bytes": 470191875040,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3-Next-80B-A3B-Instruct": {
+    "bytes": 162659161528,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3-VL-235B-A22B-Instruct": {
+    "bytes": 471340223736,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3-VL-235B-A22B-Thinking": {
+    "bytes": 471340223736,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3.5-122B-A10B": {
+    "bytes": 250173250864,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3.5-27B": {
+    "bytes": 55563022432,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3.5-397B-A17B": {
+    "bytes": 806796241352,
+    "checked": "2026-10-17"
+  },
+  "Qwen/Qwen3.8-27B": {
+    "bytes": 55563006776,
+    "checked": "2026-10-17"
+  },
+  "XiaomiMiMo/MiMo-V2-Flash": {
+    "bytes": 313060774832,
+    "checked": "2026-10-17"
+  },
+  "XiaomiMiMo/MiMo-V2.5": {
+    "bytes": 315040382024,
+    "checked": "2026-10-17"
+  },
+  "XiaomiMiMo/MiMo-V2.5-Pro": {
+    "bytes": 1033389872152,
+    "checked": "2026-10-17"
+  },
+  "XiaomiMiMo/MiMo-V2.6-Flash-RL": {
+    "bytes": 172932505264,
+    "checked": "2026-10-17"
+  },
+  "XiaomiMiMo/MiMo-V2.6-Pro-RL": {
+    "bytes": 566048103896,
+    "checked": "2026-10-17"
+  },
+  "ai21labs/AI21-Jamba-1.5-Large": {
+    "bytes": 797110651224,
+    "checked": "2026-10-17"
+  },
+  "ai21labs/AI21-Jamba-1.5-Mini": {
+    "bytes": 103140804416,
+    "checked": "2026-10-17"
+  },
+  "allenai/Molmo2-8B": {
+    "bytes": 34646910272,
+    "checked": "2026-10-17"
+  },
+  "allenai/Olmo-3.1-32B-Instruct": {
+    "bytes": 64467127296,
+    "checked": "2026-10-17"
+  },
+  "allenai/Olmo-3.1-32B-Think": {
+    "bytes": 64467127296,
+    "checked": "2026-10-17"
+  },
+  "arcee-ai/Trinity-Large-Preview": {
+    "bytes": 797275954480,
+    "checked": "2026-10-17"
+  },
+  "arcee-ai/Trinity-Large-Thinking": {
+    "bytes": 797275981696,
+    "checked": "2026-10-17"
+  },
+  "databricks/dbrx-instruct": {
+    "bytes": null,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-Coder-V2-Instruct": {
+    "bytes": 471486512925,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-R1-0528": {
+    "bytes": 688586727753,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V2.5-1210": {
+    "bytes": 471486512925,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V3": {
+    "bytes": 688586727753,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V3-0324": {
+    "bytes": 688586727753,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V3.1": {
+    "bytes": 688586727753,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V3.1-Terminus": {
+    "bytes": 688588816461,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V3.2": {
+    "bytes": 689483049129,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V4-Flash-0731": {
+    "bytes": 166886535336,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V4-Pro-0813": {
+    "bytes": 892744322880,
+    "checked": "2026-10-17"
+  },
+  "deepseek-ai/DeepSeek-V4.1-Flash": {
+    "bytes": 510296708312,
+    "checked": "2026-10-17"
+  },
+  "google/gemma-4-26B-A4B-it": {
+    "bytes": 51612009916,
+    "checked": "2026-10-17"
+  },
+  "google/gemma-4-31B-it": {
+    "bytes": 62546338248,
+    "checked": "2026-10-17"
+  },
+  "ibm-granite/granite-4.2-30b": {
+    "bytes": 58553607904,
+    "checked": "2026-10-17"
+  },
+  "ibm-granite/granite-4.2-3b": {
+    "bytes": 7319517120,
+    "checked": "2026-10-17"
+  },
+  "ibm-granite/granite-4.2-8b": {
+    "bytes": 17583228032,
+    "checked": "2026-10-17"
+  },
+  "inclusionAI/Ling-flash-2.0": {
+    "bytes": 205782456216,
+    "checked": "2026-10-17"
+  },
+  "inclusionAI/Ring-flash-2.0": {
+    "bytes": 205782456216,
+    "checked": "2026-10-17"
+  },
+  "meituan-longcat/LongCat-Flash-Chat": {
+    "bytes": 1123995572272,
+    "checked": "2026-10-17"
+  },
+  "meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
+    "bytes": 803167703320,
+    "checked": "2026-10-17"
+  },
+  "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
+    "bytes": 217283738720,
+    "checked": "2026-10-17"
+  },
+  "meta-models/Muse-Glimmer-30B": {
+    "bytes": 59553435272,
+    "checked": "2026-10-17"
+  },
+  "microsoft/phi-4": {
+    "bytes": 29319042992,
+    "checked": "2026-10-17"
+  },
+  "mistralai/Mistral-Large-3-675B-Instruct-2512": {
+    "bytes": 681504807752,
+    "checked": "2026-10-17"
+  },
+  "mistralai/Mistral-Large-Instruct-2407": {
+    "bytes": 490440459448,
+    "checked": "2026-10-17"
+  },
+  "mistralai/Mistral-Medium-3.5-128B": {
+    "bytes": 267212267176,
+    "checked": "2026-10-17"
+  },
+  "moonshotai/Kimi-K2-Instruct": {
+    "bytes": 1029190981272,
+    "checked": "2026-10-17"
+  },
+  "moonshotai/Kimi-K2-Instruct-0905": {
+    "bytes": 1029190989504,
+    "checked": "2026-10-17"
+  },
+  "moonshotai/Kimi-K2-Thinking": {
+    "bytes": 594232561304,
+    "checked": "2026-10-17"
+  },
+  "moonshotai/Kimi-K2.5": {
+    "bytes": 595177988208,
+    "checked": "2026-10-17"
+  },
+  "moonshotai/Kimi-K2.6": {
+    "bytes": 595177988208,
+    "checked": "2026-10-17"
+  },
+  "moonshotai/Kimi-K3": {
+    "bytes": 1560936091448,
+    "checked": "2026-10-17"
+  },
+  "nvidia/Llama-3_1-Nemotron-Ultra-253B-v1": {
+    "bytes": 506802614312,
+    "checked": "2026-10-17"
+  },
+  "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16": {
+    "bytes": 63156694272,
+    "checked": "2026-10-17"
+  },
+  "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16": {
+    "bytes": 1121055890600,
+    "checked": "2026-10-17"
+  },
+  "openai/gpt-oss-120b": {
+    "bytes": 65248893184,
+    "checked": "2026-10-17"
+  },
+  "openai/gpt-oss-20b": {
+    "bytes": 13761316904,
+    "checked": "2026-10-17"
+  },
+  "stepfun-ai/Step-3.5-Flash": {
+    "bytes": 398768720200,
+    "checked": "2026-10-17"
+  },
+  "stepfun-ai/step3": {
+    "bytes": 641940029760,
+    "checked": "2026-10-17"
+  },
+  "tencent/Hy3": {
+    "bytes": 597578239288,
+    "checked": "2026-10-17"
+  },
+  "tencent/Hy3-preview": {
+    "bytes": 597578240176,
+    "checked": "2026-10-17"
+  },
+  "thinkingmachines/Inkling": {
+    "bytes": 1904755463940,
+    "checked": "2026-10-17"
+  },
+  "thinkingmachines/Inkling-Small": {
+    "bytes": 531913022276,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.5": {
+    "bytes": 716681196672,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.5-Air": {
+    "bytes": 220939943456,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.5V": {
+    "bytes": 215424400616,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.6": {
+    "bytes": 713577411472,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.6V": {
+    "bytes": 215424400376,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.7": {
+    "bytes": 716681196792,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-4.7-Flash": {
+    "bytes": 62444175504,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-5": {
+    "bytes": 1507735819176,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-5.1": {
+    "bytes": 1507735819176,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-5.2": {
+    "bytes": 1506667387408,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-5.3": {
+    "bytes": 755632050320,
+    "checked": "2026-10-17"
+  },
+  "zai-org/GLM-5.3-Flash": {
+    "bytes": 328337455672,
+    "checked": "2026-10-17"
+  }
+}

@@ -1,12 +1,15 @@
 import pandas as pd
 import pytest
 from vram_calculator import (
+    COLUMNS,
     HARDWARE,
     NODE_GPUS,
+    PRECISION_BYTES,
     TIERS,
     _find_best_gpu,
     _find_best_node,
     add_all_vram_and_gpu_columns,
+    column_weights_gib,
     compute_vram_columns,
     decode_tokens_per_s,
     fits,
@@ -14,11 +17,13 @@ from vram_calculator import (
     kv_cache_gib,
     node_label,
     node_serving_gib,
+    release_format,
     serving_gib,
     weights_gib,
 )
 
 GIB = 2**30
+BF16, FP8, INT4 = (PRECISION_BYTES[p] for p in ("BF16", "FP8", "INT4"))
 
 
 def _hw(key):
@@ -35,9 +40,6 @@ class TestWeightsGib:
 
     def test_4bit_70b_includes_scales_and_16bit_layers(self):
         assert weights_gib(70, "INT4") == pytest.approx(42e9 / GIB)
-
-    def test_mxfp4(self):
-        assert weights_gib(70, "MXFP4") == pytest.approx(39.2e9 / GIB)
 
     def test_zero_params(self):
         assert weights_gib(0, "BF16") == 0.0
@@ -196,103 +198,147 @@ class TestHardwareList:
 class TestDecodeTokensPerS:
     def test_dense_formula(self):
         # 31.8 GB / (0.8 x 3350 GB/s) = 11.87 ms, + 1 ms
-        assert decode_tokens_per_s(30, "dense", "FP8", 3350) == pytest.approx(1000 / 12.866, rel=1e-3)
+        assert decode_tokens_per_s(30, "dense", FP8, 3350) == pytest.approx(1000 / 12.866, rel=1e-3)
 
     def test_moe_reads_active_params_plus_15_percent(self):
         # 37 x 1.06 x 1.15 = 45.1 GB / 3840 GB/s = 11.75 ms, + 2 ms
-        assert decode_tokens_per_s(37, "moe", "FP8", 4800) == pytest.approx(1000 / 13.746, rel=1e-3)
+        assert decode_tokens_per_s(37, "moe", FP8, 4800) == pytest.approx(1000 / 13.746, rel=1e-3)
 
     def test_apple_has_a_larger_fixed_cost_for_moe(self):
         # Current llama.cpp builds run dense models on Apple with the GPUs' 1 ms
-        gpu, apple = (decode_tokens_per_s(6.74, "dense", "BF16", 614, p) for p in ("gpu", "apple"))
+        gpu, apple = (decode_tokens_per_s(6.74, "dense", BF16, 614, p) for p in ("gpu", "apple"))
         assert apple == pytest.approx(gpu)
-        gpu, apple = (decode_tokens_per_s(5.1, "moe", "INT4", 614, p) for p in ("gpu", "apple"))
+        gpu, apple = (decode_tokens_per_s(5.1, "moe", INT4, 614, p) for p in ("gpu", "apple"))
         assert 1000 / apple - 1000 / gpu == pytest.approx(3.0)
 
     def test_eight_gpus_add_sync_cost(self):
         # 74.8 GB / (0.8 x 4800 x 8) = 2.44 ms, + 1 ms, + 3 ms sync
-        assert decode_tokens_per_s(70.6, "dense", "FP8", 4800, gpu_count=8) == pytest.approx(155.4, abs=0.1)
+        assert decode_tokens_per_s(70.6, "dense", FP8, 4800, gpu_count=8) == pytest.approx(155.4, abs=0.1)
 
     def test_fixed_cost_caps_tiny_models(self):
-        assert decode_tokens_per_s(0.001, "dense", "INT4", 8000) == pytest.approx(1000, rel=1e-3)
+        assert decode_tokens_per_s(0.001, "dense", INT4, 8000) == pytest.approx(1000, rel=1e-3)
 
     def test_lower_precision_is_faster(self):
-        fp8 = decode_tokens_per_s(30, "dense", "FP8", 3350)
-        assert decode_tokens_per_s(30, "dense", "INT4", 3350) > fp8
+        fp8 = decode_tokens_per_s(30, "dense", FP8, 3350)
+        assert decode_tokens_per_s(30, "dense", INT4, 3350) > fp8
 
 
 class TestHardwareSpeed:
-    MODEL = pd.Series({"active_params_b": 30.0, "architecture": "dense"})
+    MODEL = pd.Series({"active_params_b": 30.0, "total_params_b": 30.0, "architecture": "dense",
+                       "vram_8bit_weights_gib": weights_gib(30, "FP8")})
 
     def test_single_gpu(self):
-        assert hardware_speed(_hw("h100"), self.MODEL, "FP8") == pytest.approx(77.7, abs=0.1)
+        assert hardware_speed(_hw("h100"), self.MODEL, "8bit") == pytest.approx(77.7, abs=0.1)
 
     def test_no_speed_for_pcie_servers(self):
-        assert hardware_speed(_hw("l40s"), self.MODEL, "FP8", gpu_count=8) is None
+        assert hardware_speed(_hw("l40s"), self.MODEL, "8bit", gpu_count=8) is None
 
     def test_speed_for_fabric_servers(self):
-        assert hardware_speed(_hw("h100"), self.MODEL, "FP8", gpu_count=8) is not None
+        assert hardware_speed(_hw("h100"), self.MODEL, "8bit", gpu_count=8) is not None
 
     def test_no_speed_for_unknown_architecture(self):
         assert hardware_speed(_hw("h100"), pd.Series({"active_params_b": 30.0, "architecture": None}),
-                              "FP8") is None
+                              "8bit") is None
+
+    def test_reads_the_columns_own_bytes(self):
+        # gpt-oss-120b as released: 65.2 GB of files for 117B, so 0.557 bytes per parameter
+        model = pd.Series({"active_params_b": 5.1, "total_params_b": 117.0, "architecture": "moe",
+                           "vram_released_weights_gib": 65.2e9 / GIB})
+        expected = decode_tokens_per_s(5.1, "moe", 65.2 / 117, 3350)
+        assert hardware_speed(_hw("h100"), model, "released") == pytest.approx(expected)
+
+
+class TestReleaseColumns:
+    def test_unknown_release_is_16_bit(self):
+        assert column_weights_gib(70, None, "released") == pytest.approx(weights_gib(70, "BF16"))
+        assert column_weights_gib(70, None, "8bit") == pytest.approx(weights_gib(70, "FP8"))
+        assert column_weights_gib(70, None, "4bit") == pytest.approx(weights_gib(70, "INT4"))
+
+    def test_4bit_release_is_the_same_in_every_column(self):
+        # Kimi K2.6: 595 GB of INT4 files for 1,000B parameters
+        released = 595.2e9 / GIB
+        for column in COLUMNS:
+            assert column_weights_gib(1000, released, column) == pytest.approx(released)
+
+    def test_fp8_release_is_its_own_8bit_size(self):
+        # DeepSeek V3: 688.6 GB of FP8 files, below 1.06 bytes per parameter
+        released = 688.6e9 / GIB
+        assert column_weights_gib(684.5, released, "8bit") == pytest.approx(released)
+        assert column_weights_gib(684.5, released, "4bit") == pytest.approx(weights_gib(684.5, "INT4"))
+
+    def test_release_format(self):
+        assert release_format(2.0) == "16-bit"
+        assert release_format(1.006) == "8-bit"   # native FP8
+        assert release_format(0.595) == "4-bit"   # INT4 with 16-bit layers
+        assert release_format(0.67) == "4-bit"    # FP4 experts with FP8 attention
+
+    def test_compute_columns_use_the_release(self):
+        df = compute_vram_columns(pd.DataFrame([
+            {"total_params_b": 117.0, "released_weights_gib": 65.2e9 / GIB},
+            {"total_params_b": 70.0, "released_weights_gib": None},
+        ]))
+        assert list(df["vram_released_weights_gib"]) == [60.7, 130.4]
+        assert list(df["vram_8bit_weights_gib"]) == [60.7, 69.1]
+        # 117B: 60.7 + 4 KV + 1.5 runtime
+        assert df["vram_released_serving_gib"][0] == 66.2
 
 
 class TestComputeVramColumns:
     def test_columns_added(self, sample_leaderboard_df):
         df = compute_vram_columns(sample_leaderboard_df)
-        for p in ["bf16", "fp8", "int4"]:
-            assert f"vram_{p}_weights_gib" in df.columns
-            assert f"vram_{p}_serving_gib" in df.columns
+        for column in COLUMNS:
+            assert f"vram_{column}_weights_gib" in df.columns
+            assert f"vram_{column}_serving_gib" in df.columns
 
     def test_nan_params_produce_none(self, sample_leaderboard_df):
         df = compute_vram_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "unknown-model"].iloc[0]
-        assert pd.isna(row["vram_bf16_weights_gib"])
-        assert pd.isna(row["vram_fp8_serving_gib"])
+        assert pd.isna(row["vram_released_weights_gib"])
+        assert pd.isna(row["vram_8bit_serving_gib"])
 
     def test_values_correct(self, sample_leaderboard_df):
+        # No release known: 16-bit as released
         df = compute_vram_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "big-model-70b"].iloc[0]
-        assert row["vram_bf16_weights_gib"] == 130.4
-        assert row["vram_fp8_serving_gib"] == 74.6
+        assert row["vram_released_weights_gib"] == 130.4
+        assert row["vram_8bit_serving_gib"] == 74.6
 
 
 class TestAddAllColumns:
     def test_fit_columns_for_every_device(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         for hw in HARDWARE:
-            assert f"fits_{hw.key}_fp8" in df.columns
-        assert "best_gpu_fp8" in df.columns
-        assert "best_node_fp8" in df.columns
+            assert f"fits_{hw.key}_8bit" in df.columns
+        assert "best_gpu_8bit" in df.columns
+        assert "best_node_8bit" in df.columns
 
     def test_small_model_fits_consumer_gpu(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "small-model-8b"].iloc[0]
-        assert row["fits_rtx_4090_fp8"] is True    # 11.4 GiB
-        assert row["fits_m5_pro_64_bf16"] is True  # 18.4 GiB of 48
-        assert row["best_gpu_fp8"] == "RTX 4090"
+        assert row["fits_rtx_4090_8bit"] is True    # 11.4 GiB
+        assert row["fits_m5_pro_64_released"] is True  # 18.4 GiB of 48
+        assert row["best_gpu_8bit"] == "RTX 4090"
 
-    def test_70b_fp8_fits_h100(self, sample_leaderboard_df):
+    def test_70b_8bit_fits_h100(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "big-model-70b"].iloc[0]
-        assert row["best_gpu_fp8"] == "H100 SXM"   # 74.6 GiB of 76
-        assert row["best_gpu_bf16"] == "B200"      # 135.9 GiB: over 95% of an H200's 141
+        assert row["best_gpu_8bit"] == "H100 SXM"   # 74.6 GiB of 76
+        assert row["best_gpu_released"] == "B200"      # 135.9 GiB: over 95% of an H200's 141
 
     def test_huge_model_gets_a_node(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "moe-model-600b"].iloc[0]
-        assert row["best_gpu_fp8"] == "MULTI-GPU"
+        assert row["best_gpu_8bit"] == "MULTI-GPU"
         # 608.3 GiB: just over 95% of 8x H100's 640, so the 768 GiB PCIe server
-        assert row["best_node_fp8"] == "8x RTX PRO 6000 Blackwell Server Edition"
-        assert row["best_node_bf16"] == "8x B200"      # 1,134 GiB: over 95% of 8x H200
+        assert row["best_node_8bit"] == "8x RTX PRO 6000 Blackwell Server Edition"
+        assert row["best_node_released"] == "8x B200"      # 1,134 GiB: over 95% of 8x H200
 
     def test_unknown_model_has_unknown_gpu(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "unknown-model"].iloc[0]
-        assert row["best_gpu_fp8"] == "UNKNOWN"
-        assert row["best_node_fp8"] == "UNKNOWN"
-        assert pd.isna(row["est_tok_s_fp8"])
+        assert row["best_gpu_8bit"] == "UNKNOWN"
+        assert row["best_node_8bit"] == "UNKNOWN"
+        assert pd.isna(row["est_tok_s_8bit"])
 
 
 class TestComputeSpeedColumns:
@@ -300,8 +346,8 @@ class TestComputeSpeedColumns:
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "small-model-8b"].iloc[0]
         # RTX 4090: 8.48 GB / 806.4 GB/s = 10.5 ms, + 1 ms
-        assert row["est_tok_s_fp8"] == pytest.approx(86.8)
-        assert row["est_tok_s_bf16"] == pytest.approx(48.0)
+        assert row["est_tok_s_8bit"] == pytest.approx(86.8)
+        assert row["est_tok_s_released"] == pytest.approx(48.0)
 
     def test_speed_on_fits_on_node(self):
         df = add_all_vram_and_gpu_columns(pd.DataFrame([
@@ -309,10 +355,10 @@ class TestComputeSpeedColumns:
         ]))
         row = df.iloc[0]
         # 1,003 GiB at FP8: 8x H200.  39.0 GB / 30,720 GB/s = 1.27 ms, + 2 ms, + 6 ms sync
-        assert row["best_node_fp8"] == "8x H200 SXM"
-        assert row["est_tok_s_fp8"] == pytest.approx(107.9)
+        assert row["best_node_8bit"] == "8x H200 SXM"
+        assert row["est_tok_s_8bit"] == pytest.approx(107.9)
 
     def test_no_speed_on_pcie_server(self, sample_leaderboard_df):
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "moe-model-600b"].iloc[0]
-        assert pd.isna(row["est_tok_s_fp8"])
+        assert pd.isna(row["est_tok_s_8bit"])

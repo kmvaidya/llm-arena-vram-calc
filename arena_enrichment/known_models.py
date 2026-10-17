@@ -78,3 +78,36 @@ MODEL_OVERRIDES: dict[str, ModelOverride] = {
 NOT_RELEASED: dict[str, str] = {
     "qwen-max-0919": "Qwen-Max is API-only; Arena lists it under the Qwen license",
 }
+
+# Official Hugging Face repositories of models whose Artificial Analysis page
+# (which links the weights of most models) cannot be matched to the Arena
+# name.  The release format and size come from these repositories' files.
+# Keys match like MODEL_OVERRIDES keys.
+HF_REPOS: dict[str, str] = {
+    "GPT-OSS-120B": "openai/gpt-oss-120b",                     # MXFP4
+    "GPT-OSS-20B": "openai/gpt-oss-20b",                       # MXFP4
+    "kimi-k2-0711-preview": "moonshotai/Kimi-K2-Instruct",     # FP8
+    "kimi-k2-0905-preview": "moonshotai/Kimi-K2-Instruct-0905",  # FP8
+    "kimi-k2-thinking": "moonshotai/Kimi-K2-Thinking",         # INT4
+    "Kimi-K2.5": "moonshotai/Kimi-K2.5",                       # INT4
+    "Kimi-K2.6": "moonshotai/Kimi-K2.6",                       # INT4
+    "deepseek-r1-0528": "deepseek-ai/DeepSeek-R1-0528",
+    "LongCat-Flash": "meituan-longcat/LongCat-Flash-Chat",
+    "glm-5": "zai-org/GLM-5",
+    "glm-4.6": "zai-org/GLM-4.6",
+    "mimo-v2.5": "XiaomiMiMo/MiMo-V2.5",
+    "hunyuan-hy3-preview": "tencent/Hy3-preview",
+    "step-3.5-flash": "stepfun-ai/Step-3.5-Flash",
+    "step-3": "stepfun-ai/step3",
+    "minimax-m1": "MiniMaxAI/MiniMax-M1-80k",
+    "minimax-m2.1": "MiniMaxAI/MiniMax-M2.1",                  # AA links "MiniMax-M2-1"
+    "qwen3-235b-a22b-instruct-2507": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+    "qwen3-235b-a22b-thinking-2507": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+    "qwen3-235b-a22b": "Qwen/Qwen3-235B-A22B",
+    "qwen3-vl-235b-a22b-instruct": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+    "qwen3-vl-235b-a22b-thinking": "Qwen/Qwen3-VL-235B-A22B-Thinking",
+    "qwen3.5-27b": "Qwen/Qwen3.5-27B",
+    "llama-4-maverick-17b-128e-instruct": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+    "llama-4-scout-17b-16e-instruct": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    "trinity-large": "arcee-ai/Trinity-Large-Preview",
+}

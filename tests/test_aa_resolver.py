@@ -198,7 +198,7 @@ class TestResolveFromAa:
 
     def test_returns_correct_keys(self, aa_lookup):
         result = resolve_from_aa("deepseek-v3", aa_lookup=aa_lookup)
-        assert set(result.keys()) == {"total_params_b", "active_params_b", "architecture"}
+        assert set(result.keys()) == {"total_params_b", "active_params_b", "architecture", "hf_repo"}
 
 
 # ── _extract_models_from_rsc ──────────────────────────────────────────────
@@ -225,7 +225,7 @@ class TestExtractModelsFromRsc:
 
 # ── model pages ───────────────────────────────────────────────────────────
 
-def _spec_page(total=None, active=None):
+def _spec_page(total=None, active=None, weights=None):
     """An AA model page with the Technical Specifications rows we read."""
     rows = ""
     if total is not None:
@@ -240,6 +240,12 @@ def _spec_page(total=None, active=None):
             '<span class="align-middle ml-1">Active parameters</span></th>'
             f'<td><span class="align-middle mr-1">{active}</span><button></button>'
             '<div>Number of parameters active per token during inference</div></td></tr>'
+        )
+    if weights is not None:
+        rows += (
+            '<tr><th scope="row" class="text-left"><svg></svg>'
+            '<span class="align-middle ml-1">Model weights</span></th>'
+            f'<td><a href="{weights}" target="_blank">Hugging Face</a></td></tr>'
         )
     return f'<html><body><table class="text-sm w-full">{rows}</table></body></html>'
 
@@ -268,6 +274,7 @@ class TestFetchSingleModel:
         mock_get.return_value = MagicMock(status_code=200, text=_spec_page("1.6T", "49B"))
         assert _fetch_single_model("deepseek-v4-pro") == {
             "total_params_b": 1600.0, "active_params_b": 49.0, "architecture": "moe",
+            "hf_repo": None,
         }
 
     @patch("scrapers.aa_resolver.requests.get")
@@ -275,12 +282,25 @@ class TestFetchSingleModel:
         mock_get.return_value = MagicMock(status_code=200, text=_spec_page("70.64B"))
         assert _fetch_single_model("x") == {
             "total_params_b": 70.6, "active_params_b": 70.6, "architecture": "dense",
+            "hf_repo": None,
         }
 
     @patch("scrapers.aa_resolver.requests.get")
     def test_page_without_parameters(self, mock_get):
         mock_get.return_value = MagicMock(status_code=200, text=_spec_page())
-        assert _fetch_single_model("x") is None
+        assert _fetch_single_model("x") == {
+            "total_params_b": None, "active_params_b": None, "architecture": None, "hf_repo": None,
+        }
+
+    @pytest.mark.parametrize("href, repo", [
+        ("https://huggingface.co/zai-org/GLM-5.3", "zai-org/GLM-5.3"),
+        ("https://huggingface.co/openai/gpt-oss-120b/tree/main", "openai/gpt-oss-120b"),
+        ("https://github.com/some/repo", None),
+    ])
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_weights_link(self, mock_get, href, repo):
+        mock_get.return_value = MagicMock(status_code=200, text=_spec_page("753B", "40B", href))
+        assert _fetch_single_model("glm-5-3")["hf_repo"] == repo
 
     @patch("scrapers.aa_resolver.requests.get")
     def test_missing_page(self, mock_get):
@@ -314,11 +334,12 @@ class TestFetchSingleModel:
 
 
 class TestGetModelParams:
-    PARAMS = {"total_params_b": 1600.0, "active_params_b": 49.0, "architecture": "moe"}
+    PARAMS = {"total_params_b": 1600.0, "active_params_b": 49.0, "architecture": "moe",
+              "hf_repo": "deepseek-ai/DeepSeek-V4-Pro"}
 
     def _write(self, path, slug, checked, params=None):
         entry = dict(params or {"total_params_b": None, "active_params_b": None,
-                                "architecture": None})
+                                "architecture": None, "hf_repo": None})
         entry["checked"] = checked
         path.write_text(json.dumps({slug: entry}))
 
@@ -340,8 +361,24 @@ class TestGetModelParams:
     def test_expired_hit_refetched(self, mock_fetch, params_cache):
         self._write(params_cache, "m", _days_ago(31), self.PARAMS)
         mock_fetch.return_value = {"total_params_b": 1.0, "active_params_b": 1.0,
-                                   "architecture": "dense"}
+                                   "architecture": "dense", "hf_repo": None}
         assert get_model_params("m")["total_params_b"] == 1.0
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_entry_without_weights_link_is_read_again(self, mock_fetch, params_cache):
+        # Saved before pages were read for their weights link
+        old = {k: v for k, v in self.PARAMS.items() if k != "hf_repo"}
+        self._write(params_cache, "m", _days_ago(1), old)
+        mock_fetch.return_value = self.PARAMS
+        assert get_model_params("m")["hf_repo"] == "deepseek-ai/DeepSeek-V4-Pro"
+        assert json.loads(params_cache.read_text())["m"]["hf_repo"] == "deepseek-ai/DeepSeek-V4-Pro"
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_no_fetch_reads_only_the_cache(self, mock_fetch, params_cache):
+        self._write(params_cache, "m", _days_ago(90), self.PARAMS)
+        assert aa_resolver.get_model_page("m", fetch=False)["total_params_b"] == 1600.0
+        assert aa_resolver.get_model_page("other", fetch=False) is None
+        mock_fetch.assert_not_called()
 
     @patch("scrapers.aa_resolver._fetch_single_model")
     def test_missing_params_remembered_for_a_week(self, mock_fetch, params_cache):
@@ -584,3 +621,21 @@ class TestSecondReviewFixes:
                   {"name": "GLM-5.3", "slug": "glm-5-3-b", "isOpenWeights": False}]
         winners = {_build_lookup(order)["glm53"]["slug"] for order in (models, models[::-1])}
         assert winners == {"glm-5-3-a"}  # the open-weights one
+
+
+class TestHfRepoFor:
+    LOOKUP = [{"name": "Kimi K2.5", "slug": "kimi-k2-5", "isOpenWeights": True}]
+
+    @patch("scrapers.aa_resolver.get_model_page", return_value={
+        "total_params_b": None, "active_params_b": None, "architecture": None,
+        "hf_repo": "moonshotai/Kimi-K2.5"})
+    def test_from_the_matched_page(self, mock_page):
+        lookup = _build_lookup(self.LOOKUP)
+        assert aa_resolver.hf_repo_for("kimi-k2.5-thinking", lookup) == "moonshotai/Kimi-K2.5"
+        mock_page.assert_called_once_with("kimi-k2-5", fetch=True)
+
+    @patch("scrapers.aa_resolver.get_model_page")
+    def test_no_match_no_repo(self, mock_page):
+        assert aa_resolver.hf_repo_for("other-model", _build_lookup(self.LOOKUP)) is None
+        assert aa_resolver.hf_repo_for("kimi-k2.5", {}) is None
+        mock_page.assert_not_called()

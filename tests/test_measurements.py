@@ -6,7 +6,7 @@ from vram_calculator import PRECISION_BYTES, decode_tokens_per_s
 
 def _errors():
     return [
-        decode_tokens_per_s(m.active_params_b, m.architecture, m.precision,
+        decode_tokens_per_s(m.active_params_b, m.architecture, PRECISION_BYTES[m.precision],
                             m.bandwidth_gbs, m.platform, m.gpu_count) / m.tokens_per_s - 1
         for m in MEASUREMENTS
     ]

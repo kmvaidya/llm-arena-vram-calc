@@ -23,7 +23,7 @@ import os
 import re
 import time
 from datetime import UTC, datetime
-from typing import Any, TypedDict
+from typing import Any, NotRequired, TypedDict
 
 import requests
 from bs4 import BeautifulSoup
@@ -39,6 +39,7 @@ class AAEntry(TypedDict):
     total_params_b: float | None
     active_params_b: float | None
     architecture: str | None
+    hf_repo: NotRequired[str | None]
 
 
 class ModelParams(TypedDict):
@@ -47,6 +48,17 @@ class ModelParams(TypedDict):
     total_params_b: float
     active_params_b: float
     architecture: str
+    # The model's official weights on Hugging Face, when its AA page links them
+    hf_repo: NotRequired[str | None]
+
+
+class ModelPage(TypedDict):
+    """What a model's AA page says: its sizes (None when missing) and where its weights are."""
+
+    total_params_b: float | None
+    active_params_b: float | None
+    architecture: str | None
+    hf_repo: str | None
 
 
 class AAUnavailable(Exception):
@@ -183,15 +195,22 @@ def _extract_models_from_rsc(text: str) -> list[dict[str, Any]]:
 # Per-model pages (parameter counts)
 # ---------------------------------------------------------------------------
 
-def _fetch_single_model(slug: str) -> ModelParams | None:
+def _hf_repo_from_url(url: str | None) -> str | None:
+    """'owner/name' from a Hugging Face model URL, or None for another site."""
+    m = re.match(r"https?://(?:www\.)?huggingface\.co/([\w.-]+/[\w.-]+)", url or "")
+    return m.group(1) if m else None
+
+
+def _fetch_single_model(slug: str) -> ModelPage | None:
     """
-    Scrape parameter data from an individual model page as a fallback.
+    Read a model's AA page: its parameter counts and the Hugging Face
+    repository its "Model weights" row links to.
 
     Uses the <table class="text-sm"> Technical Specifications table.
-    Returns a dict with total_params_b, active_params_b, architecture, or
-    None when the page does not exist or lists no parameter count.  Raises
-    AAUnavailable when the page could not be read, so that a passing outage
-    is not remembered as a model without data.
+    Returns None when the page does not exist; sizes are None when the page
+    lists no parameter count.  Raises AAUnavailable when the page could not
+    be read, so that a passing outage is not remembered as a model without
+    data.
     """
     url = f"{AA_MODEL_BASE_URL}/{slug}"
     logger.info(f"Fetching single model from AA: {url}")
@@ -219,6 +238,7 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
 
     total_b = None
     active_b = None
+    hf_repo = None
 
     for row in table.select("tr"):
         label_span = row.select_one("th span.align-middle")
@@ -233,9 +253,13 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
             val_span = td.select_one("span.align-middle")
             text = val_span.get_text(strip=True) if val_span else td.get_text(strip=True)
             active_b = _parse_param_value(text)
+        elif label == "Model weights":
+            link = td.select_one("a[href]")
+            hf_repo = _hf_repo_from_url(str(link["href"])) if link else None
 
     if total_b is None:
-        return None
+        return {"total_params_b": None, "active_params_b": None, "architecture": None,
+                "hf_repo": hf_repo}
 
     if active_b is None:
         active_b = total_b
@@ -245,6 +269,7 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
         "total_params_b": round(total_b, 1),
         "active_params_b": round(active_b, 1),
         "architecture": arch,
+        "hf_repo": hf_repo,
     }
 
 
@@ -342,7 +367,7 @@ def _save_params_cache(cache: dict[str, dict[str, Any]]) -> None:
     os.replace(partial, PARAMS_CACHE_FILE)
 
 
-def _age_days(checked: str | None) -> float:
+def age_days(checked: str | None) -> float:
     """Days since a YYYY-MM-DD date; infinite when the date is missing or invalid."""
     try:
         day = datetime.strptime(checked or "", "%Y-%m-%d").replace(tzinfo=UTC)
@@ -351,23 +376,24 @@ def _age_days(checked: str | None) -> float:
     return (datetime.now(UTC) - day).total_seconds() / 86400
 
 
-def _params_from_cache_entry(hit: dict[str, Any]) -> ModelParams | None:
-    if hit.get("total_params_b") is None:
-        return None
+def _page_from_cache_entry(hit: dict[str, Any]) -> ModelPage:
     return {
-        "total_params_b": hit["total_params_b"],
-        "active_params_b": hit["active_params_b"],
-        "architecture": hit["architecture"],
+        "total_params_b": hit.get("total_params_b"),
+        "active_params_b": hit.get("active_params_b"),
+        "architecture": hit.get("architecture"),
+        "hf_repo": hit.get("hf_repo"),
     }
 
 
-def get_model_params(slug: str) -> ModelParams | None:
+def get_model_page(slug: str, fetch: bool = True) -> ModelPage | None:
     """
-    Parameter counts from a model's AA page, through the committed cache.
+    A model's AA page, through the committed cache; None when there is no
+    such page.
 
-    The page is fetched only when its cached result is older than
-    PARAMS_MAX_AGE_DAYS (MISSING_PARAMS_MAX_AGE_DAYS when the page had no
-    parameter count).  If the page cannot be read, an expired count is still
+    The page is fetched only when fetch is True and its cached result is
+    older than PARAMS_MAX_AGE_DAYS (MISSING_PARAMS_MAX_AGE_DAYS when the page
+    had no parameter count), or was saved before pages were read for their
+    weights link.  If the page cannot be read, an expired count is still
     better than none and is returned; without one, AAUnavailable is raised.
     A page that no longer shows counts it showed before keeps them too (see
     LOST_SIZES).
@@ -377,31 +403,49 @@ def get_model_params(slug: str) -> ModelParams | None:
     if hit is not None:
         has_params = hit.get("total_params_b") is not None
         max_age = PARAMS_MAX_AGE_DAYS if has_params else MISSING_PARAMS_MAX_AGE_DAYS
-        if _age_days(hit.get("checked")) < max_age:
-            return _params_from_cache_entry(hit)
+        fresh = age_days(hit.get("checked")) < max_age and ("hf_repo" in hit or not has_params)
+        if fresh or not fetch:
+            return _page_from_cache_entry(hit)
+    if not fetch:
+        return None
 
     try:
-        params = _fetch_single_model(slug)
+        page = _fetch_single_model(slug)
     except AAUnavailable:
         if hit is not None and hit.get("total_params_b") is not None:
-            return _params_from_cache_entry(hit)
+            return _page_from_cache_entry(hit)
         raise
 
-    if params is None and hit is not None and hit.get("total_params_b") is not None:
+    if (page is None or page["total_params_b"] is None) and hit is not None \
+            and hit.get("total_params_b") is not None:
         # The entry stays expired, so every run checks the page again and
         # reports it until the reader is fixed
         logger.warning(f"AA page {slug} no longer shows parameter counts; keeping the cached ones")
         LOST_SIZES.add(slug)
-        return _params_from_cache_entry(hit)
+        return _page_from_cache_entry(hit)
 
     cache[slug] = {
-        "total_params_b": params["total_params_b"] if params else None,
-        "active_params_b": params["active_params_b"] if params else None,
-        "architecture": params["architecture"] if params else None,
+        "total_params_b": page["total_params_b"] if page else None,
+        "active_params_b": page["active_params_b"] if page else None,
+        "architecture": page["architecture"] if page else None,
+        "hf_repo": page["hf_repo"] if page else None,
         "checked": datetime.now(UTC).strftime("%Y-%m-%d"),
     }
     _save_params_cache(cache)
-    return params
+    return page
+
+
+def get_model_params(slug: str) -> ModelParams | None:
+    """Parameter counts from a model's AA page (see get_model_page), with its weights' repository."""
+    page = get_model_page(slug)
+    if page is None or page["total_params_b"] is None:
+        return None
+    return {
+        "total_params_b": page["total_params_b"],
+        "active_params_b": page["active_params_b"] or page["total_params_b"],
+        "architecture": page["architecture"] or "dense",
+        "hf_repo": page["hf_repo"],
+    }
 
 
 def _cache_is_fresh(fetched_at: str | None, max_age_hours: float) -> bool:
@@ -534,6 +578,58 @@ def _same_model_suffix(rest: str, may_name_a_model: bool = True) -> bool:
     return bool(pattern.fullmatch(rest))
 
 
+def match_aa_entry(model_name: str, aa_lookup: dict[str, AAEntry]) -> AAEntry | None:
+    """The AA list entry an Arena model name refers to, or None."""
+    name_norm = _normalize(model_name)
+
+    # 1. Exact match on normalized name/slug
+    entry = aa_lookup.get(name_norm)
+    if entry:
+        return entry
+
+    # 2. Try with common suffixes/noise stripped.
+    #    Arena names often include context window ("4k", "128k"), dates ("082024",
+    #    "june2024"), and role tags ("instruct", "chat") that AA names omit.
+    stripped_variants = set()
+    stripped_variants.add(re.sub(r"(instruct|chat|it|hf)$", "", name_norm))
+    stripped_variants.add(re.sub(r"\d{6,8}$", "", name_norm))       # trailing dates
+    stripped_variants.add(re.sub(r"[a-z]*\d{4}$", "", name_norm))   # "june2024"
+    stripped_variants.add(re.sub(r"\d+k", "", name_norm))           # context "4k","128k"
+    # Combine: strip context + suffix + date
+    base = re.sub(r"\d+k", "", name_norm)
+    base = re.sub(r"(instruct|chat|it|hf)$", "", base)
+    base = re.sub(r"\d{6,8}$", "", base)
+    base = re.sub(r"[a-z]*\d{4}$", "", base)
+    stripped_variants.add(base)
+    stripped_variants.discard(name_norm)  # don't re-check original
+    stripped_variants.discard("")
+
+    for variant in stripped_variants:
+        if variant in aa_lookup:
+            return aa_lookup[variant]
+
+    # 3. Prefix matching: the longest AA key the arena name starts with, or
+    #    else the shortest AA key that starts with the arena name, as long as
+    #    the extra part only names a release of the same model ("deepseekv3"
+    #    and "deepseekv30324"), not another model ("deepseekv31",
+    #    "deepseekv4flashvision").  Keys under half the name's length are
+    #    too short to trust.
+    best_key = None
+    min_key_len = max(6, len(name_norm) // 2)
+    for key in aa_lookup:
+        if (len(key) >= min_key_len and name_norm.startswith(key)
+                and _same_model_suffix(name_norm[len(key):])
+                and (not best_key or len(key) > len(best_key))):
+            best_key = key
+    if not best_key and len(name_norm) >= min_key_len:
+        for key in aa_lookup:
+            if (key.startswith(name_norm)
+                    and _same_model_suffix(key[len(name_norm):], may_name_a_model=False)
+                    and (not best_key or len(key) < len(best_key))):
+                best_key = key
+    return aa_lookup[best_key] if best_key else None
+
+
 def resolve_from_aa(
     model_name: str,
     aa_lookup: dict[str, AAEntry] | None = None,
@@ -549,7 +645,7 @@ def resolve_from_aa(
             (through the committed cache) when the entry lacks them
 
     Returns:
-        dict with {total_params_b, active_params_b, architecture} or None
+        dict with {total_params_b, active_params_b, architecture, hf_repo} or None
     """
     if aa_lookup is None:
         aa_lookup, _ = get_aa_models()
@@ -557,58 +653,7 @@ def resolve_from_aa(
     if not aa_lookup:
         return None
 
-    name_norm = _normalize(model_name)
-
-    # 1. Exact match on normalized name/slug
-    entry = aa_lookup.get(name_norm)
-
-    # 2. Try with common suffixes/noise stripped.
-    #    Arena names often include context window ("4k", "128k"), dates ("082024",
-    #    "june2024"), and role tags ("instruct", "chat") that AA names omit.
-    if not entry:
-        # Strip trailing noise progressively
-        stripped_variants = set()
-        stripped_variants.add(re.sub(r"(instruct|chat|it|hf)$", "", name_norm))
-        stripped_variants.add(re.sub(r"\d{6,8}$", "", name_norm))       # trailing dates
-        stripped_variants.add(re.sub(r"[a-z]*\d{4}$", "", name_norm))   # "june2024"
-        stripped_variants.add(re.sub(r"\d+k", "", name_norm))           # context "4k","128k"
-        # Combine: strip context + suffix + date
-        base = re.sub(r"\d+k", "", name_norm)
-        base = re.sub(r"(instruct|chat|it|hf)$", "", base)
-        base = re.sub(r"\d{6,8}$", "", base)
-        base = re.sub(r"[a-z]*\d{4}$", "", base)
-        stripped_variants.add(base)
-        stripped_variants.discard(name_norm)  # don't re-check original
-        stripped_variants.discard("")
-
-        for variant in stripped_variants:
-            if variant in aa_lookup:
-                entry = aa_lookup[variant]
-                break
-
-    # 3. Prefix matching: the longest AA key the arena name starts with, or
-    #    else the shortest AA key that starts with the arena name, as long as
-    #    the extra part only names a release of the same model ("deepseekv3"
-    #    and "deepseekv30324"), not another model ("deepseekv31",
-    #    "deepseekv4flashvision").  Keys under half the name's length are
-    #    too short to trust.
-    if not entry:
-        best_key = None
-        min_key_len = max(6, len(name_norm) // 2)
-        for key in aa_lookup:
-            if (len(key) >= min_key_len and name_norm.startswith(key)
-                    and _same_model_suffix(name_norm[len(key):])
-                    and (not best_key or len(key) > len(best_key))):
-                best_key = key
-        if not best_key and len(name_norm) >= min_key_len:
-            for key in aa_lookup:
-                if (key.startswith(name_norm)
-                        and _same_model_suffix(key[len(name_norm):], may_name_a_model=False)
-                        and (not best_key or len(key) < len(best_key))):
-                    best_key = key
-        if best_key:
-            entry = aa_lookup[best_key]
-
+    entry = match_aa_entry(model_name, aa_lookup)
     if not entry:
         return None
 
@@ -620,6 +665,7 @@ def resolve_from_aa(
             entry["total_params_b"] = params["total_params_b"]
             entry["active_params_b"] = params["active_params_b"]
             entry["architecture"] = params["architecture"]
+            entry["hf_repo"] = params.get("hf_repo")
 
     total = entry.get("total_params_b")
     if total is None:
@@ -631,7 +677,21 @@ def resolve_from_aa(
         "total_params_b": total,
         "active_params_b": active if active is not None else total,
         "architecture": arch if arch is not None else "dense",
+        "hf_repo": entry.get("hf_repo"),
     }
+
+
+def hf_repo_for(model_name: str, aa_lookup: dict[str, AAEntry], fetch: bool = True) -> str | None:
+    """
+    The Hugging Face repository the AA page of an Arena model links its
+    weights to, or None.  Reads the page (through the cache) only when fetch
+    is True; raises AAUnavailable when it cannot be read.
+    """
+    entry = match_aa_entry(model_name, aa_lookup) if aa_lookup else None
+    if not entry or not entry.get("slug"):
+        return None
+    page = get_model_page(entry["slug"], fetch=fetch)
+    return page["hf_repo"] if page else None
 
 
 # Trailing slug parts that name a role, mode, reasoning effort or release of

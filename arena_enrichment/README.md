@@ -11,7 +11,8 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
   - Regex name parsing (e.g., `Qwen3-30B-A3B` → 30B total, 3B active, MoE)
   - Artificial Analysis pages found by guessing the page name, for models missing from the list
   - Results with more active than total parameters are rejected
-- **Compute** the memory each model needs at BF16, FP8 and INT4, in GiB (weights, a 16K-token KV cache and the runtime), and its single-request generation speed from the hardware's memory bandwidth, on one device or an 8-GPU server. The formulas are in the root README; the speed formula is checked against published measurements in `measurements.py`
+- **Find** how each model was released (16-bit, 8-bit or 4-bit) from the weight files in its official Hugging Face repository: the one its Artificial Analysis page links, or one listed in `known_models.py` (`HF_REPOS`). Sizes are cached in `data/hf_checkpoints.json`
+- **Compute** the memory each model needs as released and quantized to 8 or 4 bits (never more than as released), in GiB (weights, a 16K-token KV cache and the runtime), and its single-request generation speed from the hardware's memory bandwidth, on one device or an 8-GPU server. The formulas are in the root README; the speed formula is checked against published measurements in `measurements.py`
 - **Flag** which models fit on each device: consumer GPUs (RTX 5060 Ti 16 GB to RTX 5090), computers whose GPU shares system RAM (Macs, DGX Spark, Ryzen AI Max+ 395, counting the share the system gives the GPU), workstations (Radeon AI PRO R9700, RTX PRO 6000, DGX Station) and data-center GPUs (NVIDIA A100 to Rubin, AMD MI300X to MI355X, Intel Gaudi 3), and on 8-GPU servers of the GPUs sold that way (the list is `HARDWARE` in `vram_calculator.py`)
 - **Output** enriched CSV, formatted XLSX, and auto-updated README.md tables
 
@@ -43,6 +44,7 @@ When something goes wrong the workflow keeps one issue open, titled "Leaderboard
 - the Arena leaderboard has not been published for more than 21 days (its longest gap so far is 19), or the download no longer says when it was published;
 - the Artificial Analysis model list could not be read and the saved copy is more than 3 days old;
 - fewer than 85% of models have parameter counts (add the missing ones to `known_models.py`);
+- fewer than 70% of the 50 best-ranked models have a known release (add their repositories to `HF_REPOS` in `known_models.py`, or check the Hugging Face reader);
 - Artificial Analysis pages that showed parameter counts no longer do, which usually means the page layout changed (the cached counts are used meanwhile);
 - Artificial Analysis pages block the request or lack the specifications table every model page has.
 

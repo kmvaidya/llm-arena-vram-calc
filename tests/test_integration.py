@@ -80,8 +80,8 @@ class TestFullPipeline:
         # All expected columns exist
         for col in [
             "total_params_b", "active_params_b", "architecture",
-            "vram_bf16_weights_gib", "vram_fp8_serving_gib",
-            "best_gpu_fp8", "fits_h100_fp8",
+            "vram_released_weights_gib", "vram_8bit_serving_gib",
+            "best_gpu_8bit", "fits_h100_8bit",
         ]:
             assert col in df.columns, f"Missing column: {col}"
 
@@ -89,7 +89,7 @@ class TestFullPipeline:
         dsv3 = df[df["model_name"] == "DeepSeek-V3"].iloc[0]
         assert dsv3["total_params_b"] == 671.0
         assert dsv3["architecture"] == "moe"
-        assert dsv3["vram_fp8_serving_gib"] > 600  # 671B x 1.06 bytes = 662 GiB of weights
+        assert dsv3["vram_8bit_serving_gib"] > 600  # 671B x 1.06 bytes = 662 GiB of weights
 
         # Llama-4-Maverick: should resolve via override (400B MoE)
         mav = df[df["model_name"] == "Llama-4-Maverick"].iloc[0]
@@ -101,12 +101,12 @@ class TestFullPipeline:
         gemma = df[df["model_name"] == "Gemma-3-27B-IT"].iloc[0]
         assert 27.0 <= gemma["total_params_b"] <= 27.2
         assert gemma["architecture"] == "dense"
-        assert gemma["fits_h100_fp8"] is True  # ~27 * 1.0 * 1.25 ≈ 34 < 80
+        assert gemma["fits_h100_8bit"] is True  # 27B x 1.06 + 4 + 1.5 = 32 GiB of 76
 
         # mystery-model: should be unresolved
         mystery = df[df["model_name"] == "mystery-model"].iloc[0]
         assert pd.isna(mystery["total_params_b"])
-        assert mystery["best_gpu_fp8"] == "UNKNOWN"
+        assert mystery["best_gpu_8bit"] == "UNKNOWN"
 
         # Resolution source counts
         assert resolution_counts.get("UNKNOWN", 0) == 1  # only mystery-model
@@ -186,12 +186,15 @@ class TestFullPipeline:
         undated = generate_readme(df, {})
         assert "Arena data" not in undated
 
-    def _two_models(self, integration_leaderboard):
+    def _two_models(self, integration_leaderboard, release=None):
         df = integration_leaderboard.copy().head(2)
         # A 671B MoE (37B active) that needs 8 GPUs, and a 72B dense model
         df["total_params_b"] = [671.0, 72.0]
         df["active_params_b"] = [37.0, 72.0]
         df["architecture"] = ["moe", "dense"]
+        if release:
+            df["released_weights_gib"] = [release[0], None]
+            df["release_format"] = [release[1], None]
         return generate_readme(add_all_vram_and_gpu_columns(df), {})
 
     def test_one_hardware_table(self, integration_leaderboard):
@@ -213,16 +216,25 @@ class TestFullPipeline:
 
     def test_fits_on_and_speed_in_leaderboard(self, integration_leaderboard):
         readme = self._two_models(integration_leaderboard)
-        # DeepSeek at FP8 needs 678 GiB: over 8x H100 (640), within 8x RTX PRO
+        # DeepSeek at 8-bit needs 678 GiB: over 8x H100 (640), within 8x RTX PRO
         # 6000 (768), a PCIe server with no speed estimate
-        assert "| 8x RTX PRO 6000 Blackwell Server Edition (FP8) | — |" in readme
-        # Qwen 72B at FP8 needs 76.6 GiB, over 95% of an H100's 80, so the
+        assert "| 8x RTX PRO 6000 Blackwell Server Edition | — |" in readme
+        # Qwen 72B at 8-bit needs 76.6 GiB, over 95% of an H100's 80, so the
         # RTX PRO 6000: 76.3 GB / 1,434 GB/s + 1 ms
-        assert "| RTX PRO 6000 Blackwell (FP8) | ~18 tok/s |" in readme
-        # Whole GiB from 100 up, one decimal below
-        assert "| 671 (37) | MoE | 1,255 | 668 | 380 |" in readme
-        assert "| 72 | Dense | 140 | 76.6 | 45.7 |" in readme
+        assert "| RTX PRO 6000 Blackwell | ~18 tok/s |" in readme
+        # Release unknown, so 16-bit as released; whole GiB from 100 up, one decimal below
+        assert "| 671 (37) | MoE | ? | 1,255 | 668 | 380 |" in readme
+        assert "| 72 | Dense | ? | 140 | 76.6 | 45.7 |" in readme
         assert "*Speed* is the estimated generation speed for one request there" in readme
+
+    def test_released_precision(self, integration_leaderboard):
+        # DeepSeek V3 as published: 688.6 GB of FP8 files, 641.3 GiB
+        readme = self._two_models(integration_leaderboard, release=(688.6e9 / 2**30, "8-bit"))
+        # As released and at 8-bit it is its own 646.8 GiB; 4-bit still smaller
+        assert "| 671 (37) | MoE | 8-bit | 647 | 647 | 380 |" in readme
+        # 8x H200: DeepSeek is now the best model as released, at 657 GiB
+        h200 = next(line for line in readme.splitlines() if line.startswith("|  | 8x H200 SXM |"))
+        assert h200.split(" | ")[4].startswith("DeepSeek-V3 (#1, 657 GiB")
 
     def test_hardware_tiers_in_readme(self, integration_leaderboard):
         df = integration_leaderboard.copy().head(1)
@@ -251,14 +263,16 @@ class TestFullPipeline:
         readme = self._two_models(integration_leaderboard)
 
         assert "### Memory formula" in readme
-        assert "Memory (GiB) = total parameters (billions) × GiB per billion parameters" in readme
+        assert "Memory (GiB) = weights" in readme
         assert ("+ KV cache: 4 GiB (16,384 tokens × 256 KiB; 2 GiB under 15B parameters)"
                 in readme)
         assert "+ 1.5 GiB per GPU" in readme
-        assert "| FP8 | 1.06 | 0.987 | FP8, GGUF Q8_0, MLX 8-bit |" in readme
+        assert ("| 8-bit | 1.06 bytes per parameter, or the release if smaller | 0.987 "
+                "| FP8, GGUF Q8_0, MLX 8-bit |") in readme
         assert "70 × 0.987 + 4 + 1.5 = 74.6 GiB, so it fits an H100 (76 of 80 GiB)" in readme
         assert "a model fits a GPU when it needs at most 95% of its memory" in readme
-        assert "For them the BF16 column describes weights nobody publishes" in readme
+        assert "so no column exceeds the release" in readme
+        assert "| Tier | Hardware | Memory | Bandwidth | As released | 8-bit | 4-bit |" in readme
 
         assert "### Speed formula" in readme
         assert ("Time per token (ms) = bytes per token ÷ (0.8 × bandwidth × GPUs) + fixed cost"
@@ -269,3 +283,13 @@ class TestFullPipeline:
         assert "#### How close are the estimates?" in readme
         assert "Checked against 40 published single-request speeds" in readme
         assert "| DGX Spark | [gpt-oss-120b MXFP4](" in readme
+
+
+def test_xlsx_summary_marks_unknown_release():
+    from enrich_arena import _build_gpu_summary_rows
+    df = add_all_vram_and_gpu_columns(pd.DataFrame([
+        {"rank": 1, "model_name": "a", "total_params_b": 8.0, "active_params_b": 8.0,
+         "architecture": "dense", "release_format": None},
+    ]))
+    row = next(r for r in _build_gpu_summary_rows(df) if r["Model"] == "a")
+    assert row["Release"] == "?"

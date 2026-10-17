@@ -1,4 +1,6 @@
-from known_models import MODEL_OVERRIDES
+import re
+
+from known_models import HF_REPOS, MODEL_OVERRIDES, NOT_RELEASED
 
 
 class TestModelOverridesStructure:
@@ -56,3 +58,12 @@ class TestModelOverridesStructure:
                     f"have different values"
                 )
             lower_keys[lk] = key
+
+
+class TestHfRepos:
+    def test_repositories_are_owner_slash_name(self):
+        for key, repo in HF_REPOS.items():
+            assert re.fullmatch(r"[\w.-]+/[\w.-]+", repo), f"{key}: {repo!r}"
+
+    def test_unreleased_models_have_no_repository(self):
+        assert not set(NOT_RELEASED) & {k.lower() for k in HF_REPOS}
