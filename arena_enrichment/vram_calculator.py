@@ -2,7 +2,8 @@
 VRAM estimation and GPU fit calculations.
 
 Computes estimated VRAM requirements at multiple precisions and
-determines which single-GPU configurations can serve each model.
+determines which single-GPU and 8-GPU node configurations can serve each
+model.
 """
 
 from __future__ import annotations
@@ -37,6 +38,10 @@ GPU_DISPLAY_NAMES = {
 
 # GPUs sorted by VRAM ascending (for finding smallest fitting GPU)
 GPUS_BY_VRAM = sorted(GPU_CONFIGS.items(), key=lambda x: x[1])
+
+# GPUs in a standard server node (HGX/DGX-style), the usual way to serve
+# models too large for one GPU: weights are split across the node's GPUs
+NODE_GPU_COUNT = 8
 
 # Precisions to compute for GPU fit columns
 FIT_PRECISIONS = ["BF16", "FP8", "INT4"]
@@ -167,6 +172,43 @@ def _find_best_gpu(serving_gb: float) -> str:
     return "MULTI-GPU"
 
 
+def node_label(gpu_key: str) -> str:
+    """Display name for an 8-GPU node, e.g. '8x H100 SXM'."""
+    return f"{NODE_GPU_COUNT}x {GPU_DISPLAY_NAMES[gpu_key]}"
+
+
+def compute_best_node_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add summary columns for the smallest 8-GPU node that can serve each model.
+
+    Adds columns: best_node_bf16, best_node_fp8
+
+    Args:
+        df: DataFrame with vram_*_serving_gb columns
+
+    Returns:
+        DataFrame with best_node columns added
+    """
+    for precision in ["BF16", "FP8"]:
+        p_lower = precision.lower()
+        serving_col = f"vram_{p_lower}_serving_gb"
+        col_name = f"best_node_{p_lower}"
+
+        df[col_name] = df[serving_col].apply(
+            lambda x: _find_best_node(x) if pd.notna(x) else "UNKNOWN"
+        )
+
+    return df
+
+
+def _find_best_node(serving_gb: float) -> str:
+    """Find the smallest 8-GPU node that can fit the given serving VRAM requirement."""
+    for gpu_key, gpu_vram in GPUS_BY_VRAM:
+        if serving_gb <= gpu_vram * NODE_GPU_COUNT:
+            return node_label(gpu_key)
+    return "MULTI-NODE"
+
+
 def add_all_vram_and_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add all VRAM and GPU-related columns to the DataFrame.
@@ -182,4 +224,5 @@ def add_all_vram_and_gpu_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = compute_vram_columns(df)
     df = compute_gpu_fit_columns(df)
     df = compute_best_gpu_columns(df)
+    df = compute_best_node_columns(df)
     return df

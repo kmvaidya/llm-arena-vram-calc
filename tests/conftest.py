@@ -32,23 +32,21 @@ def sample_leaderboard_df():
 
 @pytest.fixture
 def sample_rsc_payload():
-    """Minimal RSC-style text containing a model array."""
+    """Minimal RSC-style text containing a model array (no parameter counts since 2026-04)."""
     models = [
         {
-            "name": "Test Model 70B",
             "slug": "test-model-70b",
-            "parameters": 70.0,
-            "inference_parameters_active_billions": 70.0,
-            "is_open_weights": True,
-            "context_window_tokens": 8192,
+            "name": "Test Model 70B",
+            "isOpenWeights": True,
+            "paramClass": "medium",
+            "contextWindowTokens": 8192,
         },
         {
-            "name": "Test MoE 600B",
-            "slug": "test-moe-600b",
-            "parameters": 600.0,
-            "inference_parameters_active_billions": 30.0,
-            "is_open_weights": True,
-            "context_window_tokens": 32768,
+            "slug": "test-moe",
+            "name": "Test MoE (Max)",
+            "isOpenWeights": False,
+            "paramClass": "large",
+            "contextWindowTokens": 32768,
         },
     ]
     # Wrap in RSC-like text with some prefix junk

@@ -71,6 +71,12 @@ class TestFetchHfLeaderboard:
         assert df.iloc[0]["organization"] == "acme"
 
     @patch("scrapers.arena_scraper.requests.get")
+    def test_records_publication_date(self, mock_get):
+        mock_get.return_value = _response(_parquet(SAMPLE_ROWS))
+        df = _fetch_hf_leaderboard()
+        assert df.attrs["leaderboard_date"] == "2026-10-15"
+
+    @patch("scrapers.arena_scraper.requests.get")
     def test_http_error_returns_none(self, mock_get):
         mock_get.return_value = _response(status_code=403)
         assert _fetch_hf_leaderboard() is None

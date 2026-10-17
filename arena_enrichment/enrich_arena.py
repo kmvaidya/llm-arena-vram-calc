@@ -20,7 +20,8 @@ import logging
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import date, datetime, timezone
 from typing import Any
 
 import pandas as pd
@@ -41,7 +42,9 @@ from scrapers.arena_scraper import scrape_arena_leaderboard
 from vram_calculator import (
     GPU_DISPLAY_NAMES,
     GPUS_BY_VRAM,
+    NODE_GPU_COUNT,
     add_all_vram_and_gpu_columns,
+    node_label,
 )
 
 logging.basicConfig(
@@ -56,6 +59,9 @@ REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 
 # Number of models to show directly in README (rest goes in <details>)
 README_TOP_N = 50
+
+# Arena publishes every few days; older data means the source has stalled
+LEADERBOARD_STALE_DAYS = 14
 
 
 # ---------------------------------------------------------------------------
@@ -205,36 +211,47 @@ def resolve_model_params(model_name: str, use_network: bool = True, aa_lookup: d
 
     Returns:
         tuple of (params_dict, source_name)
+
+    A result that cannot be right (active parameters above the total, or a
+    non-positive count) is logged and skipped in favour of the next strategy.
     """
-    # Strategy 1: Override corrections (highest priority — fixes AA mistakes)
-    result = resolve_from_overrides(model_name)
-    if result:
-        return result, "override"
-
-    # Strategy 2: Artificial Analysis cache (primary automated source)
+    strategies: list[tuple[str, Callable[[], ModelParams | None]]] = [
+        # Strategy 1: Override corrections (highest priority — fixes AA mistakes)
+        ("override", lambda: resolve_from_overrides(model_name)),
+    ]
     if aa_lookup is not None:
-        try:
-            result = resolve_from_aa(model_name, aa_lookup=aa_lookup)
-            if result:
-                return result, "artificial_analysis"
-        except Exception as e:
-            logger.debug(f"AA cache resolution failed for {model_name}: {e}")
-
+        # Strategy 2: Artificial Analysis list match + model page (primary automated source)
+        strategies.append(("artificial_analysis", lambda: resolve_from_aa(
+            model_name, aa_lookup=aa_lookup, fetch_params=use_network,
+        )))
     # Strategy 3: Parse from model name
-    result = resolve_from_name(model_name)
-    if result:
-        return result, "name_parsing"
-
-    # Strategy 4: AA single-model page scrape (expensive, last resort)
+    strategies.append(("name_parsing", lambda: resolve_from_name(model_name)))
     if use_network:
+        # Strategy 4: AA single-model page from a guessed slug (expensive, last resort)
+        strategies.append(("aa_single_scrape", lambda: resolve_single_from_aa(model_name)))
+
+    for source, strategy in strategies:
         try:
-            result = resolve_single_from_aa(model_name)
-            if result:
-                return result, "aa_single_scrape"
+            result = strategy()
         except Exception as e:
-            logger.debug(f"AA single scrape failed for {model_name}: {e}")
+            logger.debug(f"{source} resolution failed for {model_name}: {e}")
+            continue
+        if not result:
+            continue
+        if not _is_plausible(result):
+            logger.warning(f"Ignoring implausible {source} result for {model_name}: {result}")
+            continue
+        return result, source
 
     return None, "UNKNOWN"
+
+
+def _is_plausible(params: ModelParams) -> bool:
+    """Whether resolved parameter counts can describe a real model."""
+    total = params["total_params_b"]
+    active = params["active_params_b"]
+    # Allow 1% for rounding in sources that report the two counts separately
+    return total > 0 and 0 < active <= total * 1.01
 
 
 # ---------------------------------------------------------------------------
@@ -336,46 +353,49 @@ def _write_resolution_log(resolution_log: list[dict[str, Any]], writer: pd.Excel
         ws.column_dimensions[col_letter].width = min(max_len + 3, 40)
 
 
-def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
-    """Build GPU summary data for both XLSX and README."""
-    rows = []
-    for gpu_key, gpu_vram in GPUS_BY_VRAM:
-        display = GPU_DISPLAY_NAMES[gpu_key]
-        for precision in ["BF16", "FP8", "INT4"]:
-            p_lower = precision.lower()
-            serving_col = f"vram_{p_lower}_serving_gb"
-            if serving_col not in df.columns:
-                continue
+def _hardware_configs(gpu_count: int) -> list[tuple[str, int]]:
+    """(label, total VRAM in GB) for each GPU, alone (1) or as an 8-GPU node."""
+    return [
+        (GPU_DISPLAY_NAMES[gpu_key] if gpu_count == 1 else node_label(gpu_key), gpu_vram * gpu_count)
+        for gpu_key, gpu_vram in GPUS_BY_VRAM
+    ]
 
-            fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
-            if not fits.empty:
-                best = fits.iloc[0]
-                note = ""
-                if gpu_key == "RTX_PRO_6000" and precision == "FP8":
-                    note = "FP8 requires software emulation"
-                rows.append({
-                    "GPU": f"{display} ({gpu_vram} GB)",
-                    "Precision": precision,
-                    "Best Rank": int(best["rank"]) if pd.notna(best["rank"]) else "?",
-                    "Model": best["model_name"],
-                    "Total Params (B)": best.get("total_params_b", "?"),
-                    "Active Params (B)": best.get("active_params_b", "?"),
-                    "Architecture": best.get("architecture", "?"),
-                    "Serving VRAM (GB)": round(best[serving_col], 1),
-                    "Note": note,
-                })
-            else:
-                rows.append({
-                    "GPU": f"{display} ({gpu_vram} GB)",
-                    "Precision": precision,
-                    "Best Rank": "N/A",
-                    "Model": "No model fits",
-                    "Total Params (B)": "",
-                    "Active Params (B)": "",
-                    "Architecture": "",
-                    "Serving VRAM (GB)": "",
-                    "Note": "",
-                })
+
+def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """Build GPU summary data for both XLSX and README: single GPUs, then 8-GPU nodes."""
+    rows = []
+    for gpu_count in (1, NODE_GPU_COUNT):
+        for display, gpu_vram in _hardware_configs(gpu_count):
+            for precision in ["BF16", "FP8", "INT4"]:
+                p_lower = precision.lower()
+                serving_col = f"vram_{p_lower}_serving_gb"
+                if serving_col not in df.columns:
+                    continue
+
+                fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
+                if not fits.empty:
+                    best = fits.iloc[0]
+                    rows.append({
+                        "GPU": f"{display} ({gpu_vram} GB)",
+                        "Precision": precision,
+                        "Best Rank": int(best["rank"]) if pd.notna(best["rank"]) else "?",
+                        "Model": best["model_name"],
+                        "Total Params (B)": best.get("total_params_b", "?"),
+                        "Active Params (B)": best.get("active_params_b", "?"),
+                        "Architecture": best.get("architecture", "?"),
+                        "Serving VRAM (GB)": round(best[serving_col], 1),
+                    })
+                else:
+                    rows.append({
+                        "GPU": f"{display} ({gpu_vram} GB)",
+                        "Precision": precision,
+                        "Best Rank": "N/A",
+                        "Model": "No model fits",
+                        "Total Params (B)": "",
+                        "Active Params (B)": "",
+                        "Architecture": "",
+                        "Serving VRAM (GB)": "",
+                    })
     return rows
 
 
@@ -383,12 +403,18 @@ def _build_gpu_summary_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
 # README generation
 # ---------------------------------------------------------------------------
 
-def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_stale: bool = False) -> str:
+def generate_readme(
+    df: pd.DataFrame,
+    resolution_counts: dict[str, int],
+    aa_is_stale: bool = False,
+    leaderboard_date: str | None = None,
+) -> str:
     """
     Generate the full README.md content with:
     1. Best Model Per GPU — one table per precision
-    2. Enriched Leaderboard — compact table with collapsible rest
-    3. How It Works / Usage
+    2. Best Model Per 8-GPU Node — the same for servers of eight GPUs
+    3. Enriched Leaderboard — compact table with collapsible rest
+    4. How It Works / Usage
     """
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     total = len(df)
@@ -402,18 +428,26 @@ def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_s
     lines.append("")
     lines.append("Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) "
                  "open-source LLM leaderboard with parameter counts and VRAM estimates "
-                 "for single-GPU deployment feasibility.")
+                 "for single-GPU and 8-GPU server deployment feasibility.")
     lines.append("")
     lines.append("Most LLM leaderboards rank models by quality but ignore deployment constraints. "
                  "This tool answers: *\"What's the best model I can actually run on my hardware?\"* "
                  "by cross-referencing Arena rankings with VRAM requirements across precisions.")
     lines.append("")
+    data_date = f"**Arena data:** {leaderboard_date} | " if leaderboard_date else ""
     lines.append(f"> **Last updated:** {now} | "
+                 f"{data_date}"
                  f"**Models:** {total} | "
                  f"**Resolved:** {resolved} ({pct:.1f}%)")
     lines.append("")
+    data_age = _days_since(leaderboard_date)
+    if data_age is not None and data_age > LEADERBOARD_STALE_DAYS:
+        lines.append(f"> **Warning:** The Arena leaderboard data is {data_age} days old; "
+                     "Arena may have stopped publishing updates.")
+        lines.append("")
     if aa_is_stale:
-        lines.append("> **Warning:** AA data may be stale (RSC fetch failed, using cached data).")
+        lines.append("> **Warning:** The Artificial Analysis model list could not be fetched, "
+                     "so some parameter counts may be stale or missing.")
         lines.append("")
 
     # Table 1: Best Model Per GPU — one sub-table per precision
@@ -426,7 +460,18 @@ def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_s
         lines.extend(_generate_gpu_precision_table(df, precision))
         lines.append("")
 
-    # Table 2: Enriched Leaderboard
+    # Table 2: Best Model Per 8-GPU Node — where the top of the leaderboard lives
+    lines.append(f"## Best Model Per {NODE_GPU_COUNT}-GPU Node")
+    lines.append("")
+    lines.append(f"Highest-ranked Arena model that fits on a server with {NODE_GPU_COUNT} of each GPU, "
+                 "the usual way to serve models too large for one GPU "
+                 "(weights split across the GPUs, same 25% serving overhead).")
+    lines.append("")
+    for precision in ["BF16", "FP8", "INT4"]:
+        lines.extend(_generate_gpu_precision_table(df, precision, gpu_count=NODE_GPU_COUNT))
+        lines.append("")
+
+    # Table 3: Enriched Leaderboard
     lines.append("## Full Leaderboard")
     lines.append("")
     lines.extend(_generate_leaderboard_table(df))
@@ -440,9 +485,11 @@ def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_s
     lines.append("")
     lines.append("The parameter resolution chain prioritizes accuracy: manual overrides "
                  "catch known errors, [Artificial Analysis](https://artificialanalysis.ai) "
-                 "provides bulk data for 400+ models via a single RSC stream request "
-                 "(cached locally, 24h TTL), name parsing extracts `{N}B` patterns as a "
-                 "fallback, and per-model page scraping handles the long tail.")
+                 "supplies sizes from its model pages (its model list maps Arena names to "
+                 "pages, and page results are cached in the repository so each run only "
+                 "reads new models), name parsing extracts `{N}B` patterns as a fallback, "
+                 "and guessed page names handle the long tail. Results where active "
+                 "parameters exceed the total are rejected.")
     lines.append("")
     lines.append("### VRAM Estimation")
     lines.append("")
@@ -461,7 +508,7 @@ def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_s
     lines.append("| GPU | VRAM | Architecture | Native FP8 |")
     lines.append("|-----|------|-------------|------------|")
     lines.append("| H100 SXM | 80 GB | Hopper | Yes |")
-    lines.append("| RTX PRO 6000 | 96 GB | Ada Lovelace | No (software emulation) |")
+    lines.append("| RTX PRO 6000 | 96 GB | Blackwell | Yes |")
     lines.append("| H200 SXM | 141 GB | Hopper | Yes |")
     lines.append("| B200 SXM | 180 GB | Blackwell | Yes |")
     lines.append("| B300 SXM | 288 GB | Blackwell Ultra | Yes |")
@@ -488,8 +535,16 @@ def generate_readme(df: pd.DataFrame, resolution_counts: dict[str, int], aa_is_s
     return "\n".join(lines)
 
 
-def _generate_gpu_precision_table(df: pd.DataFrame, precision: str) -> list[str]:
-    """Generate a compact GPU summary table for a single precision."""
+def _days_since(day: str | None) -> int | None:
+    """Days from a YYYY-MM-DD date to today (UTC), or None if there is no valid date."""
+    try:
+        return (datetime.now(timezone.utc).date() - date.fromisoformat(day or "")).days
+    except ValueError:
+        return None
+
+
+def _generate_gpu_precision_table(df: pd.DataFrame, precision: str, gpu_count: int = 1) -> list[str]:
+    """Generate a compact GPU (or 8-GPU node) summary table for a single precision."""
     lines = []
     p_lower = precision.lower()
     serving_col = f"vram_{p_lower}_serving_gb"
@@ -498,14 +553,14 @@ def _generate_gpu_precision_table(df: pd.DataFrame, precision: str) -> list[str]
              "INT4": "INT4 (4-bit)"}[precision]
     lines.append(f"### {label}")
     lines.append("")
-    lines.append("| GPU | VRAM | Best Model | Arena Rank | Params | Arch | Serving VRAM |")
-    lines.append("|-----|------|------------|------------|--------|------|--------------|")
+    hardware = "GPU" if gpu_count == 1 else "Node"
+    lines.append(f"| {hardware} | VRAM | Best Model | Arena Rank | Params | Arch | Serving VRAM |")
+    lines.append(f"|{'-' * (len(hardware) + 2)}|------|------------|------------|--------|------|--------------|")
 
     if serving_col not in df.columns:
         return lines
 
-    for gpu_key, gpu_vram in GPUS_BY_VRAM:
-        display = GPU_DISPLAY_NAMES[gpu_key]
+    for display, gpu_vram in _hardware_configs(gpu_count):
         fits = df[df[serving_col].notna() & (df[serving_col] <= gpu_vram)]
         if not fits.empty:
             best = fits.iloc[0]
@@ -559,14 +614,18 @@ def _generate_leaderboard_table(df: pd.DataFrame) -> list[str]:
         fp8_s = f"{fp8:g}" if pd.notna(fp8) else "?"
         int4 = row.get("vram_int4_serving_gb")
         int4_s = f"{int4:g}" if pd.notna(int4) else "?"
-        # "Fits on" — show smallest single GPU at FP8, the most practical precision
+        # "Fits on" — show smallest single GPU at FP8, the most practical
+        # precision, or else the smallest 8-GPU node
         best_fp8 = row.get("best_gpu_fp8", "?")
-        if best_fp8 == "MULTI-GPU":
-            fits_s = "Multi-GPU"
-        elif best_fp8 == "UNKNOWN":
+        best_node_fp8 = row.get("best_node_fp8", "?")
+        if best_fp8 == "UNKNOWN":
             fits_s = "?"
-        else:
+        elif best_fp8 != "MULTI-GPU":
             fits_s = f"{best_fp8} (FP8)"
+        elif best_node_fp8 == "MULTI-NODE":
+            fits_s = "Multi-node"
+        else:
+            fits_s = f"{best_node_fp8} (FP8)"
         return f"| {rank} | {name} | {score} | {params_s} | {arch} | {bf16_s} | {fp8_s} | {int4_s} | {fits_s} |"
 
     # Top N rows shown directly
@@ -685,7 +744,9 @@ def main() -> None:
         print(f"\nError: {e}")
         sys.exit(1)
 
-    print(f"  Loaded {len(df)} models")
+    leaderboard_date = df.attrs.get("leaderboard_date")
+    published = f" (Arena published {leaderboard_date})" if leaderboard_date else ""
+    print(f"  Loaded {len(df)} models{published}")
 
     # Ensure sorted by rank
     if "rank" in df.columns and df["rank"].notna().any():
@@ -703,7 +764,8 @@ def main() -> None:
         aa_lookup, aa_is_stale = get_aa_models(force_refresh=args.refresh_cache)
         print(f"  AA database: {len(aa_lookup)} entries loaded")
         if aa_is_stale:
-            print("  WARNING: Using stale AA cache (RSC fetch failed)")
+            fallback = "using the last cached list" if aa_lookup else "no cached list either"
+            print(f"  WARNING: AA model list fetch failed, {fallback}")
 
     resolution_log: list[dict[str, Any]] = []
     resolution_counts: dict[str, int] = {}
@@ -761,7 +823,9 @@ def main() -> None:
     # Step 5: Update README if requested
     if args.update_readme:
         print("\nStep 5: Updating README.md...")
-        readme_content = generate_readme(df, resolution_counts, aa_is_stale=aa_is_stale)
+        readme_content = generate_readme(
+            df, resolution_counts, aa_is_stale=aa_is_stale, leaderboard_date=leaderboard_date
+        )
         readme_path = os.path.join(REPO_ROOT, "README.md")
         with open(readme_path, "w", encoding="utf-8") as f:
             f.write(readme_content)

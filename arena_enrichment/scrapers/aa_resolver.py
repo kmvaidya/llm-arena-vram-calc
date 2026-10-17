@@ -1,12 +1,17 @@
 """
 Resolve model parameter counts from Artificial Analysis.
 
-Fetches model data from artificialanalysis.ai via the React Server Component
-stream (one HTTP request returns all ~400 models with full metadata).  Results
-are cached locally as JSON so repeated runs avoid hitting the site.
+Fetches the model list from artificialanalysis.ai via the React Server
+Component stream (one HTTP request returns every model's name and slug), and
+caches it locally as JSON so repeated runs avoid hitting the site.
 
-Per-model HTML scraping is available as a targeted fallback for models that
-are missing from the bulk data.
+Since April 2026 the list no longer carries parameter counts, so those come
+from each model's page (its Technical Specifications table).  Page results
+are kept in a cache committed to the repository (data/aa_params.json), so a
+daily run only fetches the pages of models it has not seen recently.
+
+Guessing a page slug from the Arena name is a fallback for models that are
+missing from the list.
 """
 
 from __future__ import annotations
@@ -42,11 +47,25 @@ class ModelParams(TypedDict):
     active_params_b: float
     architecture: str
 
+
+class AAUnavailable(Exception):
+    """A model page could not be read (network error, rate limit or server error)."""
+
+
 logger = logging.getLogger(__name__)
 
 CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache")
 CACHE_FILE = os.path.join(CACHE_DIR, "aa_models.json")
 DEFAULT_MAX_AGE_HOURS = 24
+
+# Model page results, committed so each run only fetches pages it lacks
+PARAMS_CACHE_FILE = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "data", "aa_params.json"
+)
+# Days before a page is fetched again: sizes rarely change, while a page
+# without them may gain them once AA finishes its write-up
+PARAMS_MAX_AGE_DAYS = 30
+MISSING_PARAMS_MAX_AGE_DAYS = 7
 
 AA_LEADERBOARD_URL = "https://artificialanalysis.ai/leaderboards/models"
 AA_MODEL_BASE_URL = "https://artificialanalysis.ai/models"
@@ -75,7 +94,8 @@ def _fetch_all_via_rsc() -> list[dict[str, Any]]:
 
     Uses the Next.js React Server Component streaming protocol to get the
     same JSON payload the browser receives.  Returns a list of raw model
-    dicts (100+ fields each) or an empty list on failure.
+    dicts (name, slug, isOpenWeights and ~35 benchmark fields each) or an
+    empty list on failure.
     """
     logger.info("Fetching all models from Artificial Analysis (RSC stream)...")
     try:
@@ -104,9 +124,9 @@ def _fetch_all_via_rsc() -> list[dict[str, Any]]:
 
 def _extract_models_from_rsc(text: str) -> list[dict[str, Any]]:
     """Parse the model array out of the RSC payload."""
-    # The model array contains objects with 'inference_parameters_active_billions'.
+    # The model array contains objects with 'isOpenWeights'.
     # Find this marker, then scan backwards to the array start '[{'.
-    marker = '"inference_parameters_active_billions"'
+    marker = '"isOpenWeights"'
     idx = text.find(marker)
     if idx < 0:
         logger.warning("RSC payload: marker field not found")
@@ -148,7 +168,7 @@ def _extract_models_from_rsc(text: str) -> list[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Per-model HTML fallback (Method 1: HTML table scraping)
+# Per-model pages (parameter counts)
 # ---------------------------------------------------------------------------
 
 def _fetch_single_model(slug: str) -> ModelParams | None:
@@ -156,7 +176,10 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
     Scrape parameter data from an individual model page as a fallback.
 
     Uses the <table class="text-sm"> Technical Specifications table.
-    Returns a dict with total_params_b, active_params_b, architecture or None.
+    Returns a dict with total_params_b, active_params_b, architecture, or
+    None when the page does not exist or lists no parameter count.  Raises
+    AAUnavailable when the page could not be read, so that a passing outage
+    is not remembered as a model without data.
     """
     url = f"{AA_MODEL_BASE_URL}/{slug}"
     logger.info(f"Fetching single model from AA: {url}")
@@ -166,9 +189,11 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
         resp = requests.get(url, timeout=15, headers={
             "User-Agent": "Mozilla/5.0 (compatible; ArenaEnrichment/2.0)",
         })
-        if resp.status_code != 200:
-            return None
-    except requests.RequestException:
+    except requests.RequestException as e:
+        raise AAUnavailable(f"{url}: {e}") from e
+    if resp.status_code == 429 or resp.status_code >= 500:
+        raise AAUnavailable(f"{url}: status {resp.status_code}")
+    if resp.status_code != 200:
         return None
 
     soup = BeautifulSoup(resp.text, "lxml")
@@ -207,13 +232,17 @@ def _fetch_single_model(slug: str) -> ModelParams | None:
     }
 
 
+# Multipliers from a unit suffix to billions
+_PARAM_UNITS = {"t": 1000.0, "b": 1.0, "m": 0.001}
+
+
 def _parse_param_value(text: str) -> float | None:
-    """Parse a parameter value like '30.5B' or '671B' into a float in billions."""
-    m = re.search(r"([\d.]+)\s*[Bb]", text)
+    """Parse a parameter value like '1.6T', '30.5B' or '500M' into a float in billions."""
+    m = re.search(r"(\d+(?:\.\d+)?)\s*([TtBbMm])(?:r?illion|\b)", text)
     if m:
-        return float(m.group(1))
+        return float(m.group(1)) * _PARAM_UNITS[m.group(2).lower()]
     # Try plain number (already in billions from AA)
-    m = re.search(r"([\d.]+)", text)
+    m = re.search(r"(\d+(?:\.\d+)?)", text)
     if m:
         val = float(m.group(1))
         # If the value is very large, it's in raw params not billions
@@ -253,6 +282,80 @@ def _save_cache(models_dict: dict[str, AAEntry]) -> None:
     logger.info(f"Cache saved: {len(models_dict)} models → {CACHE_FILE}")
 
 
+def _load_params_cache() -> dict[str, dict[str, Any]]:
+    """Load the cached model page results, keyed by AA slug."""
+    if not os.path.exists(PARAMS_CACHE_FILE):
+        return {}
+    try:
+        with open(PARAMS_CACHE_FILE, encoding="utf-8") as f:
+            data: dict[str, dict[str, Any]] = json.load(f)
+        return data
+    except (json.JSONDecodeError, OSError) as e:
+        logger.warning(f"Params cache load failed: {e}")
+        return {}
+
+
+def _save_params_cache(cache: dict[str, dict[str, Any]]) -> None:
+    """Persist the model page results, sorted so daily diffs stay small."""
+    os.makedirs(os.path.dirname(PARAMS_CACHE_FILE), exist_ok=True)
+    with open(PARAMS_CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(cache, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+
+def _age_days(checked: str | None) -> float:
+    """Days since a YYYY-MM-DD date; infinite when the date is missing or invalid."""
+    try:
+        day = datetime.strptime(checked or "", "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return float("inf")
+    return (datetime.now(timezone.utc) - day).total_seconds() / 86400
+
+
+def _params_from_cache_entry(hit: dict[str, Any]) -> ModelParams | None:
+    if hit.get("total_params_b") is None:
+        return None
+    return {
+        "total_params_b": hit["total_params_b"],
+        "active_params_b": hit["active_params_b"],
+        "architecture": hit["architecture"],
+    }
+
+
+def get_model_params(slug: str) -> ModelParams | None:
+    """
+    Parameter counts from a model's AA page, through the committed cache.
+
+    The page is fetched only when its cached result is older than
+    PARAMS_MAX_AGE_DAYS (MISSING_PARAMS_MAX_AGE_DAYS when the page had no
+    parameter count).  If the page cannot be read, an expired count is still
+    better than none and is returned; without one, AAUnavailable is raised.
+    """
+    cache = _load_params_cache()
+    hit = cache.get(slug)
+    if hit is not None:
+        has_params = hit.get("total_params_b") is not None
+        max_age = PARAMS_MAX_AGE_DAYS if has_params else MISSING_PARAMS_MAX_AGE_DAYS
+        if _age_days(hit.get("checked")) < max_age:
+            return _params_from_cache_entry(hit)
+
+    try:
+        params = _fetch_single_model(slug)
+    except AAUnavailable:
+        if hit is not None and hit.get("total_params_b") is not None:
+            return _params_from_cache_entry(hit)
+        raise
+
+    cache[slug] = {
+        "total_params_b": params["total_params_b"] if params else None,
+        "active_params_b": params["active_params_b"] if params else None,
+        "architecture": params["architecture"] if params else None,
+        "checked": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+    }
+    _save_params_cache(cache)
+    return params
+
+
 def _cache_is_fresh(fetched_at: str | None, max_age_hours: float) -> bool:
     """Check whether the cache timestamp is within the allowed age."""
     if not fetched_at:
@@ -280,54 +383,31 @@ def _build_lookup(raw_models: list[dict[str, Any]]) -> dict[str, AAEntry]:
     Convert the raw list of AA model dicts into a lookup dict keyed by
     multiple normalized name variants for flexible matching.
 
-    Each entry contains: name, slug, total_params_b, active_params_b, architecture.
+    Each entry contains: name, slug, is_open_weights, context_window and
+    empty parameter fields, which resolve_from_aa fills from the model page.
     """
-    lookup: dict[str, Any] = {}
+    lookup: dict[str, AAEntry] = {}
 
     for m in raw_models:
         name = m.get("name") or ""
         slug = m.get("slug") or ""
-        total = m.get("parameters")           # Already in billions
-        active = m.get("inference_parameters_active_billions") or m.get("activeParams")
-
         if not name:
             continue
 
-        # Build the resolved entry
-        entry = {
+        entry: AAEntry = {
             "name": name,
             "slug": slug,
-            "is_open_weights": m.get("is_open_weights", False),
-            "context_window": m.get("context_window_tokens"),
+            "is_open_weights": bool(m.get("isOpenWeights", False)),
+            "context_window": m.get("contextWindowTokens"),
+            "total_params_b": None,
+            "active_params_b": None,
+            "architecture": None,
         }
 
-        if total is not None:
-            total_b = float(total)
-            active_b = float(active) if active is not None else total_b
-            arch = "moe" if active_b < total_b * 0.9 else "dense"
-            entry["total_params_b"] = round(total_b, 1)
-            entry["active_params_b"] = round(active_b, 1)
-            entry["architecture"] = arch
-        else:
-            entry["total_params_b"] = None
-            entry["active_params_b"] = None
-            entry["architecture"] = None
-
-        # Index under multiple keys for flexible matching
-        keys = set()
-        keys.add(_normalize(name))
+        # Index under the name and the slug for flexible matching
+        lookup[_normalize(name)] = entry
         if slug:
-            keys.add(_normalize(slug))
-
-        for key in keys:
-            # Prefer entries that have parameter data
-            if (
-                key in lookup
-                and lookup[key].get("total_params_b") is not None
-                and entry.get("total_params_b") is None
-            ):
-                continue
-            lookup[key] = entry
+            lookup[_normalize(slug)] = entry
 
     return lookup
 
@@ -366,13 +446,19 @@ def get_aa_models(max_age_hours: float = DEFAULT_MAX_AGE_HOURS, force_refresh: b
     return lookup, False
 
 
-def resolve_from_aa(model_name: str, aa_lookup: dict[str, AAEntry] | None = None) -> ModelParams | None:
+def resolve_from_aa(
+    model_name: str,
+    aa_lookup: dict[str, AAEntry] | None = None,
+    fetch_params: bool = False,
+) -> ModelParams | None:
     """
     Resolve model parameters from the Artificial Analysis dataset.
 
     Args:
         model_name: Arena model name (e.g., "deepseek-v3", "qwen3-30b-a3b")
         aa_lookup: Pre-loaded lookup dict (if None, loads/fetches automatically)
+        fetch_params: Read the matched model's parameter counts from its page
+            (through the committed cache) when the entry lacks them
 
     Returns:
         dict with {total_params_b, active_params_b, architecture} or None
@@ -423,12 +509,14 @@ def resolve_from_aa(model_name: str, aa_lookup: dict[str, AAEntry] | None = None
             if len(key) >= min_key_len and len(key) > best_len and key in name_norm:
                 best_key = key
                 best_len = len(key)
-        # Also try the reverse: arena name contained in an AA key
+        # Also try the reverse: an AA key that starts with the arena name
+        # ("deepseekv3" → "deepseekv30324").  A key merely containing it can be
+        # another model: "glm45air" is inside "intellect3basedonglm45air".
         if not best_key:
             for key in aa_lookup:
                 if (
                     len(name_norm) >= min_key_len
-                    and name_norm in key
+                    and key.startswith(name_norm)
                     and (not best_key or len(key) < len(best_key))
                 ):
                     best_key = key
@@ -437,6 +525,15 @@ def resolve_from_aa(model_name: str, aa_lookup: dict[str, AAEntry] | None = None
 
     if not entry:
         return None
+
+    if entry.get("total_params_b") is None and fetch_params and entry.get("slug"):
+        params = get_model_params(entry["slug"])
+        if params:
+            # Entries are shared between name and slug keys, so this also
+            # serves later Arena names that match the same model
+            entry["total_params_b"] = params["total_params_b"]
+            entry["active_params_b"] = params["active_params_b"]
+            entry["architecture"] = params["architecture"]
 
     total = entry.get("total_params_b")
     if total is None:
@@ -451,24 +548,54 @@ def resolve_from_aa(model_name: str, aa_lookup: dict[str, AAEntry] | None = None
     }
 
 
+# Trailing slug parts that name a role, mode, reasoning effort or release of
+# a model rather than a different model, so the base model's page has the
+# same size (AA lists "GLM-5.3 (Max)" on the glm-5-3 page).  Dates are not
+# among them: Mistral Small 2409 (22B) and 2506 (24B) differ.
+_ROLE_SUFFIXES = ("-instruct", "-chat", "-it", "-hf")
+_VARIANT_TAGS = (
+    # "-non-thinking" must be tried before "-thinking", which it ends with
+    "-non-thinking", "-thinking", "-non-reasoning", "-reasoning",
+    "-max", "-xhigh", "-high", "-low",
+    "-preview", "-exp", "-terminus",
+)
+
+
+def _slug_variants(base: str) -> list[str]:
+    """The slug, then the slug with role suffixes and variant tags stripped one at a time."""
+    variants = [base]
+    current = base
+    while True:
+        for tag in _ROLE_SUFFIXES + _VARIANT_TAGS:
+            if current.endswith(tag):
+                current = current[:-len(tag)]
+                variants.append(current)
+                break
+        else:
+            return variants
+
+
 def resolve_single_from_aa(model_name: str) -> ModelParams | None:
     """
-    Fallback: scrape a single model page from AA by trying slug variants.
+    Fallback: read a single model page from AA by trying slug variants.
 
-    This is expensive (one HTTP request per model) so should only be used
-    for models not found in the bulk data.
+    Each guess costs one HTTP request unless the committed cache already
+    holds its result, so this should only be used for models not found in
+    the bulk list.
     """
-    # Generate slug candidates from the model name
+    # Generate slug candidates from the model name.  Older AA slugs keep
+    # version dots ("glm-4.5"); newer ones spell them with hyphens and drop
+    # brackets ("glm-5-3", "mimo-v2-flash-thinking").
     slug_base = re.sub(r"[\s_]+", "-", model_name.lower()).strip("-")
-    slugs_to_try = [slug_base]
-
-    # Also try without common suffixes
-    for suffix in ["-instruct", "-chat", "-it", "-hf"]:
-        if slug_base.endswith(suffix):
-            slugs_to_try.append(slug_base[:-len(suffix)])
+    hyphenated = re.sub(r"-+", "-", re.sub(r"[()]", "", slug_base).replace(".", "-")).strip("-")
+    slugs_to_try: list[str] = []
+    for base in (slug_base, hyphenated):
+        for candidate in _slug_variants(base):
+            if candidate not in slugs_to_try:
+                slugs_to_try.append(candidate)
 
     for slug in slugs_to_try:
-        result = _fetch_single_model(slug)
+        result = get_model_params(slug)
         if result:
             return result
 

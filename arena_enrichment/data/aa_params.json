@@ -1,0 +1,788 @@
+{
+  "command-a": {
+    "active_params_b": 111.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 111.0
+  },
+  "command-a-03-2025": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "command-r": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "command-r-plus": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "dbrx": {
+    "active_params_b": 36.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 132.0
+  },
+  "dbrx-instruct": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "dbrx-instruct-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-coder-v2": {
+    "active_params_b": 21.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 236.0
+  },
+  "deepseek-r1": {
+    "active_params_b": 37.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 685.0
+  },
+  "deepseek-r1-0528": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v2-5": {
+    "active_params_b": 21.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 236.0
+  },
+  "deepseek-v2-5-1210": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v2.5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v2.5-1210": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3": {
+    "active_params_b": 37.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 671.0
+  },
+  "deepseek-v3-0324": {
+    "active_params_b": 37.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 671.0
+  },
+  "deepseek-v3-1": {
+    "active_params_b": 37.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 685.0
+  },
+  "deepseek-v3-1-terminus": {
+    "active_params_b": 37.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 685.0
+  },
+  "deepseek-v3-1-terminus-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3-1-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3-2": {
+    "active_params_b": 37.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 685.0
+  },
+  "deepseek-v3-2-exp": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3-2-exp-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3-2-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.1": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.1-terminus": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.1-terminus-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.1-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.2": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.2-exp": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.2-exp-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v3.2-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v4-1-flash": {
+    "active_params_b": 16.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 552.0
+  },
+  "deepseek-v4-flash": {
+    "active_params_b": 13.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 284.0
+  },
+  "deepseek-v4-flash-high": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v4-flash-high-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v4-flash-vision": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "deepseek-v4-pro": {
+    "active_params_b": 49.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 1600.0
+  },
+  "gemma-3n-e4b": {
+    "active_params_b": 4.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 8.4
+  },
+  "gemma-3n-e4b-it": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "gemma-4-26b-a4b": {
+    "active_params_b": 3.8,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 25.2
+  },
+  "gemma-4-31b": {
+    "active_params_b": 30.7,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 30.7
+  },
+  "glm-4-5-air": {
+    "active_params_b": 12.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 106.0
+  },
+  "glm-4-5v": {
+    "active_params_b": 12.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 108.0
+  },
+  "glm-4-6": {
+    "active_params_b": 32.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 357.0
+  },
+  "glm-4-6v": {
+    "active_params_b": 12.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 108.0
+  },
+  "glm-4-7": {
+    "active_params_b": 32.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 357.0
+  },
+  "glm-4-7-flash": {
+    "active_params_b": 3.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 31.2
+  },
+  "glm-4.5": {
+    "active_params_b": 32.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 355.0
+  },
+  "glm-4.5-air": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-4.5v": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-4.6": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-4.6v": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-4.7": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-4.7-flash": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-5": {
+    "active_params_b": 40.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 744.0
+  },
+  "glm-5-1": {
+    "active_params_b": 40.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 744.0
+  },
+  "glm-5-2": {
+    "active_params_b": 40.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 753.0
+  },
+  "glm-5-2-max": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-5-3": {
+    "active_params_b": 40.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 753.0
+  },
+  "glm-5-3-flash": {
+    "active_params_b": 18.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 320.0
+  },
+  "glm-5.1": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-5.2": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-5.2-max": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "glm-5.3-flash": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "granite-4-2-30b": {
+    "active_params_b": 30.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 30.0
+  },
+  "granite-4-2-3b": {
+    "active_params_b": 3.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 3.0
+  },
+  "granite-4-2-8b": {
+    "active_params_b": 8.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 8.0
+  },
+  "hunyuan-hy3": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "hunyuan-hy3-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "hy3": {
+    "active_params_b": 21.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 299.0
+  },
+  "inkling": {
+    "active_params_b": 41.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 975.0
+  },
+  "inkling-small": {
+    "active_params_b": 12.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 266.0
+  },
+  "intellect-3": {
+    "active_params_b": 12.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 107.0
+  },
+  "jamba-1-5-large": {
+    "active_params_b": 94.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 398.0
+  },
+  "jamba-1-5-mini": {
+    "active_params_b": 12.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 52.0
+  },
+  "jamba-1.5-large": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "jamba-1.5-mini": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "kimi-k3": {
+    "active_params_b": 104.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 2800.0
+  },
+  "ling-flash-2-0": {
+    "active_params_b": 6.1,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 103.0
+  },
+  "ling-flash-2.0": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "llama-3-1-nemotron-ultra-253b-v1-reasoning": {
+    "active_params_b": 253.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 253.0
+  },
+  "mimo-v2-5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mimo-v2-5-pro": {
+    "active_params_b": 42.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 1000.0
+  },
+  "mimo-v2-6-flash": {
+    "active_params_b": 15.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 309.0
+  },
+  "mimo-v2-6-pro": {
+    "active_params_b": 42.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 1000.0
+  },
+  "mimo-v2-flash": {
+    "active_params_b": 15.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 309.0
+  },
+  "mimo-v2-flash-(non-thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mimo-v2-flash-(thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mimo-v2-flash-non-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mimo-v2-flash-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mimo-v2.5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mimo-v2.5-pro": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m1": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m2": {
+    "active_params_b": 10.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 230.0
+  },
+  "minimax-m2-1": {
+    "active_params_b": 10.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 230.0
+  },
+  "minimax-m2-1-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m2-5": {
+    "active_params_b": 10.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 230.0
+  },
+  "minimax-m2-7": {
+    "active_params_b": 10.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 230.0
+  },
+  "minimax-m2.1": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m2.1-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m2.5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m2.7": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "minimax-m3": {
+    "active_params_b": 23.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 428.0
+  },
+  "mistral-large-2407": {
+    "active_params_b": 123.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 123.0
+  },
+  "mistral-large-2411": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mistral-large-3": {
+    "active_params_b": 41.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 675.0
+  },
+  "mistral-medium-3-5": {
+    "active_params_b": 128.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 128.0
+  },
+  "mistral-small-2506": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "molmo2-8b": {
+    "active_params_b": 8.7,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 8.7
+  },
+  "muse-glimmer": {
+    "active_params_b": 30.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 30.0
+  },
+  "nemotron-3-5-lightning": {
+    "active_params_b": 3.6,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 31.6
+  },
+  "nvidia-nemotron-3-nano-30b-a3b": {
+    "active_params_b": 3.6,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 31.6
+  },
+  "nvidia-nemotron-3-ultra-550b-a55b": {
+    "active_params_b": 55.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 550.0
+  },
+  "olmo-3-1-32b-instruct": {
+    "active_params_b": 32.2,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 32.2
+  },
+  "olmo-3-1-32b-think": {
+    "active_params_b": 32.2,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 32.2
+  },
+  "openchat-3-5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "openchat-3-5-0106": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "openchat-3.5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "openchat-3.5-0106": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "qwen-max-0919": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "qwen3-5-122b-a10b": {
+    "active_params_b": 10.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 125.0
+  },
+  "qwen3-5-397b-a17b": {
+    "active_params_b": 17.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 397.0
+  },
+  "qwen3-8-27b": {
+    "active_params_b": 27.0,
+    "architecture": "dense",
+    "checked": "2026-10-17",
+    "total_params_b": 27.0
+  },
+  "qwen3-next-80b-a3b-instruct": {
+    "active_params_b": 3.0,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 80.0
+  },
+  "ring-flash-2-0": {
+    "active_params_b": 6.1,
+    "architecture": "moe",
+    "checked": "2026-10-17",
+    "total_params_b": 103.0
+  },
+  "snowflake-arctic": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "snowflake-arctic-instruct": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "step-3": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "step-3-5-flash": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "step-3.5-flash": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-17",
+    "total_params_b": null
+  }
+}

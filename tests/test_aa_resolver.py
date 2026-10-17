@@ -1,11 +1,21 @@
 
+import json
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, patch
+
 import pytest
+import requests
+from scrapers import aa_resolver
 from scrapers.aa_resolver import (
+    AAUnavailable,
     _build_lookup,
     _extract_models_from_rsc,
+    _fetch_single_model,
     _normalize,
     _parse_param_value,
+    get_model_params,
     resolve_from_aa,
+    resolve_single_from_aa,
 )
 
 # ── _normalize ────────────────────────────────────────────────────────────
@@ -61,6 +71,25 @@ class TestParseParamValue:
     def test_text_with_b(self):
         assert _parse_param_value("Parameters: 30.5 B") == 30.5
 
+    def test_trillions(self):
+        # AA lists DeepSeek V4 Pro as "1.6T"; reading it as 1.6B put a 1.6T
+        # model at the top of every single-GPU table
+        assert _parse_param_value("1.6T") == pytest.approx(1600.0)
+
+    def test_millions(self):
+        assert _parse_param_value("500M") == pytest.approx(0.5)
+
+    def test_unit_words(self):
+        assert _parse_param_value("1.2 trillion") == pytest.approx(1200.0)
+        assert _parse_param_value("30 billion") == 30.0
+
+    def test_unit_followed_by_description(self):
+        # The active-parameters cell carries a description after the value
+        assert _parse_param_value("49B Number of parameters active per token") == 49.0
+
+    def test_word_starting_with_unit_letter_is_not_a_unit(self):
+        assert _parse_param_value("8 total") == 8.0
+
     def test_no_number(self):
         assert _parse_param_value("N/A") is None
 
@@ -71,67 +100,48 @@ class TestParseParamValue:
 # ── _build_lookup ─────────────────────────────────────────────────────────
 
 class TestBuildLookup:
-    def _make_raw_model(self, name, slug="", params=None, active=None, **extra):
-        m = {"name": name, "slug": slug, "is_open_weights": True,
-             "context_window_tokens": 4096}
-        if params is not None:
-            m["parameters"] = params
-        if active is not None:
-            m["inference_parameters_active_billions"] = active
+    def _make_raw_model(self, name, slug="", **extra):
+        m = {"name": name, "slug": slug, "isOpenWeights": True,
+             "contextWindowTokens": 4096, "paramClass": "large"}
         m.update(extra)
         return m
 
     def test_basic_indexing(self):
-        raw = [self._make_raw_model("Llama 3 70B", params=70.6, active=70.6)]
+        raw = [self._make_raw_model("Llama 3 70B", slug="llama-3-70b")]
         lookup = _build_lookup(raw)
         assert "llama370b" in lookup
-        assert lookup["llama370b"]["total_params_b"] == 70.6
+        assert lookup["llama370b"]["slug"] == "llama-3-70b"
 
     def test_slug_also_indexed(self):
-        raw = [self._make_raw_model("X", slug="llama-3-70b", params=70.6, active=70.6)]
+        raw = [self._make_raw_model("GLM-5.3 (Max)", slug="glm-5-3")]
         lookup = _build_lookup(raw)
-        assert "llama370b" in lookup
+        assert lookup["glm53"] is lookup["glm53max"]
 
-    def test_moe_detection(self):
-        raw = [self._make_raw_model("MoE", params=600, active=30)]
-        lookup = _build_lookup(raw)
-        assert lookup["moe"]["architecture"] == "moe"
+    def test_fields_mapped(self):
+        raw = [self._make_raw_model("X", isOpenWeights=False, contextWindowTokens=8192)]
+        entry = _build_lookup(raw)["x"]
+        assert entry["is_open_weights"] is False
+        assert entry["context_window"] == 8192
 
-    def test_dense_detection(self):
-        raw = [self._make_raw_model("Dense", params=70, active=70)]
-        lookup = _build_lookup(raw)
-        assert lookup["dense"]["architecture"] == "dense"
-
-    def test_null_params(self):
+    def test_params_left_for_model_page(self):
         raw = [self._make_raw_model("NoParams")]
         lookup = _build_lookup(raw)
         assert lookup["noparams"]["total_params_b"] is None
+        assert lookup["noparams"]["architecture"] is None
 
-    def test_prefers_entry_with_params(self):
-        # Same normalized key, entry with params should win
-        raw = [
-            self._make_raw_model("Model"),
-            self._make_raw_model("Model", params=10, active=10),
-        ]
-        lookup = _build_lookup(raw)
-        assert lookup["model"]["total_params_b"] == 10.0
+    def test_nameless_entry_skipped(self):
+        assert _build_lookup([self._make_raw_model("", slug="ghost")]) == {}
 
     def test_no_family_slug_indexing(self):
         """Family slug must NOT be used as a lookup key (caused false matches)."""
         raw = [self._make_raw_model(
-            "Qwen1.5 110B", slug="qwen-1.5-110b", params=110, active=110,
-            model_family_slug="qwen15",
+            "Qwen1.5 110B", slug="qwen-1.5-110b", model_family_slug="qwen15",
         )]
         lookup = _build_lookup(raw)
         # The family slug key should NOT exist
         assert "qwen15" not in lookup
         # But name and slug keys should
         assert "qwen15110b" in lookup
-
-    def test_rounding(self):
-        raw = [self._make_raw_model("X", params=70.64, active=70.64)]
-        lookup = _build_lookup(raw)
-        assert lookup["x"]["total_params_b"] == 70.6
 
 
 # ── resolve_from_aa ───────────────────────────────────────────────────────
@@ -198,16 +208,239 @@ class TestExtractModelsFromRsc:
         models = _extract_models_from_rsc(sample_rsc_payload)
         assert len(models) == 2
         assert models[0]["name"] == "Test Model 70B"
-        assert models[1]["parameters"] == 600.0
+        assert models[1]["slug"] == "test-moe"
 
     def test_no_marker(self):
         assert _extract_models_from_rsc("no relevant data here") == []
 
     def test_malformed_json(self):
-        text = 'prefix[{"inference_parameters_active_billions": broken'
+        text = 'prefix[{"isOpenWeights": broken'
         assert _extract_models_from_rsc(text) == []
 
     def test_no_array_start(self):
         # Marker exists but no '[{' before it
-        text = '"inference_parameters_active_billions": 70.0'
+        text = '"isOpenWeights": true'
         assert _extract_models_from_rsc(text) == []
+
+
+# ── model pages ───────────────────────────────────────────────────────────
+
+def _spec_page(total=None, active=None):
+    """An AA model page with the Technical Specifications rows we read."""
+    rows = ""
+    if total is not None:
+        rows += (
+            '<tr><th scope="row" class="text-left"><svg></svg>'
+            '<span class="align-middle ml-1">Total parameters</span></th>'
+            f'<td class="py-2 text-right font-medium">{total}</td></tr>'
+        )
+    if active is not None:
+        rows += (
+            '<tr><th scope="row" class="text-left"><svg></svg>'
+            '<span class="align-middle ml-1">Active parameters</span></th>'
+            f'<td><span class="align-middle mr-1">{active}</span><button></button>'
+            '<div>Number of parameters active per token during inference</div></td></tr>'
+        )
+    return f'<html><body><table class="text-sm w-full">{rows}</table></body></html>'
+
+
+@pytest.fixture
+def no_rate_limit(monkeypatch):
+    monkeypatch.setattr(aa_resolver, "_rate_limit", lambda: None)
+
+
+@pytest.fixture
+def params_cache(monkeypatch, tmp_path):
+    """Point the committed page cache at a temporary file."""
+    path = tmp_path / "aa_params.json"
+    monkeypatch.setattr(aa_resolver, "PARAMS_CACHE_FILE", str(path))
+    return path
+
+
+def _days_ago(days):
+    return (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+
+
+@pytest.mark.usefixtures("no_rate_limit")
+class TestFetchSingleModel:
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_moe_in_trillions(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=200, text=_spec_page("1.6T", "49B"))
+        assert _fetch_single_model("deepseek-v4-pro") == {
+            "total_params_b": 1600.0, "active_params_b": 49.0, "architecture": "moe",
+        }
+
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_dense_without_active_row(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=200, text=_spec_page("70.64B"))
+        assert _fetch_single_model("x") == {
+            "total_params_b": 70.6, "active_params_b": 70.6, "architecture": "dense",
+        }
+
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_page_without_parameters(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=200, text=_spec_page())
+        assert _fetch_single_model("x") is None
+
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_missing_page(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=404, text="")
+        assert _fetch_single_model("no-such-model") is None
+
+    @pytest.mark.parametrize("status", [429, 500, 503])
+    @patch("scrapers.aa_resolver.requests.get")
+    def test_server_trouble_raises(self, mock_get, status):
+        mock_get.return_value = MagicMock(status_code=status, text="")
+        with pytest.raises(AAUnavailable):
+            _fetch_single_model("x")
+
+    @patch("scrapers.aa_resolver.requests.get", side_effect=requests.Timeout("slow"))
+    def test_network_error_raises(self, mock_get):
+        with pytest.raises(AAUnavailable):
+            _fetch_single_model("x")
+
+
+class TestGetModelParams:
+    PARAMS = {"total_params_b": 1600.0, "active_params_b": 49.0, "architecture": "moe"}
+
+    def _write(self, path, slug, checked, params=None):
+        entry = dict(params or {"total_params_b": None, "active_params_b": None,
+                                "architecture": None})
+        entry["checked"] = checked
+        path.write_text(json.dumps({slug: entry}))
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_fetches_and_caches(self, mock_fetch, params_cache):
+        mock_fetch.return_value = self.PARAMS
+        assert get_model_params("deepseek-v4-pro") == self.PARAMS
+        saved = json.loads(params_cache.read_text())["deepseek-v4-pro"]
+        assert saved["total_params_b"] == 1600.0
+        assert saved["checked"] == _days_ago(0)
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_fresh_hit_skips_fetch(self, mock_fetch, params_cache):
+        self._write(params_cache, "m", _days_ago(29), self.PARAMS)
+        assert get_model_params("m") == self.PARAMS
+        mock_fetch.assert_not_called()
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_expired_hit_refetched(self, mock_fetch, params_cache):
+        self._write(params_cache, "m", _days_ago(31), self.PARAMS)
+        mock_fetch.return_value = {"total_params_b": 1.0, "active_params_b": 1.0,
+                                   "architecture": "dense"}
+        assert get_model_params("m")["total_params_b"] == 1.0
+
+    @patch("scrapers.aa_resolver._fetch_single_model")
+    def test_missing_params_remembered_for_a_week(self, mock_fetch, params_cache):
+        self._write(params_cache, "m", _days_ago(6))
+        assert get_model_params("m") is None
+        mock_fetch.assert_not_called()
+
+        self._write(params_cache, "m", _days_ago(8))
+        mock_fetch.return_value = None
+        assert get_model_params("m") is None
+        mock_fetch.assert_called_once_with("m")
+
+    @patch("scrapers.aa_resolver._fetch_single_model", side_effect=AAUnavailable("down"))
+    def test_outage_keeps_expired_params(self, mock_fetch, params_cache):
+        self._write(params_cache, "m", _days_ago(90), self.PARAMS)
+        assert get_model_params("m") == self.PARAMS
+
+    @patch("scrapers.aa_resolver._fetch_single_model", side_effect=AAUnavailable("down"))
+    def test_outage_without_params_raises_and_caches_nothing(self, mock_fetch, params_cache):
+        with pytest.raises(AAUnavailable):
+            get_model_params("m")
+        assert not params_cache.exists()
+
+
+class TestResolveFromAaWithPages:
+    def _lookup(self):
+        return _build_lookup([{"name": "GLM-5.3 (Max)", "slug": "glm-5-3", "isOpenWeights": True}])
+
+    @patch("scrapers.aa_resolver.get_model_params")
+    def test_reads_matched_models_page(self, mock_params):
+        mock_params.return_value = {"total_params_b": 754.0, "active_params_b": 40.0,
+                                    "architecture": "moe"}
+        lookup = self._lookup()
+        result = resolve_from_aa("glm-5.3-max", aa_lookup=lookup, fetch_params=True)
+        assert result["total_params_b"] == 754.0
+        mock_params.assert_called_once_with("glm-5-3")
+        # The entry keeps the counts for later names matching the same model
+        assert lookup["glm53"]["total_params_b"] == 754.0
+
+    @patch("scrapers.aa_resolver.get_model_params")
+    def test_no_page_reads_without_fetch_params(self, mock_params):
+        assert resolve_from_aa("glm-5.3-max", aa_lookup=self._lookup()) is None
+        mock_params.assert_not_called()
+
+
+class TestResolveSingleFromAa:
+    @patch("scrapers.aa_resolver.get_model_params", return_value=None)
+    def test_slug_candidates(self, mock_params):
+        assert resolve_single_from_aa("GLM-4.6-Instruct") is None
+        tried = [c.args[0] for c in mock_params.call_args_list]
+        assert tried == ["glm-4.6-instruct", "glm-4.6", "glm-4-6-instruct", "glm-4-6"]
+
+    @patch("scrapers.aa_resolver.get_model_params", return_value=None)
+    def test_brackets_dropped_in_hyphenated_slug(self, mock_params):
+        resolve_single_from_aa("mimo-v2-flash (thinking)")
+        tried = [c.args[0] for c in mock_params.call_args_list]
+        assert tried == ["mimo-v2-flash-(thinking)", "mimo-v2-flash-thinking", "mimo-v2-flash"]
+
+    @patch("scrapers.aa_resolver.get_model_params", return_value=None)
+    def test_variant_tags_stripped_one_at_a_time(self, mock_params):
+        resolve_single_from_aa("deepseek-v3.2-exp-thinking")
+        tried = [c.args[0] for c in mock_params.call_args_list]
+        assert tried == [
+            "deepseek-v3.2-exp-thinking", "deepseek-v3.2-exp", "deepseek-v3.2",
+            "deepseek-v3-2-exp-thinking", "deepseek-v3-2-exp", "deepseek-v3-2",
+        ]
+
+    @patch("scrapers.aa_resolver.get_model_params", return_value=None)
+    def test_non_thinking_stripped_whole(self, mock_params):
+        resolve_single_from_aa("mimo-v2-flash (non-thinking)")
+        tried = [c.args[0] for c in mock_params.call_args_list]
+        assert tried == [
+            "mimo-v2-flash-(non-thinking)", "mimo-v2-flash-non-thinking", "mimo-v2-flash",
+        ]
+
+    @patch("scrapers.aa_resolver.get_model_params", return_value=None)
+    def test_reasoning_effort_stripped(self, mock_params):
+        resolve_single_from_aa("deepseek-v4-flash-high-preview")
+        tried = [c.args[0] for c in mock_params.call_args_list]
+        assert tried == [
+            "deepseek-v4-flash-high-preview", "deepseek-v4-flash-high", "deepseek-v4-flash",
+        ]
+
+    @patch("scrapers.aa_resolver.get_model_params", return_value=None)
+    def test_dates_and_sizes_kept(self, mock_params):
+        # A date or a "flash" names a different model, so it is never stripped
+        resolve_single_from_aa("mistral-small-2506")
+        resolve_single_from_aa("glm-4.7-flash")
+        tried = [c.args[0] for c in mock_params.call_args_list]
+        assert tried == ["mistral-small-2506", "glm-4.7-flash", "glm-4-7-flash"]
+
+    @patch("scrapers.aa_resolver.get_model_params")
+    def test_stops_at_first_hit(self, mock_params):
+        params = {"total_params_b": 355.0, "active_params_b": 32.0, "architecture": "moe"}
+        mock_params.side_effect = [None, params]
+        assert resolve_single_from_aa("glm-4.6") == params
+        assert mock_params.call_count == 2
+
+
+class TestReverseMatching:
+    def _lookup(self):
+        return {
+            "intellect3basedonglm45air": {"name": "INTELLECT-3 (Based on GLM-4.5-Air)",
+                                          "slug": "intellect-3", "total_params_b": 107.0,
+                                          "active_params_b": 12.0, "architecture": "moe"},
+            "deepseekv30324": {"name": "DeepSeek V3 0324", "slug": "deepseek-v3-0324",
+                               "total_params_b": 671.0, "active_params_b": 37.0,
+                               "architecture": "moe"},
+        }
+
+    def test_key_starting_with_arena_name_matches(self):
+        assert resolve_from_aa("deepseek-v3", aa_lookup=self._lookup())["total_params_b"] == 671.0
+
+    def test_key_merely_containing_arena_name_does_not(self):
+        assert resolve_from_aa("glm-4.5-air", aa_lookup=self._lookup()) is None

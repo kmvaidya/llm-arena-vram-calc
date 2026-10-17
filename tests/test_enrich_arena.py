@@ -163,3 +163,32 @@ class TestResolveModelParams:
         )
         assert source == "name_parsing"
         assert result["total_params_b"] == 50
+
+    @patch("enrich_arena.resolve_from_aa")
+    def test_implausible_result_falls_through(self, mock_aa):
+        """A 1.6T model read as 1.6B has more active than total parameters."""
+        mock_aa.return_value = {"total_params_b": 1.6, "active_params_b": 49.0,
+                                "architecture": "dense"}
+        result, source = resolve_model_params(
+            "NewModel-50B", use_network=False, aa_lookup={"x": {}}
+        )
+        assert source == "name_parsing"
+        assert result["total_params_b"] == 50
+
+    @patch("enrich_arena.resolve_from_aa")
+    def test_implausible_result_with_no_fallback_is_unknown(self, mock_aa):
+        mock_aa.return_value = {"total_params_b": 0, "active_params_b": 0,
+                                "architecture": "dense"}
+        result, source = resolve_model_params(
+            "mystery-model", use_network=False, aa_lookup={"x": {}}
+        )
+        assert (result, source) == (None, "UNKNOWN")
+
+    @patch("enrich_arena.resolve_from_aa")
+    def test_aa_reads_pages_only_with_network(self, mock_aa):
+        mock_aa.return_value = None
+        resolve_model_params("m", use_network=False, aa_lookup={"x": {}})
+        assert mock_aa.call_args.kwargs["fetch_params"] is False
+        with patch("enrich_arena.resolve_single_from_aa", return_value=None):
+            resolve_model_params("m", use_network=True, aa_lookup={"x": {}})
+        assert mock_aa.call_args.kwargs["fetch_params"] is True

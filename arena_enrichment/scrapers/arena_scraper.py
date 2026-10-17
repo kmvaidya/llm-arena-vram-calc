@@ -58,7 +58,8 @@ def scrape_arena_leaderboard(input_csv: str | None = None) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame with columns: rank, model_name, arena_score,
-        ci_lower, ci_upper, votes, organization, license
+        ci_lower, ci_upper, votes, organization, license.  When downloaded,
+        df.attrs["leaderboard_date"] holds Arena's publication date.
     """
     if input_csv:
         return _load_from_csv(input_csv)
@@ -104,8 +105,10 @@ def _fetch_hf_leaderboard() -> pd.DataFrame | None:
         return None
 
     overall = data[data["category"] == "overall"]
+    published = None
     if "leaderboard_publish_date" in overall.columns:
-        logger.info(f"Leaderboard published {overall['leaderboard_publish_date'].max()}")
+        published = overall["leaderboard_publish_date"].max()
+        logger.info(f"Leaderboard published {published}")
     logger.info(f"Loaded {len(overall)} models from the overall ranking")
 
     # A model without a license is treated as proprietary
@@ -125,6 +128,7 @@ def _fetch_hf_leaderboard() -> pd.DataFrame | None:
     df["rank"] = range(1, len(df) + 1)
     df["votes"] = df["votes"].round().astype("Int64")
     df = df[EXPECTED_COLUMNS].reset_index(drop=True)
+    df.attrs["leaderboard_date"] = str(published) if pd.notna(published) else None
     logger.info(f"Built DataFrame with {len(df)} open-source models")
     return df
 

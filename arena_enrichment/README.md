@@ -6,36 +6,34 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 - **Load** the Arena.ai open-source text leaderboard from Arena's [Hugging Face dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (or a CSV export)
 - **Resolve** total and active parameter counts via multiple strategies:
-  - Small overrides dict for models with misleading names or no public metadata
+  - Small overrides dict (`known_models.py`) for models with misleading names or no public metadata
+  - Artificial Analysis: its model list maps Arena names to model pages, whose sizes are cached in `data/aa_params.json`
   - Regex name parsing (e.g., `Qwen3-30B-A3B` → 30B total, 3B active, MoE)
-  - HuggingFace API (safetensors metadata + config.json)
-  - Artificial Analysis scraping
+  - Artificial Analysis pages found by guessing the page name, for models missing from the list
+  - Results with more active than total parameters are rejected
 - **Compute** VRAM estimates at BF16, FP8, and INT4 precisions
-- **Flag** which models fit on single-GPU configurations (H100, RTX PRO 6000, H200, B200, B300)
+- **Flag** which models fit on a single GPU (H100, RTX PRO 6000, H200, B200, B300) or an 8-GPU node of each
 - **Output** enriched CSV, formatted XLSX, and auto-updated README.md tables
 
 ## Installation
 
 ```bash
-pip install -r requirements.txt
-
-# Only if using browser-based scraping:
-playwright install chromium
+uv sync
 ```
 
 ## Usage
 
 ```bash
 # Full pipeline (downloads the latest leaderboard)
-python enrich_arena.py --update-readme
+uv run python arena_enrichment/enrich_arena.py --update-readme
 
 # Use a pre-downloaded CSV
-python enrich_arena.py --input arena_data.csv --update-readme
+uv run python arena_enrichment/enrich_arena.py --input arena_data.csv --update-readme
 
 # Skip network resolution (overrides + name parsing only)
-python enrich_arena.py --input arena_data.csv --no-network --update-readme
+uv run python arena_enrichment/enrich_arena.py --input arena_data.csv --no-network --update-readme
 ```
 
 ## Automation
 
-A GitHub Actions workflow runs daily at 06:00 UTC to fetch the latest leaderboard and update the root README.md with fresh tables. See `.github/workflows/update-leaderboard.yml`.
+A GitHub Actions workflow runs daily at 06:00 UTC to fetch the latest leaderboard and update the root README.md with fresh tables. It commits the outputs and the Artificial Analysis page cache, so each run only reads pages for new models. See `.github/workflows/update-leaderboard.yml`.

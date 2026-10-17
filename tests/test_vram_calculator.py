@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 from vram_calculator import (
     _find_best_gpu,
+    _find_best_node,
     add_all_vram_and_gpu_columns,
     compute_vram_columns,
     practical_serving_gb,
@@ -85,6 +86,28 @@ class TestFindBestGpu:
         assert _find_best_gpu(5) == "H100 SXM"
 
 
+
+class TestFindBestNode:
+    def test_fits_h100_node(self):
+        assert _find_best_node(600) == "8x H100 SXM"
+
+    def test_exactly_h100_node(self):
+        assert _find_best_node(640) == "8x H100 SXM"
+
+    def test_exceeds_h100_node_fits_rtx_pro_node(self):
+        assert _find_best_node(700) == "8x RTX PRO 6000"
+
+    def test_fits_h200_node(self):
+        assert _find_best_node(1000) == "8x H200 SXM"
+
+    def test_fits_b300_node(self):
+        # A 1.6T model at FP8 needs 2000 GB with serving overhead
+        assert _find_best_node(2000) == "8x B300 SXM"
+
+    def test_multi_node(self):
+        assert _find_best_node(3000) == "MULTI-NODE"
+
+
 class TestComputeVramColumns:
     def test_columns_added(self, sample_leaderboard_df):
         df = compute_vram_columns(sample_leaderboard_df)
@@ -130,3 +153,14 @@ class TestAddAllColumns:
         df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
         row = df[df["model_name"] == "unknown-model"].iloc[0]
         assert row["best_gpu_fp8"] == "UNKNOWN"
+
+    def test_huge_model_gets_a_node(self, sample_leaderboard_df):
+        df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
+        row = df[df["model_name"] == "moe-model-600b"].iloc[0]
+        assert row["best_node_bf16"] == "8x B300 SXM"   # 1500 GB
+        assert row["best_node_fp8"] == "8x RTX PRO 6000"  # 750 GB
+
+    def test_unknown_model_has_unknown_node(self, sample_leaderboard_df):
+        df = add_all_vram_and_gpu_columns(sample_leaderboard_df)
+        row = df[df["model_name"] == "unknown-model"].iloc[0]
+        assert row["best_node_fp8"] == "UNKNOWN"

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 import pytest
@@ -168,3 +169,33 @@ class TestFullPipeline:
 
         readme_fresh = generate_readme(df, {}, aa_is_stale=False)
         assert "stale" not in readme_fresh.lower()
+
+    def test_arena_date_in_readme(self, integration_leaderboard):
+        df = add_all_vram_and_gpu_columns(integration_leaderboard.copy().assign(
+            total_params_b=None, active_params_b=None, architecture=None,
+        ))
+        today = datetime.now(timezone.utc).date()
+
+        fresh = generate_readme(df, {}, leaderboard_date=str(today - timedelta(days=2)))
+        assert f"**Arena data:** {today - timedelta(days=2)}" in fresh
+        assert "days old" not in fresh
+
+        old = generate_readme(df, {}, leaderboard_date=str(today - timedelta(days=30)))
+        assert "data is 30 days old" in old
+
+        undated = generate_readme(df, {})
+        assert "Arena data" not in undated
+
+    def test_node_tables_and_fits_on(self, integration_leaderboard):
+        df = integration_leaderboard.copy().head(2)
+        # Too big for one GPU at FP8 (838.75 GB), fits 8x H200 (1128 GB)
+        df["total_params_b"] = [671.0, 72.0]
+        df["active_params_b"] = [37.0, 72.0]
+        df["architecture"] = ["moe", "dense"]
+        readme = generate_readme(add_all_vram_and_gpu_columns(df), {})
+
+        assert "## Best Model Per 8-GPU Node" in readme
+        assert "| 8x H100 SXM | 640 GB |" in readme
+        assert "| 8x H200 SXM | 1128 GB | DeepSeek-V3 | #1 |" in readme
+        assert "| 8x H200 SXM (FP8) |" in readme   # Fits on, row 1
+        assert "| RTX PRO 6000 (FP8) |" in readme  # Fits on, row 2: 90 GB, one GPU
