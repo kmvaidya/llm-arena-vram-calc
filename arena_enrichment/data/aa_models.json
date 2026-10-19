@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-10-17T19:43:31.715865+00:00",
-  "model_count": 372,
+  "fetched_at": "2026-10-19T11:48:22.797237+00:00",
+  "model_count": 374,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -477,6 +477,24 @@
       "is_open_weights": true,
       "name": "DeepSeek V4.1 Flash (Max)",
       "slug": "deepseek-v4-1-flash",
+      "total_params_b": null
+    },
+    "deepseekv41flash1017": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4.1 Flash 1017 (Max)",
+      "slug": "deepseek-v4-1-flash-1017",
+      "total_params_b": null
+    },
+    "deepseekv41flash1017max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4.1 Flash 1017 (Max)",
+      "slug": "deepseek-v4-1-flash-1017",
       "total_params_b": null
     },
     "deepseekv41flashmax": {
