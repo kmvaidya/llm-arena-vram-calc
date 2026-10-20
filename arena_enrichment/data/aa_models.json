@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-10-19T11:48:22.797237+00:00",
-  "model_count": 374,
+  "fetched_at": "2026-10-20T10:47:02.913539+00:00",
+  "model_count": 372,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -470,15 +470,6 @@
       "slug": "deephermes-3-mistral-24b-preview",
       "total_params_b": null
     },
-    "deepseekv41flash": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": true,
-      "name": "DeepSeek V4.1 Flash (Max)",
-      "slug": "deepseek-v4-1-flash",
-      "total_params_b": null
-    },
     "deepseekv41flash1017": {
       "active_params_b": null,
       "architecture": null,
@@ -495,24 +486,6 @@
       "is_open_weights": true,
       "name": "DeepSeek V4.1 Flash 1017 (Max)",
       "slug": "deepseek-v4-1-flash-1017",
-      "total_params_b": null
-    },
-    "deepseekv41flashmax": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": true,
-      "name": "DeepSeek V4.1 Flash (Max)",
-      "slug": "deepseek-v4-1-flash",
-      "total_params_b": null
-    },
-    "deepseekv41flashnonreasoning": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": true,
-      "name": "DeepSeek V4.1 Flash (Non-reasoning)",
-      "slug": "deepseek-v4-1-flash-non-reasoning",
       "total_params_b": null
     },
     "deepseekv4flashvision": {
@@ -2115,6 +2088,15 @@
       "is_open_weights": true,
       "name": "MiniMax-M3",
       "slug": "minimax-m3",
+      "total_params_b": null
+    },
+    "minimaxm31flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "MiniMax-M3.1-Flash",
+      "slug": "minimax-m3-1-flash",
       "total_params_b": null
     },
     "ministral314b": {

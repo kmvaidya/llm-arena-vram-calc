@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-10-19 11:48 UTC | **Arena data:** 2026-10-15 | **Models:** 225 | **Resolved:** 225 (100.0%)
+> **Last updated:** 2026-10-20 10:47 UTC | **Arena data:** 2026-10-15 | **Models:** 225 | **Resolved:** 225 (100.0%)
 
 ## Best Model Per Hardware
 
@@ -67,7 +67,7 @@ Highest-ranked Arena model that fits each piece of hardware, with its Arena rank
 | 2 | mimo-v2.6-pro | 1479 | 1000 (42) | MoE | 4-bit | 533 | 533 | 533 | 8x H100 SXM | ~110 tok/s |
 | 3 | glm-5.3-max | 1478 | 753 (40) | MoE | 8-bit | 709 | 709 | 426 | 8x RTX PRO 6000 Blackwell Server Edition | — |
 | 4 | glm-5.2-max | 1475 | 753 (40) | MoE | 16-bit | 1,409 | 749 | 426 | 8x H200 SXM | ~100 tok/s |
-| 5 | deepseek-v4.1-flash-max | 1474 | 763 (16) | MoE | 4-bit | 481 | 481 | 432 | 8x H100 SXM | ~120 tok/s |
+| 5 | deepseek-v4.1-flash-max | 1474 | 763 (16) | MoE | ? | 1,427 | 759 | 432 | 8x H200 SXM | ~120 tok/s |
 | 6 | glm-5.3-flash | 1473 | 320 (18) | MoE | 8-bit | 311 | 311 | 184 | 8x L40S | — |
 | 7 | mimo-v2.5-pro | 1467 | 1000 (42) | MoE | 8-bit | 968 | 968 | 564 | 8x H200 SXM | ~100 tok/s |
 | 8 | glm-5.1 | 1465 | 744 (40) | MoE | 16-bit | 1,410 | 740 | 421 | 8x H200 SXM | ~100 tok/s |
