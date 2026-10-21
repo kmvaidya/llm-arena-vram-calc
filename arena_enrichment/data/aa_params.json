@@ -18,6 +18,34 @@
     "checked": "2026-10-17",
     "total_params_b": null
   },
+  "command-r+-(08-2024)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "command-r+-08-2024": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "command-r-(08-2024)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "command-r-08-2024": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "command-r-plus": {
     "active_params_b": null,
     "architecture": null,
@@ -59,10 +87,18 @@
     "hf_repo": "deepseek-ai/DeepSeek-R1-0528",
     "total_params_b": 685.0
   },
+  "deepseek-r1-(0528)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "deepseek-r1-0528": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v2-5": {
@@ -75,13 +111,21 @@
   "deepseek-v2-5-1210": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v2.5": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v2.5-(1210)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -97,6 +141,13 @@
     "checked": "2026-10-17",
     "hf_repo": "deepseek-ai/DeepSeek-V3",
     "total_params_b": 671.0
+  },
+  "deepseek-v3-(0324)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
   },
   "deepseek-v3-0324": {
     "active_params_b": 37.0,
@@ -168,10 +219,24 @@
     "hf_repo": null,
     "total_params_b": null
   },
+  "deepseek-v3.1-(thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "deepseek-v3.1-terminus": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v3.1-terminus-(thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -196,10 +261,24 @@
     "hf_repo": null,
     "total_params_b": null
   },
+  "deepseek-v3.2-(thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "deepseek-v3.2-exp": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v3.2-exp-(thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -224,6 +303,20 @@
     "hf_repo": "deepseek-ai/DeepSeek-V4.1-Flash",
     "total_params_b": 552.0
   },
+  "deepseek-v4-1-flash-20260910": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-1-flash-20260910-max": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "deepseek-v4-flash": {
     "active_params_b": 13.0,
     "architecture": "moe",
@@ -245,6 +338,27 @@
     "hf_repo": null,
     "total_params_b": null
   },
+  "deepseek-v4-flash-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-flash-preview-(high)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-flash-preview-high": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "deepseek-v4-flash-vision": {
     "active_params_b": null,
     "architecture": null,
@@ -257,6 +371,27 @@
     "checked": "2026-10-17",
     "hf_repo": "deepseek-ai/DeepSeek-V4-Pro-0813",
     "total_params_b": 1600.0
+  },
+  "deepseek-v4-pro-(high,-20260813)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-pro-high,-20260813": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4.1-flash-20260910-(max)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
   },
   "gemma-3n-e4b": {
     "active_params_b": 4.0,
@@ -431,6 +566,13 @@
     "hf_repo": null,
     "total_params_b": null
   },
+  "glm-5.2-(max)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "glm-5.2-max": {
     "active_params_b": null,
     "architecture": null,
@@ -450,6 +592,13 @@
     "checked": "2026-10-17",
     "hf_repo": "openai/gpt-oss-120b",
     "total_params_b": 117.0
+  },
+  "granite-4-0-h-small": {
+    "active_params_b": 9.0,
+    "architecture": "moe",
+    "checked": "2026-10-21",
+    "hf_repo": "ibm-granite/granite-4.0-h-small",
+    "total_params_b": 32.0
   },
   "granite-4-2-30b": {
     "active_params_b": 30.0,
@@ -490,6 +639,13 @@
     "checked": "2026-10-17",
     "hf_repo": "tencent/Hy3",
     "total_params_b": 299.0
+  },
+  "hy3-preview": {
+    "active_params_b": 21.0,
+    "architecture": "moe",
+    "checked": "2026-10-21",
+    "hf_repo": "tencent/Hy3-preview",
+    "total_params_b": 295.0
   },
   "inkling": {
     "active_params_b": 41.0,
@@ -537,6 +693,69 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2-5": {
+    "active_params_b": 32.0,
+    "architecture": "moe",
+    "checked": "2026-10-21",
+    "hf_repo": "moonshotai/Kimi-K2.5",
+    "total_params_b": 1000.0
+  },
+  "kimi-k2-5-instant": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2-5-thinking": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2-preview-(0711)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2-preview-(0905)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2-preview-0711": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2-preview-0905": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2.5-(instant)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k2.5-(thinking)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -719,6 +938,27 @@
     "hf_repo": "MiniMaxAI/MiniMax-M3",
     "total_params_b": 428.0
   },
+  "mistral-large-(2411)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "mistral-large-2-(2407)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "mistral-large-2-2407": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "mistral-large-2407": {
     "active_params_b": 123.0,
     "architecture": "dense",
@@ -729,7 +969,8 @@
   "mistral-large-2411": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "mistral-large-3": {
@@ -750,6 +991,20 @@
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "mistral-small-3-2-2506": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "mistral-small-3.2-(2506)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "molmo2-8b": {
@@ -809,7 +1064,8 @@
   "openchat-3-5-0106": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "openchat-3.5": {
@@ -818,10 +1074,31 @@
     "checked": "2026-10-17",
     "total_params_b": null
   },
+  "openchat-3.5-(0106)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "openchat-3.5-0106": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-10-17",
+    "total_params_b": null
+  },
+  "phi-3-mini-4k-instruct-(june-2024)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "phi-3-mini-4k-instruct-june-2024": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "phi-4": {
@@ -831,10 +1108,18 @@
     "hf_repo": "microsoft/phi-4",
     "total_params_b": 14.0
   },
+  "qwen-max-(0919)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-21",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "qwen-max-0919": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-21",
+    "hf_repo": null,
     "total_params_b": null
   },
   "qwen3-5-122b-a10b": {
