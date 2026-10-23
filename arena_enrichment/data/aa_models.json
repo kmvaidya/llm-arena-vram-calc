@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-10-22T10:57:54.943008+00:00",
-  "model_count": 369,
+  "fetched_at": "2026-10-23T10:50:54.708228+00:00",
+  "model_count": 370,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -1872,6 +1872,15 @@
       "is_open_weights": true,
       "name": "Ling 3.1 Flash",
       "slug": "ling-3-1-flash",
+      "total_params_b": null
+    },
+    "ling31flash1019": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "Ling 3.1 Flash 1019",
+      "slug": "ling-3-1-flash-1019",
       "total_params_b": null
     },
     "llama31instruct405b": {
