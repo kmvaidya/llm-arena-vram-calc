@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-23T10:50:54.708228+00:00",
+  "fetched_at": "2026-10-24T10:05:33.985901+00:00",
   "model_count": 370,
   "models": {
     "agnes25probeta": {
@@ -1748,31 +1748,13 @@
       "slug": "kimi-k2-7-code",
       "total_params_b": null
     },
-    "kimik3": {
+    "kimik31pro": {
       "active_params_b": null,
       "architecture": null,
-      "context_window": 1048576,
-      "is_open_weights": true,
-      "name": "Kimi K3 (Max)",
-      "slug": "kimi-k3",
-      "total_params_b": null
-    },
-    "kimik3low": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1048576,
-      "is_open_weights": true,
-      "name": "Kimi K3 (Low)",
-      "slug": "kimi-k3-low",
-      "total_params_b": null
-    },
-    "kimik3max": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1048576,
-      "is_open_weights": true,
-      "name": "Kimi K3 (Max)",
-      "slug": "kimi-k3",
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Kimi K3.1 Pro",
+      "slug": "kimi-k3-1-pro",
       "total_params_b": null
     },
     "kimilinear48ba3binstruct": {
@@ -2322,6 +2304,24 @@
       "is_open_weights": true,
       "name": "Nemotron 3.5 Bolt 74B-A9B",
       "slug": "nemotron-3-5-bolt-74b-a9b",
+      "total_params_b": null
+    },
+    "nemotron35bolte4b4gb": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": false,
+      "name": "Nemotron 3.5 Bolt E4B 4GB (Reasoning)",
+      "slug": "nemotron-3-5-bolt-e4b-4gb",
+      "total_params_b": null
+    },
+    "nemotron35bolte4b4gbreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 131072,
+      "is_open_weights": false,
+      "name": "Nemotron 3.5 Bolt E4B 4GB (Reasoning)",
+      "slug": "nemotron-3-5-bolt-e4b-4gb",
       "total_params_b": null
     },
     "nemotron35lightning": {

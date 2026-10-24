@@ -229,7 +229,7 @@
   "deepseek-v3.1-terminus": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-24",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -534,7 +534,7 @@
   "glm-5-2-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-24",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -766,6 +766,20 @@
     "hf_repo": "moonshotai/Kimi-K3",
     "total_params_b": 2800.0
   },
+  "kimi-k3-(max)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-24",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k3-max": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-10-24",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "ling-flash-2-0": {
     "active_params_b": 6.1,
     "architecture": "moe",
@@ -858,7 +872,7 @@
   "mimo-v2.5-pro": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-24",
     "hf_repo": null,
     "total_params_b": null
   },
