@@ -69,7 +69,7 @@
   "dbrx-instruct-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-25",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -257,7 +257,7 @@
   "deepseek-v3.2": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-25",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -838,14 +838,14 @@
   "mimo-v2-flash-(non-thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-25",
     "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2-flash-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-25",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -941,7 +941,7 @@
   "minimax-m2.7": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-25",
     "hf_repo": null,
     "total_params_b": null
   },
