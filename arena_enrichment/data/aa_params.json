@@ -180,7 +180,7 @@
   "deepseek-v3-1-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-26",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -271,7 +271,7 @@
   "deepseek-v3.2-exp": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-26",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -478,7 +478,7 @@
   "glm-4.5v": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-26",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -499,7 +499,7 @@
   "glm-4.7": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-26",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -852,7 +852,7 @@
   "mimo-v2-flash-non-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-26",
     "hf_repo": null,
     "total_params_b": null
   },
