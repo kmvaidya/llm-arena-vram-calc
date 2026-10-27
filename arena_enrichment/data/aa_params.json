@@ -208,7 +208,7 @@
   "deepseek-v3-2-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-27",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -790,7 +790,7 @@
   "ling-flash-2.0": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-27",
     "hf_repo": null,
     "total_params_b": null
   },

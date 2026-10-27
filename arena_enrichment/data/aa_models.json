@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-26T12:03:34.491889+00:00",
+  "fetched_at": "2026-10-27T11:23:42.369915+00:00",
   "model_count": 370,
   "models": {
     "agnes25probeta": {
@@ -1001,69 +1001,6 @@
       "slug": "gpt-5-5-pro",
       "total_params_b": null
     },
-    "gpt56terra": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (Max)",
-      "slug": "gpt-5-6-terra",
-      "total_params_b": null
-    },
-    "gpt56terrahigh": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (High)",
-      "slug": "gpt-5-6-terra-high",
-      "total_params_b": null
-    },
-    "gpt56terralow": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (Low)",
-      "slug": "gpt-5-6-terra-low",
-      "total_params_b": null
-    },
-    "gpt56terramax": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (Max)",
-      "slug": "gpt-5-6-terra",
-      "total_params_b": null
-    },
-    "gpt56terramedium": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (Medium)",
-      "slug": "gpt-5-6-terra-medium",
-      "total_params_b": null
-    },
-    "gpt56terranonreasoning": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (Non-reasoning)",
-      "slug": "gpt-5-6-terra-non-reasoning",
-      "total_params_b": null
-    },
-    "gpt56terraxhigh": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-5.6 Terra (Xhigh)",
-      "slug": "gpt-5-6-terra-xhigh",
-      "total_params_b": null
-    },
     "gpt61sol": {
       "active_params_b": null,
       "architecture": null,
@@ -1116,6 +1053,69 @@
       "is_open_weights": false,
       "name": "GPT-6.1 Sol (Xhigh)",
       "slug": "gpt-6-1-sol-xhigh",
+      "total_params_b": null
+    },
+    "gpt61terra": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (Max)",
+      "slug": "gpt-6-1-terra",
+      "total_params_b": null
+    },
+    "gpt61terrahigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (High)",
+      "slug": "gpt-6-1-terra-high",
+      "total_params_b": null
+    },
+    "gpt61terralow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (Low)",
+      "slug": "gpt-6-1-terra-low",
+      "total_params_b": null
+    },
+    "gpt61terramax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (Max)",
+      "slug": "gpt-6-1-terra",
+      "total_params_b": null
+    },
+    "gpt61terramedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (Medium)",
+      "slug": "gpt-6-1-terra-medium",
+      "total_params_b": null
+    },
+    "gpt61terranonreasoning": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (Non-reasoning)",
+      "slug": "gpt-6-1-terra-non-reasoning",
+      "total_params_b": null
+    },
+    "gpt61terraxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.1 Terra (Xhigh)",
+      "slug": "gpt-6-1-terra-xhigh",
       "total_params_b": null
     },
     "gpt6astra": {
@@ -2310,7 +2310,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 131072,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "Nemotron 3.5 Bolt E4B 4GB (Reasoning)",
       "slug": "nemotron-3-5-bolt-e4b-4gb",
       "total_params_b": null
@@ -2319,7 +2319,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 131072,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "Nemotron 3.5 Bolt E4B 4GB (Reasoning)",
       "slug": "nemotron-3-5-bolt-e4b-4gb",
       "total_params_b": null
