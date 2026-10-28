@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-27T11:23:42.369915+00:00",
+  "fetched_at": "2026-10-28T11:56:38.855044+00:00",
   "model_count": 370,
   "models": {
     "agnes25probeta": {
@@ -1860,7 +1860,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 1048576,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "Ling 3.1 Flash 1019",
       "slug": "ling-3-1-flash-1019",
       "total_params_b": null

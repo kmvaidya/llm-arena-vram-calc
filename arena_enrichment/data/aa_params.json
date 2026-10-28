@@ -21,14 +21,14 @@
   "command-r+-(08-2024)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
   "command-r+-08-2024": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -236,7 +236,7 @@
   "deepseek-v3.1-terminus-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -348,7 +348,7 @@
   "deepseek-v4-flash-preview-(high)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -471,7 +471,7 @@
   "glm-4.5-air": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -485,7 +485,7 @@
   "glm-4.6": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -555,7 +555,7 @@
   "glm-5.1": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -706,7 +706,7 @@
   "kimi-k2-5-instant": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -734,7 +734,7 @@
   "kimi-k2-preview-0711": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -859,7 +859,7 @@
   "mimo-v2-flash-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -899,7 +899,7 @@
   "minimax-m2-1-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1017,7 +1017,7 @@
   "mistral-small-3.2-(2506)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-28",
     "hf_repo": null,
     "total_params_b": null
   },
