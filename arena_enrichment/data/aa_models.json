@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-10-28T11:56:38.855044+00:00",
-  "model_count": 370,
+  "fetched_at": "2026-10-29T12:05:23.702526+00:00",
+  "model_count": 371,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -765,6 +765,24 @@
       "is_open_weights": false,
       "name": "Gemini 4 Argon (High)",
       "slug": "gemini-4-argon",
+      "total_params_b": null
+    },
+    "gemini4carbon": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Carbon (High)",
+      "slug": "gemini-4-carbon",
+      "total_params_b": null
+    },
+    "gemini4carbonhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Carbon (High)",
+      "slug": "gemini-4-carbon",
       "total_params_b": null
     },
     "gemma3270m": {
@@ -2085,7 +2103,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "MiniMax-M3.1-Flash",
       "slug": "minimax-m3-1-flash",
       "total_params_b": null
@@ -2117,22 +2135,13 @@
       "slug": "ministral-3-8b",
       "total_params_b": null
     },
-    "mistrallarge4": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 524288,
-      "is_open_weights": false,
-      "name": "Mistral Large 4 Preview",
-      "slug": "mistral-large-4",
-      "total_params_b": null
-    },
     "mistrallarge4preview": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 524288,
       "is_open_weights": false,
       "name": "Mistral Large 4 Preview",
-      "slug": "mistral-large-4",
+      "slug": "mistral-large-4-preview",
       "total_params_b": null
     },
     "mistralmedium35": {

@@ -118,7 +118,7 @@
   "deepseek-v2.5": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -201,7 +201,7 @@
   "deepseek-v3-2-exp-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -278,7 +278,7 @@
   "deepseek-v3.2-exp-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -382,7 +382,7 @@
   "deepseek-v4-pro-high,-20260813": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -506,7 +506,7 @@
   "glm-4.7-flash": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -692,7 +692,7 @@
   "jamba-1.5-mini": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -741,7 +741,7 @@
   "kimi-k2-preview-0905": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -755,7 +755,7 @@
   "kimi-k2.5-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -934,7 +934,7 @@
   "minimax-m2.5": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -962,7 +962,7 @@
   "mistral-large-2-(2407)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1010,7 +1010,7 @@
   "mistral-small-3-2-2506": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1078,7 +1078,7 @@
   "openchat-3-5-0106": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1132,7 +1132,7 @@
   "qwen-max-0919": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-29",
     "hf_repo": null,
     "total_params_b": null
   },
