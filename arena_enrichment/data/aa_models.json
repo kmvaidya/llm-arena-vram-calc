@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-10-29T12:05:23.702526+00:00",
-  "model_count": 371,
+  "fetched_at": "2026-10-30T11:57:51.366444+00:00",
+  "model_count": 373,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -2135,13 +2135,31 @@
       "slug": "ministral-3-8b",
       "total_params_b": null
     },
-    "mistrallarge4preview": {
+    "mistrallarge4": {
       "active_params_b": null,
       "architecture": null,
-      "context_window": 524288,
-      "is_open_weights": false,
-      "name": "Mistral Large 4 Preview",
-      "slug": "mistral-large-4-preview",
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Mistral Large 4 (High)",
+      "slug": "mistral-large-4",
+      "total_params_b": null
+    },
+    "mistrallarge4high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Mistral Large 4 (High)",
+      "slug": "mistral-large-4",
+      "total_params_b": null
+    },
+    "mistrallarge4medium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Mistral Large 4 (Medium)",
+      "slug": "mistral-large-4-medium",
       "total_params_b": null
     },
     "mistralmedium35": {
