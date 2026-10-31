@@ -62,7 +62,7 @@
   "dbrx-instruct": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -194,7 +194,7 @@
   "deepseek-v3-2-exp": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -229,7 +229,7 @@
   "deepseek-v3.1-terminus": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-24",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -534,7 +534,7 @@
   "glm-5-2-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-24",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -569,7 +569,7 @@
   "glm-5.2-(max)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -713,7 +713,7 @@
   "kimi-k2-5-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -872,7 +872,7 @@
   "mimo-v2.5-pro": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-24",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -927,7 +927,7 @@
   "minimax-m2.1-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-10-31",
     "hf_repo": null,
     "total_params_b": null
   },
