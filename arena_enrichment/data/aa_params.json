@@ -389,7 +389,7 @@
   "deepseek-v4.1-flash-20260910-(max)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-01",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1111,7 +1111,7 @@
   "phi-3-mini-4k-instruct-june-2024": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-01",
     "hf_repo": null,
     "total_params_b": null
   },
