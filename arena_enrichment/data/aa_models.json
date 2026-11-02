@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-01T12:29:34.861351+00:00",
-  "model_count": 374,
+  "fetched_at": "2026-11-02T14:29:19.492538+00:00",
+  "model_count": 377,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -479,6 +479,15 @@
       "slug": "deepseek-v4-1-flash-1017",
       "total_params_b": null
     },
+    "deepseekv41flash1017high": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "DeepSeek V4.1 Flash 1017 (High)",
+      "slug": "deepseek-v4-1-flash-1017-high",
+      "total_params_b": null
+    },
     "deepseekv41flash1017max": {
       "active_params_b": null,
       "architecture": null,
@@ -792,6 +801,15 @@
       "is_open_weights": false,
       "name": "Gemini 4 Carbon (High)",
       "slug": "gemini-4-carbon",
+      "total_params_b": null
+    },
+    "gemini4carbonmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Carbon (Medium)",
+      "slug": "gemini-4-carbon-medium",
       "total_params_b": null
     },
     "gemma3270m": {
@@ -2331,6 +2349,15 @@
       "is_open_weights": true,
       "name": "Nanbeige4.1-3B",
       "slug": "nanbeige4-1-3b",
+      "total_params_b": null
+    },
+    "nanbeige4333b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": true,
+      "name": "Nanbeige4.3-33B",
+      "slug": "nanbeige4-3-33b",
       "total_params_b": null
     },
     "nemotron35bolt74ba9b": {
