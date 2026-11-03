@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-02T14:29:19.492538+00:00",
-  "model_count": 377,
+  "fetched_at": "2026-11-03T13:26:04.289985+00:00",
+  "model_count": 379,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -801,6 +801,15 @@
       "is_open_weights": false,
       "name": "Gemini 4 Carbon (High)",
       "slug": "gemini-4-carbon",
+      "total_params_b": null
+    },
+    "gemini4carbonlow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Carbon (Low)",
+      "slug": "gemini-4-carbon-low",
       "total_params_b": null
     },
     "gemini4carbonmedium": {
@@ -1775,12 +1784,21 @@
       "slug": "kat-coder-pro-v2",
       "total_params_b": null
     },
+    "kexaone20": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "K-EXAONE 2.0",
+      "slug": "k-exaone-2-0-0803",
+      "total_params_b": null
+    },
     "kexaone200803": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 262144,
       "is_open_weights": true,
-      "name": "K-EXAONE 2.0 0803",
+      "name": "K-EXAONE 2.0",
       "slug": "k-exaone-2-0-0803",
       "total_params_b": null
     },

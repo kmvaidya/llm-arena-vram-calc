@@ -35,7 +35,7 @@
   "command-r-(08-2024)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-03",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -264,7 +264,7 @@
   "deepseek-v3.2-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-03",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -720,14 +720,14 @@
   "kimi-k2-preview-(0711)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-03",
     "hf_repo": null,
     "total_params_b": null
   },
   "kimi-k2-preview-(0905)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-03",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1104,7 +1104,7 @@
   "phi-3-mini-4k-instruct-(june-2024)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-03",
     "hf_repo": null,
     "total_params_b": null
   },
