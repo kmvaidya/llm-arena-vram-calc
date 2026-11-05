@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-04T13:37:09.168252+00:00",
-  "model_count": 379,
+  "fetched_at": "2026-11-05T13:50:09.443683+00:00",
+  "model_count": 381,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -2351,6 +2351,15 @@
       "slug": "muse-wonder-full",
       "total_params_b": null
     },
+    "musewonderhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "Muse Wonder (High)",
+      "slug": "muse-wonder-high",
+      "total_params_b": null
+    },
     "musewondermax": {
       "active_params_b": null,
       "architecture": null,
@@ -3375,6 +3384,15 @@
       "is_open_weights": true,
       "name": "Step 5 Preview",
       "slug": "step-5",
+      "total_params_b": null
+    },
+    "tencenthy4": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "Tencent Hy4",
+      "slug": "tencent-hy4",
       "total_params_b": null
     },
     "tinyayaglobal": {

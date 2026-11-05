@@ -42,7 +42,7 @@
   "command-r-08-2024": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-05",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -90,7 +90,7 @@
   "deepseek-r1-(0528)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-05",
     "hf_repo": null,
     "total_params_b": null
   },
