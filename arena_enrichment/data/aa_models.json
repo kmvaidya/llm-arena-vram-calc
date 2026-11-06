@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-05T13:50:09.443683+00:00",
-  "model_count": 381,
+  "fetched_at": "2026-11-06T13:34:55.416004+00:00",
+  "model_count": 382,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -1577,6 +1577,15 @@
       "slug": "inkling",
       "total_params_b": null
     },
+    "inkling2small": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1024000,
+      "is_open_weights": false,
+      "name": "Inkling 2 Small",
+      "slug": "inkling-2-small",
+      "total_params_b": null
+    },
     "inklingsmall": {
       "active_params_b": null,
       "architecture": null,
@@ -1815,7 +1824,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "Kimi K3.1 Pro",
       "slug": "kimi-k3-1-pro",
       "total_params_b": null

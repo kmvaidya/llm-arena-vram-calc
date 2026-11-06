@@ -125,7 +125,7 @@
   "deepseek-v2.5-(1210)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -208,7 +208,7 @@
   "deepseek-v3-2-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-27",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -278,7 +278,7 @@
   "deepseek-v3.2-exp-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -382,7 +382,7 @@
   "deepseek-v4-pro-high,-20260813": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -741,7 +741,7 @@
   "kimi-k2-preview-0905": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -755,7 +755,7 @@
   "kimi-k2.5-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -776,7 +776,7 @@
   "kimi-k3-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-24",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -790,7 +790,7 @@
   "ling-flash-2.0": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-27",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -962,7 +962,7 @@
   "mistral-large-2-(2407)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1010,7 +1010,7 @@
   "mistral-small-3-2-2506": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1078,7 +1078,7 @@
   "openchat-3-5-0106": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1125,14 +1125,14 @@
   "qwen-max-(0919)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-21",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
   "qwen-max-0919": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-06",
     "hf_repo": null,
     "total_params_b": null
   },
