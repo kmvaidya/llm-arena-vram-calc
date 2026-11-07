@@ -227,6 +227,10 @@
     "bytes": 681504807752,
     "checked": "2026-10-17"
   },
+  "mistralai/Mistral-Large-4-1T-A52B": {
+    "bytes": 1060554587912,
+    "checked": "2026-11-07"
+  },
   "mistralai/Mistral-Large-Instruct-2407": {
     "bytes": 245220233776,
     "checked": "2026-10-17"
