@@ -145,7 +145,7 @@
   "deepseek-v3-(0324)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-30",
+    "checked": "2026-11-09",
     "hf_repo": null,
     "total_params_b": null
   },

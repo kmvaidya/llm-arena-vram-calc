@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-08T12:35:25.762875+00:00",
-  "model_count": 382,
+  "fetched_at": "2026-11-09T14:53:28.907851+00:00",
+  "model_count": 383,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -9,6 +9,15 @@
       "is_open_weights": false,
       "name": "Agnes 2.5 Pro Beta",
       "slug": "agnes-2-5-pro-beta",
+      "total_params_b": null
+    },
+    "agnes25protheta": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Agnes 2.5 Pro Theta",
+      "slug": "agnes-2-5-pro-theta",
       "total_params_b": null
     },
     "apertus70binstruct": {
