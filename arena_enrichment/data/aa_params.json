@@ -69,7 +69,7 @@
   "dbrx-instruct-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -118,7 +118,7 @@
   "deepseek-v2.5": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -201,7 +201,7 @@
   "deepseek-v3-2-exp-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -257,7 +257,7 @@
   "deepseek-v3.2": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -506,7 +506,7 @@
   "glm-4.7-flash": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -569,7 +569,7 @@
   "glm-5.2-(max)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-31",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -692,7 +692,7 @@
   "jamba-1.5-mini": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -713,7 +713,7 @@
   "kimi-k2-5-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-31",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -772,6 +772,13 @@
     "checked": "2026-11-04",
     "hf_repo": null,
     "total_params_b": null
+  },
+  "kimi-k3-1-pro": {
+    "active_params_b": 104.0,
+    "architecture": "moe",
+    "checked": "2026-11-10",
+    "hf_repo": "moonshotai/Kimi-K3.1-Pro",
+    "total_params_b": 2800.0
   },
   "kimi-k3-max": {
     "active_params_b": null,
@@ -838,14 +845,14 @@
   "mimo-v2-flash-(non-thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2-flash-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -934,14 +941,14 @@
   "minimax-m2.5": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-29",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m2.7": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-10",
     "hf_repo": null,
     "total_params_b": null
   },
