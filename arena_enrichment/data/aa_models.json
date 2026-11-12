@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-11T13:22:30.898306+00:00",
-  "model_count": 386,
+  "fetched_at": "2026-11-12T14:27:34.041003+00:00",
+  "model_count": 384,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -1672,25 +1672,7 @@
       "architecture": null,
       "context_window": 262144,
       "is_open_weights": false,
-      "name": "JT-4.1 Flash 236B A21B (Reasoning)",
-      "slug": "jt-4-1-flash-236b-a21b",
-      "total_params_b": null
-    },
-    "jt41flash236ba21bnonreasoning": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 262144,
-      "is_open_weights": false,
-      "name": "JT-4.1 Flash 236B A21B (Non-reasoning)",
-      "slug": "jt-4-1-flash-236b-a21b-non-reasoning",
-      "total_params_b": null
-    },
-    "jt41flash236ba21breasoning": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 262144,
-      "is_open_weights": false,
-      "name": "JT-4.1 Flash 236B A21B (Reasoning)",
+      "name": "JT-4.1 Flash 236B A21B",
       "slug": "jt-4-1-flash-236b-a21b",
       "total_params_b": null
     },

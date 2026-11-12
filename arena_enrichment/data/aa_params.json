@@ -173,7 +173,7 @@
   "deepseek-v3-1-terminus-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-30",
+    "checked": "2026-11-12",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -389,7 +389,7 @@
   "deepseek-v4.1-flash-20260910-(max)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-01",
+    "checked": "2026-11-12",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -492,7 +492,7 @@
   "glm-4.6v": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-30",
+    "checked": "2026-11-12",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1125,7 +1125,7 @@
   "phi-3-mini-4k-instruct-june-2024": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-01",
+    "checked": "2026-11-12",
     "hf_repo": null,
     "total_params_b": null
   },
