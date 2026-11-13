@@ -180,7 +180,7 @@
   "deepseek-v3-1-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-13",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -271,7 +271,7 @@
   "deepseek-v3.2-exp": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-13",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -478,7 +478,7 @@
   "glm-4.5v": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-13",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -499,7 +499,7 @@
   "glm-4.7": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-13",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -653,6 +653,13 @@
     "checked": "2026-10-17",
     "hf_repo": "thinkingmachines/Inkling",
     "total_params_b": 975.0
+  },
+  "inkling-2-small": {
+    "active_params_b": 17.0,
+    "architecture": "moe",
+    "checked": "2026-11-13",
+    "hf_repo": "thinkingmachines/Inkling-2-Small",
+    "total_params_b": 594.0
   },
   "inkling-small": {
     "active_params_b": 12.0,
@@ -859,7 +866,7 @@
   "mimo-v2-flash-non-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-13",
     "hf_repo": null,
     "total_params_b": null
   },

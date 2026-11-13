@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-12T14:27:34.041003+00:00",
-  "model_count": 384,
+  "fetched_at": "2026-11-13T13:45:18.982127+00:00",
+  "model_count": 388,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -830,6 +830,51 @@
       "slug": "gemini-4-carbon-medium",
       "total_params_b": null
     },
+    "gemini4hydrogen": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Hydrogen (Xhigh)",
+      "slug": "gemini-4-hydrogen",
+      "total_params_b": null
+    },
+    "gemini4hydrogenhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Hydrogen (High)",
+      "slug": "gemini-4-hydrogen-high",
+      "total_params_b": null
+    },
+    "gemini4hydrogenlow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Hydrogen (Low)",
+      "slug": "gemini-4-hydrogen-low",
+      "total_params_b": null
+    },
+    "gemini4hydrogenmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Hydrogen (Medium)",
+      "slug": "gemini-4-hydrogen-medium",
+      "total_params_b": null
+    },
+    "gemini4hydrogenxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Hydrogen (Xhigh)",
+      "slug": "gemini-4-hydrogen",
+      "total_params_b": null
+    },
     "gemma3270m": {
       "active_params_b": null,
       "architecture": null,
@@ -1590,7 +1635,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 1024000,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "Inkling 2 Small",
       "slug": "inkling-2-small",
       "total_params_b": null
@@ -1790,16 +1835,7 @@
       "context_window": 262144,
       "is_open_weights": true,
       "name": "K-EXAONE 2.0",
-      "slug": "k-exaone-2-0-0803",
-      "total_params_b": null
-    },
-    "kexaone200803": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 262144,
-      "is_open_weights": true,
-      "name": "K-EXAONE 2.0",
-      "slug": "k-exaone-2-0-0803",
+      "slug": "k-exaone-2-0",
       "total_params_b": null
     },
     "kimik27code": {

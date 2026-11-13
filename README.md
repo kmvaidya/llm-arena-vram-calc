@@ -4,7 +4,7 @@ Enriches the [Arena.ai](https://arena.ai/leaderboard/text?license=open-source) o
 
 Most LLM leaderboards rank models by quality but ignore deployment constraints. This tool answers: *"What's the best model I can actually run on my hardware?"* by cross-referencing Arena rankings with VRAM requirements across precisions.
 
-> **Last updated:** 2026-11-12 14:27 UTC | **Arena data:** 2026-11-09 | **Models:** 229 | **Resolved:** 214 (93.4%)
+> **Last updated:** 2026-11-13 13:45 UTC | **Arena data:** 2026-11-11 | **Models:** 230 | **Resolved:** 215 (93.5%)
 
 ## Best Model Per Hardware
 
@@ -12,21 +12,21 @@ Highest-ranked Arena model that fits each piece of hardware, with its Arena rank
 
 | Tier | Hardware | Memory | Bandwidth | As released | 8-bit | 4-bit |
 |------|----------|--------|-----------|------|------|------|
-| Consumer GPU | RTX 5060 Ti 16 GB | 16 GiB | 0.448 TB/s | Gemma 3 4B IT (#120, 11 GiB, ~43 tok/s) | Molmo 2 8B (#107, 12 GiB, ~37 tok/s) | Gemma 3 12B IT (#95, 10 GiB, ~47 tok/s) |
-|  | RTX 5080 | 16 GiB | 0.96 TB/s | Gemma 3 4B IT (#120, 11 GiB, ~88 tok/s) | Molmo 2 8B (#107, 12 GiB, ~77 tok/s) | Gemma 3 12B IT (#95, 10 GiB, ~96 tok/s) |
-|  | RTX 3090 | 24 GiB | 0.936 TB/s | Molmo 2 8B (#107, 20 GiB, ~41 tok/s) | Gemma 3 12B IT (#95, 15 GiB, ~56 tok/s) | Gemma 4 31B (#16, 23 GiB, ~39 tok/s) |
-|  | RTX 4090 | 24 GiB | 1.01 TB/s | Molmo 2 8B (#107, 20 GiB, ~44 tok/s) | Gemma 3 12B IT (#95, 15 GiB, ~60 tok/s) | Gemma 4 31B (#16, 23 GiB, ~42 tok/s) |
-|  | RTX 5090 | 32 GiB | 1.79 TB/s | Gemma 3 12B IT (#95, 26 GiB, ~56 tok/s) | Gemma 4 26B A4B (#23, 30 GiB, ~190 tok/s) | Gemma 4 31B (#16, 23 GiB, ~72 tok/s) |
-| Unified memory | Mac mini / MacBook Pro, M5 Pro 64 GB | 48 of 64 GiB | 0.307 TB/s | Gemma 3 12B IT (#95, 26 GiB, ~10 tok/s) | Gemma 4 31B (#16, 36 GiB, ~7.5 tok/s) | Gemma 4 31B (#16, 23 GiB, ~13 tok/s) |
+| Consumer GPU | RTX 5060 Ti 16 GB | 16 GiB | 0.448 TB/s | Gemma 3 4B IT (#121, 11 GiB, ~43 tok/s) | Molmo 2 8B (#108, 12 GiB, ~37 tok/s) | Gemma 3 12B IT (#96, 10 GiB, ~47 tok/s) |
+|  | RTX 5080 | 16 GiB | 0.96 TB/s | Gemma 3 4B IT (#121, 11 GiB, ~88 tok/s) | Molmo 2 8B (#108, 12 GiB, ~77 tok/s) | Gemma 3 12B IT (#96, 10 GiB, ~96 tok/s) |
+|  | RTX 3090 | 24 GiB | 0.936 TB/s | Molmo 2 8B (#108, 20 GiB, ~41 tok/s) | Gemma 3 12B IT (#96, 15 GiB, ~56 tok/s) | Gemma 4 31B (#16, 23 GiB, ~39 tok/s) |
+|  | RTX 4090 | 24 GiB | 1.01 TB/s | Molmo 2 8B (#108, 20 GiB, ~44 tok/s) | Gemma 3 12B IT (#96, 15 GiB, ~60 tok/s) | Gemma 4 31B (#16, 23 GiB, ~42 tok/s) |
+|  | RTX 5090 | 32 GiB | 1.79 TB/s | Gemma 3 12B IT (#96, 26 GiB, ~56 tok/s) | Gemma 4 26B A4B (#23, 30 GiB, ~190 tok/s) | Gemma 4 31B (#16, 23 GiB, ~72 tok/s) |
+| Unified memory | Mac mini / MacBook Pro, M5 Pro 64 GB | 48 of 64 GiB | 0.307 TB/s | Gemma 3 12B IT (#96, 26 GiB, ~10 tok/s) | Gemma 4 31B (#16, 36 GiB, ~7.5 tok/s) | Gemma 4 31B (#16, 23 GiB, ~13 tok/s) |
 |  | Ryzen AI Max+ 395, 128 GB | 96 of 128 GiB | 0.256 TB/s | Gemma 4 31B (#16, 64 GiB, ~3.3 tok/s) | Gemma 4 31B (#16, 36 GiB, ~6.3 tok/s) | Gemma 4 31B (#16, 23 GiB, ~11 tok/s) |
 |  | MacBook Pro / Mac Studio, M5 Max 128 GB | 96 of 128 GiB | 0.614 TB/s | Gemma 4 31B (#16, 64 GiB, ~7.8 tok/s) | Gemma 4 31B (#16, 36 GiB, ~15 tok/s) | Gemma 4 31B (#16, 23 GiB, ~26 tok/s) |
 |  | DGX Spark (GB10), 128 GB | 115 of 128 GiB | 0.273 TB/s | Gemma 4 31B (#16, 64 GiB, ~3.5 tok/s) | Gemma 4 31B (#16, 36 GiB, ~6.7 tok/s) | Gemma 4 31B (#16, 23 GiB, ~12 tok/s) |
-|  | Mac Studio, M5 Ultra 256 GB | 192 of 256 GiB | 1.23 TB/s | Gemma 4 31B (#16, 64 GiB, ~15 tok/s) | Gemma 4 31B (#16, 36 GiB, ~29 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~57 tok/s) |
-|  | Mac Studio, M5 Ultra 512 GB | 384 of 512 GiB | 1.23 TB/s | GLM-5.3-Flash (#7, 311 GiB, ~38 tok/s) | GLM-5.3-Flash (#7, 311 GiB, ~38 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~57 tok/s) |
-| Workstation | Radeon AI PRO R9700 | 32 GiB | 0.64 TB/s | Gemma 3 12B IT (#95, 26 GiB, ~21 tok/s) | Gemma 4 26B A4B (#23, 30 GiB, ~91 tok/s) | Gemma 4 31B (#16, 23 GiB, ~27 tok/s) |
+|  | Mac Studio, M5 Ultra 256 GB | 192 of 256 GiB | 1.23 TB/s | Gemma 4 31B (#16, 64 GiB, ~15 tok/s) | Gemma 4 31B (#16, 36 GiB, ~29 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~57 tok/s) |
+|  | Mac Studio, M5 Ultra 512 GB | 384 of 512 GiB | 1.23 TB/s | GLM-5.3-Flash (#5, 311 GiB, ~38 tok/s) | GLM-5.3-Flash (#5, 311 GiB, ~38 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~57 tok/s) |
+| Workstation | Radeon AI PRO R9700 | 32 GiB | 0.64 TB/s | Gemma 3 12B IT (#96, 26 GiB, ~21 tok/s) | Gemma 4 26B A4B (#23, 30 GiB, ~91 tok/s) | Gemma 4 31B (#16, 23 GiB, ~27 tok/s) |
 |  | RTX PRO 6000 Blackwell | 96 GiB | 1.79 TB/s | Gemma 4 31B (#16, 64 GiB, ~22 tok/s) | Gemma 4 31B (#16, 36 GiB, ~42 tok/s) | Gemma 4 31B (#16, 23 GiB, ~72 tok/s) |
-|  | DGX Station (GB300) | 252 GiB | 7.1 TB/s | Gemma 4 31B (#16, 64 GiB, ~83 tok/s) | Gemma 4 31B (#16, 36 GiB, ~150 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~240 tok/s) |
-| Data center GPU | L40S | 48 GiB | 0.864 TB/s | Gemma 3 12B IT (#95, 26 GiB, ~28 tok/s) | Gemma 4 31B (#16, 36 GiB, ~21 tok/s) | Gemma 4 31B (#16, 23 GiB, ~36 tok/s) |
+|  | DGX Station (GB300) | 252 GiB | 7.1 TB/s | Gemma 4 31B (#16, 64 GiB, ~83 tok/s) | Gemma 4 31B (#16, 36 GiB, ~150 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~240 tok/s) |
+| Data center GPU | L40S | 48 GiB | 0.864 TB/s | Gemma 3 12B IT (#96, 26 GiB, ~28 tok/s) | Gemma 4 31B (#16, 36 GiB, ~21 tok/s) | Gemma 4 31B (#16, 23 GiB, ~36 tok/s) |
 |  | H100 SXM | 80 GiB | 3.35 TB/s | Gemma 4 31B (#16, 64 GiB, ~41 tok/s) | Gemma 4 31B (#16, 36 GiB, ~76 tok/s) | Gemma 4 31B (#16, 23 GiB, ~130 tok/s) |
 |  | A100 80GB SXM | 80 GiB | 2.04 TB/s | Gemma 4 31B (#16, 64 GiB, ~25 tok/s) | Gemma 4 31B (#16, 36 GiB, ~48 tok/s) | Gemma 4 31B (#16, 23 GiB, ~81 tok/s) |
 |  | H100 NVL | 94 GiB | 3.9 TB/s | Gemma 4 31B (#16, 64 GiB, ~48 tok/s) | Gemma 4 31B (#16, 36 GiB, ~87 tok/s) | Gemma 4 31B (#16, 23 GiB, ~140 tok/s) |
@@ -34,11 +34,11 @@ Highest-ranked Arena model that fits each piece of hardware, with its Arena rank
 |  | H200 SXM / NVL | 141 GiB | 4.8 TB/s | Gemma 4 31B (#16, 64 GiB, ~58 tok/s) | Gemma 4 31B (#16, 36 GiB, ~110 tok/s) | Gemma 4 31B (#16, 23 GiB, ~170 tok/s) |
 |  | B200 | 180 of 192 GiB | 8 TB/s | Gemma 4 31B (#16, 64 GiB, ~93 tok/s) | Gemma 4 31B (#16, 36 GiB, ~160 tok/s) | Gemma 4 31B (#16, 23 GiB, ~260 tok/s) |
 |  | MI300X | 192 GiB | 5.3 TB/s | Gemma 4 31B (#16, 64 GiB, ~63 tok/s) | Gemma 4 31B (#16, 36 GiB, ~120 tok/s) | Hy3 (#15, 173 GiB, ~180 tok/s) |
-|  | Rubin | 250 of 288 GiB | 16.2 TB/s | Gemma 4 31B (#16, 64 GiB, ~170 tok/s) | Gemma 4 31B (#16, 36 GiB, ~290 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~340 tok/s) |
-|  | MI325X | 256 GiB | 6 TB/s | Gemma 4 31B (#16, 64 GiB, ~71 tok/s) | Gemma 4 31B (#16, 36 GiB, ~130 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~220 tok/s) |
-|  | B300 | 268 of 288 GiB | 8 TB/s | Gemma 4 31B (#16, 64 GiB, ~93 tok/s) | Gemma 4 31B (#16, 36 GiB, ~160 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~250 tok/s) |
-|  | MI350X / MI355X | 288 GiB | 8 TB/s | Gemma 4 31B (#16, 64 GiB, ~93 tok/s) | Gemma 4 31B (#16, 36 GiB, ~160 tok/s) | GLM-5.3-Flash (#7, 184 GiB, ~250 tok/s) |
-| 8-GPU server | 8x L40S | 384 GiB | 8 × 0.864 TB/s | GLM-5.3-Flash (#7, 322 GiB) | GLM-5.3-Flash (#7, 322 GiB) | GLM-5.3-Flash (#7, 195 GiB) |
+|  | Rubin | 250 of 288 GiB | 16.2 TB/s | Gemma 4 31B (#16, 64 GiB, ~170 tok/s) | Gemma 4 31B (#16, 36 GiB, ~290 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~340 tok/s) |
+|  | MI325X | 256 GiB | 6 TB/s | Gemma 4 31B (#16, 64 GiB, ~71 tok/s) | Gemma 4 31B (#16, 36 GiB, ~130 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~220 tok/s) |
+|  | B300 | 268 of 288 GiB | 8 TB/s | Gemma 4 31B (#16, 64 GiB, ~93 tok/s) | Gemma 4 31B (#16, 36 GiB, ~160 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~250 tok/s) |
+|  | MI350X / MI355X | 288 GiB | 8 TB/s | Gemma 4 31B (#16, 64 GiB, ~93 tok/s) | Gemma 4 31B (#16, 36 GiB, ~160 tok/s) | GLM-5.3-Flash (#5, 184 GiB, ~250 tok/s) |
+| 8-GPU server | 8x L40S | 384 GiB | 8 × 0.864 TB/s | GLM-5.3-Flash (#5, 322 GiB) | GLM-5.3-Flash (#5, 322 GiB) | GLM-5.3-Flash (#5, 195 GiB) |
 |  | 8x H100 SXM | 640 GiB | 8 × 3.35 TB/s | MiMo-V2.6-Pro (#4, 543 GiB, ~110 tok/s) | MiMo-V2.6-Pro (#4, 543 GiB, ~110 tok/s) | GLM-5.3 (Max) (#3, 437 GiB, ~110 tok/s) |
 |  | 8x A100 80GB SXM | 640 GiB | 8 × 2.04 TB/s | MiMo-V2.6-Pro (#4, 543 GiB, ~99 tok/s) | MiMo-V2.6-Pro (#4, 543 GiB, ~99 tok/s) | GLM-5.3 (Max) (#3, 437 GiB, ~99 tok/s) |
 |  | 8x H100 NVL | 752 GiB | 8 × 3.9 TB/s | MiMo-V2.6-Pro (#4, 543 GiB) | MiMo-V2.6-Pro (#4, 543 GiB) | GLM-5.3 (Max) (#3, 437 GiB) |
@@ -64,239 +64,240 @@ Highest-ranked Arena model that fits each piece of hardware, with its Arena rank
 | Rank | Model | Score | Params (B) | Arch | Release | GiB as released | GiB 8-bit | GiB 4-bit | Fits on | Speed |
 |------|-------|-------|------------|------|---------|-----------------|-----------|-----------|---------|-------|
 | 1 | Kimi K3 (Max) | 1487 | 2800 (104) | MoE | 4-bit | 1,459 | 1,459 | 1,459 | 8x B300 | ~110 tok/s |
-| 2 | Kimi K3.1 Pro (Max) | 1483 | 2800 (104) | MoE | 4-bit | 1,460 | 1,460 | 1,460 | 8x B300 | ~110 tok/s |
-| 3 | GLM-5.3 (Max) | 1482 | 753 (40) | MoE | 8-bit | 709 | 709 | 426 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 4 | MiMo-V2.6-Pro | 1480 | 1000 (42) | MoE | 4-bit | 533 | 533 | 533 | 8x H100 SXM | ~110 tok/s |
-| 5 | GLM-5.2 (Max) | 1475 | 753 (40) | MoE | 16-bit | 1,409 | 749 | 426 | 8x H200 SXM | ~100 tok/s |
-| 6 | DeepSeek-V4.1-Flash-20260910 (Max) | 1474 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 7 | GLM-5.3-Flash | 1474 | 320 (18) | MoE | 8-bit | 311 | 311 | 184 | 8x L40S | — |
+| 2 | Kimi K3.1 Pro (Max) | 1484 | 2800 (104) | MoE | 4-bit | 1,460 | 1,460 | 1,460 | 8x B300 | ~110 tok/s |
+| 3 | GLM-5.3 (Max) | 1481 | 753 (40) | MoE | 8-bit | 709 | 709 | 426 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 4 | MiMo-V2.6-Pro | 1479 | 1000 (42) | MoE | 4-bit | 533 | 533 | 533 | 8x H100 SXM | ~110 tok/s |
+| 5 | GLM-5.3-Flash | 1475 | 320 (18) | MoE | 8-bit | 311 | 311 | 184 | 8x L40S | — |
+| 6 | DeepSeek-V4.1-Flash-20260910 (Max) | 1475 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 7 | GLM-5.2 (Max) | 1475 | 753 (40) | MoE | 16-bit | 1,409 | 749 | 426 | 8x H200 SXM | ~100 tok/s |
 | 8 | MiMo-V2.5-Pro | 1466 | 1000 (42) | MoE | 8-bit | 968 | 968 | 564 | 8x H200 SXM | ~100 tok/s |
-| 9 | GLM-5.1 | 1465 | 744 (40) | MoE | 16-bit | 1,410 | 740 | 421 | 8x H200 SXM | ~100 tok/s |
-| 10 | DeepSeek-V4-Pro (High, 20260813) | 1464 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 9 | GLM-5.1 | 1464 | 744 (40) | MoE | 16-bit | 1,410 | 740 | 421 | 8x H200 SXM | ~100 tok/s |
+| 10 | DeepSeek-V4-Pro (High, 20260813) | 1463 | ? | ? | ? | ? | ? | ? | ? | ? |
 | 11 | Kimi K2.6 | 1460 | 1000 (32) | MoE | 4-bit | 560 | 560 | 560 | 8x H100 SXM | ~110 tok/s |
-| 12 | DeepSeek-V4-Pro | 1458 | 1600 (49) | MoE | 4-bit | 837 | 837 | 837 | 8x H200 SXM | ~110 tok/s |
+| 12 | DeepSeek-V4-Pro | 1457 | 1600 (49) | MoE | 4-bit | 837 | 837 | 837 | 8x H200 SXM | ~110 tok/s |
 | 13 | GLM-5 | 1457 | 744 (40) | MoE | 16-bit | 1,410 | 740 | 421 | 8x H200 SXM | ~100 tok/s |
 | 14 | DeepSeek-V4-Pro Preview (High) | 1454 | 1600 (49) | MoE | 4-bit | 837 | 837 | 837 | 8x H200 SXM | ~110 tok/s |
-| 15 | Hy3 | 1454 | 299 (21) | MoE | 16-bit | 562 | 301 | 173 | 8x L40S | — |
+| 15 | Hy3 | 1453 | 299 (21) | MoE | 16-bit | 562 | 301 | 173 | 8x L40S | — |
 | 16 | Gemma 4 31B | 1451 | 30.7 | Dense | 16-bit | 63.8 | 35.8 | 22.7 | L40S | ~21 tok/s |
 | 17 | Kimi K2.5 (Thinking) | 1449 | 1000 (32) | MoE | 4-bit | 560 | 560 | 560 | 8x H100 SXM | ~110 tok/s |
-| 18 | MiMo-V2.6-Flash | 1447 | 309 (15) | MoE | 4-bit | 167 | 167 | 167 | B200 | ~280 tok/s |
-| 19 | Inkling | 1443 | 975 (41) | MoE | 16-bit | 1,779 | 968 | 550 | 8x H200 SXM | ~100 tok/s |
+| 18 | MiMo-V2.6-Flash | 1448 | 309 (15) | MoE | 4-bit | 167 | 167 | 167 | B200 | ~280 tok/s |
+| 19 | Inkling | 1442 | 975 (41) | MoE | 16-bit | 1,779 | 968 | 550 | 8x H200 SXM | ~100 tok/s |
 | 20 | Qwen3.5-397B-A17B | 1441 | 397 (17) | MoE | 16-bit | 757 | 397 | 227 | 8x H100 SXM | ~110 tok/s |
 | 21 | GLM-4.7 | 1441 | 357 (32) | MoE | 16-bit | 673 | 358 | 205 | 8x H100 SXM | ~100 tok/s |
 | 22 | DeepSeek-V4-Flash Preview (High) | 1438 | 284 (13) | MoE | 4-bit | 161 | 161 | 161 | B200 | ~300 tok/s |
 | 23 | Gemma 4 26B A4B | 1437 | 25.2 (3.8) | MoE | 16-bit | 53.6 | 30.4 | 19.6 | RTX 5090 | ~190 tok/s |
-| 24 | MiniMax-M3 | 1435 | 428 (23) | MoE | 16-bit | 801 | 428 | 245 | 8x H100 SXM | ~110 tok/s |
-| 25 | DeepSeek-V4-Flash | 1435 | 284 (13) | MoE | 4-bit | 161 | 161 | 161 | B200 | ~300 tok/s |
+| 24 | DeepSeek-V4-Flash | 1435 | 284 (13) | MoE | 4-bit | 161 | 161 | 161 | B200 | ~300 tok/s |
+| 25 | MiniMax-M3 | 1435 | 428 (23) | MoE | 16-bit | 801 | 428 | 245 | 8x H100 SXM | ~110 tok/s |
 | 26 | Beam 1.0 501B A23B | 1434 | 501 (23) | MoE | ? | 939 | 500 | 285 | 8x H100 SXM | ~110 tok/s |
-| 27 | MiMo-V2.5 | 1433 | 310.8 (15) | MoE | 8-bit | 299 | 299 | 179 | 8x L40S | — |
-| 28 | Qwen3.8-27B | 1433 | 27 | Dense | 16-bit | 57.2 | 32.2 | 20.6 | L40S | ~24 tok/s |
+| 27 | Qwen3.8-27B | 1433 | 27 | Dense | 16-bit | 57.2 | 32.2 | 20.6 | L40S | ~24 tok/s |
+| 28 | MiMo-V2.5 | 1433 | 310.8 (15) | MoE | 8-bit | 299 | 299 | 179 | 8x L40S | — |
 | 29 | Kimi K2.5 (Instant) | 1430 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 30 | Kimi K2 Thinking Turbo | 1430 | 1000 (32) | MoE | 4-bit | 559 | 559 | 559 | 8x H100 SXM | ~110 tok/s |
+| 30 | Kimi K2 Thinking Turbo | 1429 | 1000 (32) | MoE | 4-bit | 559 | 559 | 559 | 8x H100 SXM | ~110 tok/s |
 | 31 | Mistral Medium 3.5 | 1426 | 128 | Dense | 8-bit | 130 | 130 | 77.0 | H200 SXM / NVL | ~28 tok/s |
 | 32 | NVIDIA-Nemotron-3-Ultra-550B-A55B (NVFP4) | 1426 | 550 (55) | MoE | 16-bit | 1,050 | 548 | 313 | 8x H100 SXM | ~90 tok/s |
 | 33 | DeepSeek-V3.2-Exp (Thinking) | 1425 | 685 (37) | MoE | 8-bit | 648 | 648 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
 | 34 | DeepSeek-V3.2 | 1424 | 685 (37) | MoE | 8-bit | 648 | 648 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
 | 35 | Muse Glimmer | 1424 | 30 | Dense | 16-bit | 61.0 | 35.1 | 22.3 | L40S | ~21 tok/s |
 | 36 | GLM-4.6 | 1424 | 357 (32) | MoE | 16-bit | 670 | 358 | 205 | 8x H100 SXM | ~100 tok/s |
-| 37 | Mistral Large 4 | 1423 | 1100 (52) | MoE | 8-bit | 993 | 993 | 620 | 8x H200 SXM | ~100 tok/s |
-| 38 | DeepSeek-V3.2 (Thinking) | 1422 | 685 (37) | MoE | 8-bit | 648 | 648 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 39 | Qwen3-235B-A22B-Instruct (2507) | 1422 | 235 (22) | MoE | ? | 443 | 237 | 137 | B300 | ~160 tok/s |
-| 40 | DeepSeek-V3.2-Exp | 1421 | 685 (37) | MoE | 8-bit | 648 | 648 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 41 | DeepSeek-R1 (0528) | 1421 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 37 | DeepSeek-V3.2 (Thinking) | 1422 | 685 (37) | MoE | 8-bit | 648 | 648 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 38 | Qwen3-235B-A22B-Instruct (2507) | 1422 | 235 (22) | MoE | ? | 443 | 237 | 137 | B300 | ~160 tok/s |
+| 39 | DeepSeek-V3.2-Exp | 1421 | 685 (37) | MoE | 8-bit | 648 | 648 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 40 | DeepSeek-R1 (0528) | 1421 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 41 | Mistral Large 4 | 1420 | 1100 (52) | MoE | 8-bit | 993 | 993 | 620 | 8x H200 SXM | ~100 tok/s |
 | 42 | Kimi K2 Preview (0905) | 1418 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 43 | Kimi K2 Preview (0711) | 1417 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 43 | Kimi K2 Preview (0711) | 1418 | ? | ? | ? | ? | ? | ? | ? | ? |
 | 44 | DeepSeek-V3.1 | 1417 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
 | 45 | Qwen3.5-122B-A10B | 1416 | 125 (10) | MoE | 16-bit | 238 | 129 | 75.3 | H200 SXM / NVL | ~190 tok/s |
 | 46 | DeepSeek-V3.1-Terminus (Thinking) | 1415 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
 | 47 | DeepSeek-V3.1 (Thinking) | 1415 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 48 | NVIDIA-Nemotron-3.5-Super-VL-120B-A12B (NVFP4) | 1415 | 120 (12) | MoE | ? | 229 | 124 | 72.6 | H200 SXM / NVL | ~170 tok/s |
-| 49 | MiniMax-M2.7 | 1414 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
-| 50 | DeepSeek-V3.1-Terminus | 1414 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 48 | MiniMax-M2.7 | 1414 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
+| 49 | DeepSeek-V3.1-Terminus | 1414 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 50 | Mistral Large 3 | 1414 | 675 (41) | MoE | 8-bit | 640 | 640 | 383 | 8x RTX PRO 6000 Blackwell Server Edition | — |
 
-<details><summary>Show remaining 179 models</summary>
+<details><summary>Show remaining 180 models</summary>
 
 | Rank | Model | Score | Params (B) | Arch | Release | GiB as released | GiB 8-bit | GiB 4-bit | Fits on | Speed |
 |------|-------|-------|------------|------|---------|-----------------|-----------|-----------|---------|-------|
-| 51 | Mistral Large 3 | 1414 | 675 (41) | MoE | 8-bit | 640 | 640 | 383 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 51 | NVIDIA-Nemotron-3.5-Super-VL-120B-A12B (NVFP4) | 1414 | 120 (12) | MoE | ? | 229 | 124 | 72.6 | H200 SXM / NVL | ~170 tok/s |
 | 52 | Qwen3-VL-235B-A22B-Instruct | 1413 | 235 (22) | MoE | 16-bit | 444 | 237 | 137 | B300 | ~160 tok/s |
-| 53 | GLM-4.5 | 1410 | 355 (32) | MoE | 16-bit | 673 | 356 | 204 | 8x H100 SXM | ~100 tok/s |
-| 54 | Hy3 preview | 1408 | 295 (21) | MoE | 16-bit | 562 | 297 | 170 | 8x L40S | — |
-| 55 | Qwen3.5-27B | 1408 | 27 | Dense | 16-bit | 57.2 | 32.2 | 20.6 | L40S | ~24 tok/s |
-| 56 | Inkling-Small | 1405 | 266 (12) | MoE | 16-bit | 501 | 268 | 154 | 8x L40S | — |
-| 57 | Qwen3-235B-A22B (Non-Thinking) | 1402 | 235 (22) | MoE | ? | 443 | 237 | 137 | B300 | ~160 tok/s |
-| 58 | LongCat-Flash-Chat | 1400 | 560 (27) | MoE | 16-bit | 1,052 | 558 | 318 | 8x H100 SXM | ~100 tok/s |
-| 59 | Qwen3-235B-A22B-Thinking (2507) | 1400 | 235 (22) | MoE | ? | 443 | 237 | 137 | B300 | ~160 tok/s |
-| 60 | Qwen3-Next-80B-A3B-Instruct | 1398 | 80 (3) | MoE | 16-bit | 157 | 84.5 | 50.2 | RTX PRO 6000 Blackwell | ~220 tok/s |
-| 61 | DeepSeek-R1 | 1398 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 62 | DeepSeek-V3 (0324) | 1395 | 671 (37) | MoE | 8-bit | 647 | 647 | 380 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 63 | Qwen3-VL-235B-A22B-Thinking | 1394 | 235 (22) | MoE | 16-bit | 444 | 237 | 137 | B300 | ~160 tok/s |
-| 64 | Qwen3.5-35B-A3B | 1393 | 35 (3) | MoE | ? | 70.7 | 40.1 | 25.1 | L40S | ~140 tok/s |
-| 65 | Step-3.5-Flash | 1392 | 199.4 (11) | MoE | 16-bit | 377 | 202 | 117 | B300 | ~240 tok/s |
-| 66 | MiMo-V2-Flash (Non-Thinking) | 1391 | 309 (15) | MoE | 8-bit | 297 | 297 | 178 | 8x L40S | — |
-| 67 | MiniMax-M2.5 | 1390 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
-| 68 | Qwen3-Coder-480B-A35B-Instruct | 1387 | 480 (35) | MoE | ? | 900 | 479 | 274 | 8x H100 SXM | ~100 tok/s |
-| 69 | MiMo-V2-Flash (Thinking) | 1386 | 309 (15) | MoE | 8-bit | 297 | 297 | 178 | 8x L40S | — |
-| 70 | MiniMax-M2.1 Preview | 1384 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
-| 71 | Qwen3-30B-A3B-Instruct (2507) | 1382 | 30 (3) | MoE | ? | 61.4 | 35.1 | 22.3 | L40S | ~140 tok/s |
-| 72 | Trinity Large Preview | 1378 | 398.6 (13) | MoE | 16-bit | 748 | 399 | 228 | 8x H100 SXM | ~110 tok/s |
-| 73 | GLM-4.6V | 1378 | 108 (12) | MoE | 16-bit | 206 | 112 | 65.8 | H200 SXM / NVL | ~170 tok/s |
-| 74 | Qwen3-235B-A22B | 1374 | 235 (22) | MoE | 16-bit | 443 | 237 | 137 | B300 | ~160 tok/s |
-| 75 | GLM-4.5-Air | 1372 | 106 (12) | MoE | 16-bit | 211 | 110 | 64.7 | H200 SXM / NVL | ~170 tok/s |
-| 76 | Qwen3-Next-80B-A3B-Thinking | 1369 | 80 (3) | MoE | ? | 155 | 84.5 | 50.2 | RTX PRO 6000 Blackwell | ~220 tok/s |
-| 77 | Trinity Large Thinking | 1367 | 398.6 (13) | MoE | 16-bit | 748 | 399 | 228 | 8x H100 SXM | ~110 tok/s |
-| 78 | Gemma 3 27B IT | 1365 | 27 | Dense | ? | 55.8 | 32.2 | 20.6 | L40S | ~24 tok/s |
-| 79 | GLM-4.7-Flash | 1364 | 31.2 (3) | MoE | 16-bit | 63.7 | 36.3 | 22.9 | L40S | ~140 tok/s |
-| 80 | MiniMax-M1 | 1363 | 456.1 (45.9) | MoE | 16-bit | 855 | 456 | 260 | 8x H100 SXM | ~94 tok/s |
-| 81 | NVIDIA-Nemotron-3-Super-120B-A12B | 1359 | 120 (12) | MoE | ? | 229 | 124 | 72.6 | H200 SXM / NVL | ~170 tok/s |
-| 82 | DeepSeek-V3 | 1358 | 671 (37) | MoE | 8-bit | 647 | 647 | 380 | 8x RTX PRO 6000 Blackwell Server Edition | — |
-| 83 | Mistral Small 3.2 (2506) | 1356 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 84 | INTELLECT-3 | 1355 | 107 (12) | MoE | 16-bit | 205 | 111 | 65.3 | H200 SXM / NVL | ~170 tok/s |
-| 85 | Command A (03-2025) | 1353 | 111 | Dense | 16-bit | 212 | 115 | 67.5 | H200 SXM / NVL | ~32 tok/s |
-| 86 | GLM-4.5V | 1352 | 108 (12) | MoE | 16-bit | 206 | 112 | 65.8 | H200 SXM / NVL | ~170 tok/s |
-| 87 | gpt-oss-120b | 1351 | 117 (5.1) | MoE | 4-bit | 66.3 | 66.3 | 66.3 | H100 SXM | ~310 tok/s |
-| 88 | NVIDIA-Nemotron-3.5-Lightning-30B-A3B (NVFP4) | 1351 | 30 (3) | MoE | ? | 61.4 | 35.1 | 22.3 | L40S | ~140 tok/s |
-| 89 | Step-3 | 1348 | 321 (38) | MoE | 16-bit | 603 | 322 | 185 | 8x L40S | — |
-| 90 | Llama 3.1 Nemotron Ultra 253B v1 | 1347 | 253 | Dense | 16-bit | 477 | 255 | 147 | 8x L40S | — |
-| 91 | Qwen3-32B | 1346 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 92 | MiniMax-M2 | 1343 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
-| 93 | Llama 3.3 Nemotron Super 49B v1.5 | 1343 | 49 | Dense | ? | 96.8 | 53.9 | 32.9 | H100 SXM | ~49 tok/s |
-| 94 | Ling-flash-2.0 | 1343 | 103 (6.1) | MoE | 16-bit | 197 | 107 | 63.1 | H200 SXM / NVL | ~250 tok/s |
-| 95 | Gemma 3 12B IT | 1341 | 12 | Dense | ? | 25.9 | 15.3 | 10.2 | RTX 4090 | ~60 tok/s |
-| 96 | Granite 4.2 30B | 1339 | 30 | Dense | 16-bit | 60.0 | 35.1 | 22.3 | L40S | ~21 tok/s |
-| 97 | QwQ-32B | 1335 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 53 | Inkling 2 Small | 1411 | 594 (17) | MoE | 4-bit | 372 | 372 | 337 | 8x H100 SXM | ~120 tok/s |
+| 54 | GLM-4.5 | 1410 | 355 (32) | MoE | 16-bit | 673 | 356 | 204 | 8x H100 SXM | ~100 tok/s |
+| 55 | Hy3 preview | 1408 | 295 (21) | MoE | 16-bit | 562 | 297 | 170 | 8x L40S | — |
+| 56 | Qwen3.5-27B | 1408 | 27 | Dense | 16-bit | 57.2 | 32.2 | 20.6 | L40S | ~24 tok/s |
+| 57 | Inkling-Small | 1405 | 266 (12) | MoE | 16-bit | 501 | 268 | 154 | 8x L40S | — |
+| 58 | Qwen3-235B-A22B (Non-Thinking) | 1402 | 235 (22) | MoE | ? | 443 | 237 | 137 | B300 | ~160 tok/s |
+| 59 | LongCat-Flash-Chat | 1400 | 560 (27) | MoE | 16-bit | 1,052 | 558 | 318 | 8x H100 SXM | ~100 tok/s |
+| 60 | Qwen3-235B-A22B-Thinking (2507) | 1400 | 235 (22) | MoE | ? | 443 | 237 | 137 | B300 | ~160 tok/s |
+| 61 | Qwen3-Next-80B-A3B-Instruct | 1398 | 80 (3) | MoE | 16-bit | 157 | 84.5 | 50.2 | RTX PRO 6000 Blackwell | ~220 tok/s |
+| 62 | DeepSeek-R1 | 1398 | 685 (37) | MoE | 8-bit | 647 | 647 | 388 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 63 | DeepSeek-V3 (0324) | 1395 | 671 (37) | MoE | 8-bit | 647 | 647 | 380 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 64 | Qwen3-VL-235B-A22B-Thinking | 1394 | 235 (22) | MoE | 16-bit | 444 | 237 | 137 | B300 | ~160 tok/s |
+| 65 | Qwen3.5-35B-A3B | 1393 | 35 (3) | MoE | ? | 70.7 | 40.1 | 25.1 | L40S | ~140 tok/s |
+| 66 | Step-3.5-Flash | 1392 | 199.4 (11) | MoE | 16-bit | 377 | 202 | 117 | B300 | ~240 tok/s |
+| 67 | MiMo-V2-Flash (Non-Thinking) | 1391 | 309 (15) | MoE | 8-bit | 297 | 297 | 178 | 8x L40S | — |
+| 68 | MiniMax-M2.5 | 1390 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
+| 69 | Qwen3-Coder-480B-A35B-Instruct | 1387 | 480 (35) | MoE | ? | 900 | 479 | 274 | 8x H100 SXM | ~100 tok/s |
+| 70 | MiMo-V2-Flash (Thinking) | 1386 | 309 (15) | MoE | 8-bit | 297 | 297 | 178 | 8x L40S | — |
+| 71 | MiniMax-M2.1 Preview | 1384 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
+| 72 | Qwen3-30B-A3B-Instruct (2507) | 1382 | 30 (3) | MoE | ? | 61.4 | 35.1 | 22.3 | L40S | ~140 tok/s |
+| 73 | Trinity Large Preview | 1378 | 398.6 (13) | MoE | 16-bit | 748 | 399 | 228 | 8x H100 SXM | ~110 tok/s |
+| 74 | GLM-4.6V | 1378 | 108 (12) | MoE | 16-bit | 206 | 112 | 65.8 | H200 SXM / NVL | ~170 tok/s |
+| 75 | Qwen3-235B-A22B | 1374 | 235 (22) | MoE | 16-bit | 443 | 237 | 137 | B300 | ~160 tok/s |
+| 76 | GLM-4.5-Air | 1372 | 106 (12) | MoE | 16-bit | 211 | 110 | 64.7 | H200 SXM / NVL | ~170 tok/s |
+| 77 | Qwen3-Next-80B-A3B-Thinking | 1369 | 80 (3) | MoE | ? | 155 | 84.5 | 50.2 | RTX PRO 6000 Blackwell | ~220 tok/s |
+| 78 | Trinity Large Thinking | 1367 | 398.6 (13) | MoE | 16-bit | 748 | 399 | 228 | 8x H100 SXM | ~110 tok/s |
+| 79 | Gemma 3 27B IT | 1365 | 27 | Dense | ? | 55.8 | 32.2 | 20.6 | L40S | ~24 tok/s |
+| 80 | GLM-4.7-Flash | 1364 | 31.2 (3) | MoE | 16-bit | 63.7 | 36.3 | 22.9 | L40S | ~140 tok/s |
+| 81 | MiniMax-M1 | 1363 | 456.1 (45.9) | MoE | 16-bit | 855 | 456 | 260 | 8x H100 SXM | ~94 tok/s |
+| 82 | NVIDIA-Nemotron-3-Super-120B-A12B | 1359 | 120 (12) | MoE | ? | 229 | 124 | 72.6 | H200 SXM / NVL | ~170 tok/s |
+| 83 | DeepSeek-V3 | 1358 | 671 (37) | MoE | 8-bit | 647 | 647 | 380 | 8x RTX PRO 6000 Blackwell Server Edition | — |
+| 84 | Mistral Small 3.2 (2506) | 1356 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 85 | INTELLECT-3 | 1355 | 107 (12) | MoE | 16-bit | 205 | 111 | 65.3 | H200 SXM / NVL | ~170 tok/s |
+| 86 | Command A (03-2025) | 1353 | 111 | Dense | 16-bit | 212 | 115 | 67.5 | H200 SXM / NVL | ~32 tok/s |
+| 87 | GLM-4.5V | 1352 | 108 (12) | MoE | 16-bit | 206 | 112 | 65.8 | H200 SXM / NVL | ~170 tok/s |
+| 88 | gpt-oss-120b | 1351 | 117 (5.1) | MoE | 4-bit | 66.3 | 66.3 | 66.3 | H100 SXM | ~310 tok/s |
+| 89 | NVIDIA-Nemotron-3.5-Lightning-30B-A3B (NVFP4) | 1351 | 30 (3) | MoE | ? | 61.4 | 35.1 | 22.3 | L40S | ~140 tok/s |
+| 90 | Step-3 | 1348 | 321 (38) | MoE | 16-bit | 603 | 322 | 185 | 8x L40S | — |
+| 91 | Llama 3.1 Nemotron Ultra 253B v1 | 1347 | 253 | Dense | 16-bit | 477 | 255 | 147 | 8x L40S | — |
+| 92 | Qwen3-32B | 1346 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 93 | MiniMax-M2 | 1343 | 230 (10) | MoE | 8-bit | 220 | 220 | 134 | B300 | ~260 tok/s |
+| 94 | Llama 3.3 Nemotron Super 49B v1.5 | 1343 | 49 | Dense | ? | 96.8 | 53.9 | 32.9 | H100 SXM | ~49 tok/s |
+| 95 | Ling-flash-2.0 | 1343 | 103 (6.1) | MoE | 16-bit | 197 | 107 | 63.1 | H200 SXM / NVL | ~250 tok/s |
+| 96 | Gemma 3 12B IT | 1341 | 12 | Dense | ? | 25.9 | 15.3 | 10.2 | RTX 4090 | ~60 tok/s |
+| 97 | Granite 4.2 30B | 1340 | 30 | Dense | 16-bit | 60.0 | 35.1 | 22.3 | L40S | ~21 tok/s |
 | 98 | Llama 3.1 405B Instruct (BF16) | 1335 | 405 | Dense | ? | 760 | 405 | 232 | 8x H100 SXM | ~42 tok/s |
-| 99 | Llama 3.1 405B Instruct (FP8) | 1333 | 405 | Dense | ? | 760 | 405 | 232 | 8x H100 SXM | ~42 tok/s |
-| 100 | Olmo 3.1 32B Instruct | 1329 | 32.2 | Dense | 16-bit | 65.5 | 37.3 | 23.5 | L40S | ~20 tok/s |
-| 101 | Llama 3.3 Nemotron Super 49B v1 | 1327 | 49 | Dense | ? | 96.8 | 53.9 | 32.9 | H100 SXM | ~49 tok/s |
-| 102 | Llama 4 Maverick 17B 128E Instruct | 1327 | 400 (17) | MoE | 16-bit | 754 | 400 | 229 | 8x H100 SXM | ~110 tok/s |
-| 103 | Qwen3-30B-A3B | 1326 | 30 (3) | MoE | ? | 61.4 | 35.1 | 22.3 | L40S | ~140 tok/s |
-| 104 | DeepSeek-V2.5 (1210) | 1323 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 105 | Ring-flash-2.0 | 1322 | 103 (6.1) | MoE | 16-bit | 197 | 107 | 63.1 | H200 SXM / NVL | ~250 tok/s |
-| 106 | Llama 4 Scout 17B 16E Instruct | 1321 | 109 (17) | MoE | 16-bit | 208 | 113 | 66.4 | H200 SXM / NVL | ~140 tok/s |
-| 107 | Molmo 2 8B | 1320 | 8.7 | Dense | ? | 19.7 | 12.1 | 8.4 | RTX 4090 | ~80 tok/s |
-| 108 | Qwen-Max (0919) | 1318 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 109 | Llama 3.3 70B Instruct | 1318 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 110 | gpt-oss-20b | 1317 | 21 (3.6) | MoE | 4-bit | 18.3 | 18.3 | 17.2 | RTX 4090 | ~190 tok/s |
+| 99 | QwQ-32B | 1335 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 100 | Llama 3.1 405B Instruct (FP8) | 1333 | 405 | Dense | ? | 760 | 405 | 232 | 8x H100 SXM | ~42 tok/s |
+| 101 | Olmo 3.1 32B Instruct | 1329 | 32.2 | Dense | 16-bit | 65.5 | 37.3 | 23.5 | L40S | ~20 tok/s |
+| 102 | Llama 3.3 Nemotron Super 49B v1 | 1327 | 49 | Dense | ? | 96.8 | 53.9 | 32.9 | H100 SXM | ~49 tok/s |
+| 103 | Llama 4 Maverick 17B 128E Instruct | 1327 | 400 (17) | MoE | 16-bit | 754 | 400 | 229 | 8x H100 SXM | ~110 tok/s |
+| 104 | Qwen3-30B-A3B | 1326 | 30 (3) | MoE | ? | 61.4 | 35.1 | 22.3 | L40S | ~140 tok/s |
+| 105 | DeepSeek-V2.5 (1210) | 1323 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 106 | Ring-flash-2.0 | 1322 | 103 (6.1) | MoE | 16-bit | 197 | 107 | 63.1 | H200 SXM / NVL | ~250 tok/s |
+| 107 | Llama 4 Scout 17B 16E Instruct | 1321 | 109 (17) | MoE | 16-bit | 208 | 113 | 66.4 | H200 SXM / NVL | ~140 tok/s |
+| 108 | Molmo 2 8B | 1321 | 8.7 | Dense | ? | 19.7 | 12.1 | 8.4 | RTX 4090 | ~80 tok/s |
+| 109 | Qwen-Max (0919) | 1318 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 110 | Llama 3.3 70B Instruct | 1318 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
 | 111 | Gemma 3n E4B IT | 1317 | 7.85 | Dense | ? | 18.1 | 11.2 | 7.9 | RTX 4090 | ~88 tok/s |
-| 112 | Mistral Large 2 (2407) | 1314 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 113 | Athene V2 Chat | 1314 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
-| 114 | NVIDIA-Nemotron-3-Nano-30B-A3B (BF16) | 1313 | 31.6 (3.6) | MoE | 16-bit | 64.3 | 36.7 | 23.2 | L40S | ~120 tok/s |
-| 115 | DeepSeek-V2.5 | 1307 | 236 (21) | MoE | 16-bit | 445 | 238 | 137 | B300 | ~170 tok/s |
-| 116 | Athene 70B (0725) | 1306 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 117 | Olmo 3 32B Think | 1305 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 118 | Mistral Large (2411) | 1305 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 119 | Granite 4.1 8B | 1304 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 120 | Gemma 3 4B IT | 1303 | 4 | Dense | ? | 11.0 | 7.4 | 5.7 | RTX 4090 | ~160 tok/s |
-| 121 | Qwen2.5-72B-Instruct | 1302 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
-| 122 | Mistral Small 3.1 24B Instruct (2503) | 1302 | 24 | Dense | ? | 50.2 | 29.2 | 18.9 | RTX 5090 | ~53 tok/s |
-| 123 | Llama 3.1 Nemotron 70B Instruct | 1298 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 124 | Llama 3.1 70B Instruct | 1293 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 125 | Gemma 2 27B IT | 1289 | 27 | Dense | ? | 55.8 | 32.2 | 20.6 | L40S | ~24 tok/s |
-| 126 | Granite 4.2 8B | 1289 | 8 | Dense | 16-bit | 19.9 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 112 | gpt-oss-20b | 1317 | 21 (3.6) | MoE | 4-bit | 18.3 | 18.3 | 17.2 | RTX 4090 | ~190 tok/s |
+| 113 | Mistral Large 2 (2407) | 1314 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 114 | Athene V2 Chat | 1314 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
+| 115 | NVIDIA-Nemotron-3-Nano-30B-A3B (BF16) | 1313 | 31.6 (3.6) | MoE | 16-bit | 64.3 | 36.7 | 23.2 | L40S | ~120 tok/s |
+| 116 | DeepSeek-V2.5 | 1307 | 236 (21) | MoE | 16-bit | 445 | 238 | 137 | B300 | ~170 tok/s |
+| 117 | Athene 70B (0725) | 1306 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 118 | Olmo 3 32B Think | 1305 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 119 | Mistral Large (2411) | 1305 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 120 | Granite 4.1 8B | 1304 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 121 | Gemma 3 4B IT | 1303 | 4 | Dense | ? | 11.0 | 7.4 | 5.7 | RTX 4090 | ~160 tok/s |
+| 122 | Qwen2.5-72B-Instruct | 1302 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
+| 123 | Mistral Small 3.1 24B Instruct (2503) | 1302 | 24 | Dense | ? | 50.2 | 29.2 | 18.9 | RTX 5090 | ~53 tok/s |
+| 124 | Llama 3.1 Nemotron 70B Instruct | 1298 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 125 | Llama 3.1 70B Instruct | 1293 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 126 | Gemma 2 27B IT | 1289 | 27 | Dense | ? | 55.8 | 32.2 | 20.6 | L40S | ~24 tok/s |
 | 127 | Jamba 1.5 Large | 1289 | 398 (94) | MoE | 16-bit | 748 | 398 | 228 | 8x H100 SXM | ~75 tok/s |
-| 128 | Granite 4.2 3B | 1289 | 3 | Dense | ? | 9.1 | 6.5 | 5.2 | RTX 4090 | ~200 tok/s |
-| 129 | Granite-4.0-H-Small | 1287 | 32 (9) | MoE | 16-bit | 65.5 | 37.1 | 23.4 | L40S | ~56 tok/s |
-| 130 | Llama 3.1 Nemotron 51B Instruct | 1286 | 51 | Dense | ? | 100 | 55.8 | 34.0 | H100 SXM | ~47 tok/s |
-| 131 | Llama 3.1 Tulu 3 70B | 1286 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 132 | Olmo 3.1 32B Think | 1286 | 32.2 | Dense | 16-bit | 65.5 | 37.3 | 23.5 | L40S | ~20 tok/s |
-| 133 | Gemma 2 9B IT SimPO | 1280 | 9 | Dense | ? | 20.3 | 12.4 | 8.5 | RTX 4090 | ~78 tok/s |
-| 134 | Nemotron-4 340B Instruct | 1277 | 340 | Dense | ? | 639 | 341 | 195 | 8x L40S | — |
-| 135 | Llama 3 70B Instruct | 1276 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 136 | Command R+ (08-2024) | 1276 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 137 | Mistral Small 24B Instruct (2501) | 1274 | 24 | Dense | ? | 50.2 | 29.2 | 18.9 | RTX 5090 | ~53 tok/s |
-| 138 | Qwen2.5-Coder-32B-Instruct | 1270 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 139 | Aya Expanse 32B | 1267 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 140 | Gemma 2 9B IT | 1267 | 9 | Dense | ? | 20.3 | 12.4 | 8.5 | RTX 4090 | ~78 tok/s |
-| 141 | DeepSeek-Coder-V2 | 1265 | 236 (21) | MoE | 16-bit | 445 | 238 | 137 | B300 | ~170 tok/s |
-| 142 | Qwen2-72B-Instruct | 1261 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
-| 143 | Command R+ | 1261 | 104 | Dense | ? | 199 | 108 | 63.6 | H200 SXM / NVL | ~34 tok/s |
-| 144 | Phi-4 | 1256 | 14 | Dense | 16-bit | 30.8 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
-| 145 | OLMo 2 32B Instruct (0325) | 1251 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 146 | Command R (08-2024) | 1250 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 147 | Jamba 1.5 Mini | 1239 | 52 (12) | MoE | 16-bit | 102 | 56.8 | 34.6 | H100 SXM | ~130 tok/s |
-| 148 | Ministral 8B (2410) | 1237 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 149 | Qwen1.5-110B-Chat | 1234 | 110 | Dense | ? | 210 | 114 | 67.0 | H200 SXM / NVL | ~32 tok/s |
-| 150 | Qwen1.5-72B-Chat | 1233 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
-| 151 | Mixtral 8x22B Instruct v0.1 | 1229 | 140.8 (39.6) | MoE | ? | 268 | 144 | 84.2 | B200 | ~100 tok/s |
-| 152 | Command R | 1226 | 35 | Dense | ? | 70.7 | 40.1 | 25.1 | L40S | ~18 tok/s |
-| 153 | Llama 3 8B Instruct | 1223 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 154 | Aya Expanse 8B | 1223 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 155 | Llama 3.1 Tulu 3 8B | 1220 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 156 | Zephyr ORPO 141B A35B v0.1 | 1213 | 141 (35) | MoE | ? | 268 | 145 | 84.3 | B200 | ~120 tok/s |
-| 157 | Yi 1.5 34B Chat | 1212 | 34 | Dense | ? | 68.8 | 39.1 | 24.5 | L40S | ~19 tok/s |
-| 158 | Llama 3.1 8B Instruct | 1211 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 159 | Granite 3.1 8B Instruct | 1208 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 160 | Qwen1.5-32B-Chat | 1204 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 161 | Gemma 2 2B IT | 1200 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
-| 162 | Phi-3 Medium 4K Instruct | 1198 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
-| 163 | Mixtral 8x7B Instruct v0.1 | 1197 | 44.8 (12.6) | MoE | ? | 88.9 | 49.7 | 30.5 | H100 SXM | ~130 tok/s |
-| 164 | DBRX Instruct Preview | 1195 | 132 (36) | MoE | ? | 251 | 136 | 79.3 | B200 | ~110 tok/s |
-| 165 | Qwen1.5-14B-Chat | 1191 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
-| 166 | InternLM2.5 20B Chat | 1190 | 20 | Dense | ? | 42.8 | 25.2 | 16.7 | RTX 5090 | ~63 tok/s |
-| 167 | DeepSeek LLM 67B Chat | 1185 | 67 | Dense | ? | 130 | 71.6 | 42.9 | H100 SXM | ~36 tok/s |
-| 168 | WizardLM 70B | 1184 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 169 | Yi 34B Chat | 1183 | 34 | Dense | ? | 68.8 | 39.1 | 24.5 | L40S | ~19 tok/s |
-| 170 | Granite 3.0 8B Instruct | 1183 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
-| 171 | OpenChat 3.5 | 1183 | 7.24 | Dense | ? | 17.0 | 10.6 | 7.5 | RTX 4090 | ~95 tok/s |
-| 172 | OpenChat 3.5 (0106) | 1182 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 173 | Gemma 1.1 7B IT | 1182 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 174 | Snowflake Arctic Instruct | 1180 | 478.6 (17) | MoE | ? | 897 | 478 | 273 | 8x H100 SXM | ~110 tok/s |
-| 175 | Granite 3.1 2B Instruct | 1178 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
-| 176 | Tulu 2 DPO 70B | 1177 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 177 | OpenHermes 2.5 Mistral 7B | 1176 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 178 | Vicuna 33B | 1173 | 33 | Dense | ? | 67.0 | 38.1 | 23.9 | L40S | ~19 tok/s |
-| 179 | Phi-3 Small 8K Instruct | 1171 | 7.4 | Dense | ? | 17.3 | 10.8 | 7.6 | RTX 4090 | ~93 tok/s |
-| 180 | Starling LM 7B Beta | 1171 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 181 | Llama 2 70B Chat | 1170 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 182 | Starling LM 7B Alpha | 1167 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 183 | Llama 3.2 3B Instruct | 1166 | 3 | Dense | ? | 9.1 | 6.5 | 5.2 | RTX 4090 | ~200 tok/s |
-| 184 | Nous Hermes 2 Mixtral 8x7B DPO | 1164 | 44.8 (12.6) | MoE | ? | 88.9 | 49.7 | 30.5 | H100 SXM | ~130 tok/s |
-| 185 | Granite 3.0 2B Instruct | 1156 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
-| 186 | Llama 2 70B SteerLM Chat | 1154 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 187 | QwQ-32B-Preview | 1154 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
-| 188 | SOLAR 10.7B Instruct v1.0 | 1152 | 10.7 | Dense | ? | 23.4 | 14.1 | 9.5 | RTX 4090 | ~66 tok/s |
-| 189 | Dolphin 2.2.1 Mistral 7B | 1152 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 190 | MPT 30B Chat | 1150 | 30 | Dense | ? | 61.4 | 35.1 | 22.3 | L40S | ~21 tok/s |
-| 191 | WizardLM 13B | 1149 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 192 | Mistral 7B Instruct v0.2 | 1149 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 193 | Falcon 180B Chat | 1148 | 180 | Dense | ? | 341 | 183 | 106 | B300 | ~32 tok/s |
-| 194 | Qwen1.5-7B-Chat | 1143 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 195 | Phi-3 Mini 4K Instruct (June 2024) | 1143 | ? | ? | ? | ? | ? | ? | ? | ? |
-| 196 | Vicuna 13B | 1141 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 197 | Llama 2 13B Chat | 1141 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 198 | Qwen-14B-Chat | 1139 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
-| 199 | Gemma 7B IT | 1137 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 200 | Code Llama 34B Instruct | 1136 | 34 | Dense | ? | 68.8 | 39.1 | 24.5 | L40S | ~19 tok/s |
-| 201 | Zephyr 7B Beta | 1130 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 202 | Phi-3 Mini 128K Instruct | 1129 | 3.8 | Dense | ? | 10.6 | 7.3 | 5.6 | RTX 4090 | ~170 tok/s |
-| 203 | Phi-3 Mini 4K Instruct | 1128 | 3.8 | Dense | ? | 10.6 | 7.3 | 5.6 | RTX 4090 | ~170 tok/s |
-| 204 | Guanaco 33B | 1127 | 33 | Dense | ? | 67.0 | 38.1 | 23.9 | L40S | ~19 tok/s |
-| 205 | Zephyr 7B Alpha | 1127 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 206 | StripedHyena Nous 7B | 1121 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 207 | Code Llama 70B Instruct | 1119 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
-| 208 | Gemma 1.1 2B IT | 1116 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
-| 209 | Vicuna 7B | 1115 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 210 | SmolLM2 1.7B Instruct | 1114 | 1.7 | Dense | ? | 6.7 | 5.2 | 4.4 | RTX 4090 | ~310 tok/s |
-| 211 | Llama 3.2 1B Instruct | 1111 | 1 | Dense | ? | 5.4 | 4.5 | 4.1 | RTX 4090 | ~430 tok/s |
-| 212 | Mistral 7B Instruct | 1110 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 213 | Llama 2 7B Chat | 1107 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 214 | Gemma 2B IT | 1093 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
-| 215 | Qwen1.5-4B-Chat | 1091 | 4 | Dense | ? | 11.0 | 7.4 | 5.7 | RTX 4090 | ~160 tok/s |
-| 216 | OLMo 7B Instruct | 1073 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 217 | Koala 13B | 1071 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 218 | Alpaca 13B | 1070 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 219 | GPT4All 13B Snoozy | 1067 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 220 | MPT 7B Chat | 1063 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
-| 221 | ChatGLM3 6B | 1056 | 6 | Dense | ? | 14.7 | 9.4 | 6.9 | RTX 4090 | ~110 tok/s |
-| 222 | RWKV-4 Raven 14B | 1042 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
-| 223 | ChatGLM2 6B | 1024 | 6 | Dense | ? | 14.7 | 9.4 | 6.9 | RTX 4090 | ~110 tok/s |
-| 224 | OpenAssistant Pythia 12B | 1023 | 12 | Dense | ? | 25.9 | 15.3 | 10.2 | RTX 4090 | ~60 tok/s |
-| 225 | ChatGLM 6B | 995 | 6 | Dense | ? | 14.7 | 9.4 | 6.9 | RTX 4090 | ~110 tok/s |
-| 226 | FastChat-T5 3B | 992 | 3 | Dense | ? | 9.1 | 6.5 | 5.2 | RTX 4090 | ~200 tok/s |
-| 227 | Dolly 2.0 12B | 982 | 12 | Dense | ? | 25.9 | 15.3 | 10.2 | RTX 4090 | ~60 tok/s |
-| 228 | LLaMA 13B | 975 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
-| 229 | StableLM Tuned Alpha 7B | 953 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 128 | Granite 4.2 8B | 1289 | 8 | Dense | 16-bit | 19.9 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 129 | Granite 4.2 3B | 1288 | 3 | Dense | ? | 9.1 | 6.5 | 5.2 | RTX 4090 | ~200 tok/s |
+| 130 | Granite-4.0-H-Small | 1287 | 32 (9) | MoE | 16-bit | 65.5 | 37.1 | 23.4 | L40S | ~56 tok/s |
+| 131 | Llama 3.1 Nemotron 51B Instruct | 1286 | 51 | Dense | ? | 100 | 55.8 | 34.0 | H100 SXM | ~47 tok/s |
+| 132 | Llama 3.1 Tulu 3 70B | 1286 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 133 | Olmo 3.1 32B Think | 1286 | 32.2 | Dense | 16-bit | 65.5 | 37.3 | 23.5 | L40S | ~20 tok/s |
+| 134 | Gemma 2 9B IT SimPO | 1280 | 9 | Dense | ? | 20.3 | 12.4 | 8.5 | RTX 4090 | ~78 tok/s |
+| 135 | Nemotron-4 340B Instruct | 1277 | 340 | Dense | ? | 639 | 341 | 195 | 8x L40S | — |
+| 136 | Llama 3 70B Instruct | 1276 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 137 | Command R+ (08-2024) | 1276 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 138 | Mistral Small 24B Instruct (2501) | 1274 | 24 | Dense | ? | 50.2 | 29.2 | 18.9 | RTX 5090 | ~53 tok/s |
+| 139 | Qwen2.5-Coder-32B-Instruct | 1270 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 140 | Aya Expanse 32B | 1267 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 141 | Gemma 2 9B IT | 1267 | 9 | Dense | ? | 20.3 | 12.4 | 8.5 | RTX 4090 | ~78 tok/s |
+| 142 | DeepSeek-Coder-V2 | 1265 | 236 (21) | MoE | 16-bit | 445 | 238 | 137 | B300 | ~170 tok/s |
+| 143 | Qwen2-72B-Instruct | 1261 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
+| 144 | Command R+ | 1261 | 104 | Dense | ? | 199 | 108 | 63.6 | H200 SXM / NVL | ~34 tok/s |
+| 145 | Phi-4 | 1256 | 14 | Dense | 16-bit | 30.8 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
+| 146 | OLMo 2 32B Instruct (0325) | 1251 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 147 | Command R (08-2024) | 1250 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 148 | Jamba 1.5 Mini | 1239 | 52 (12) | MoE | 16-bit | 102 | 56.8 | 34.6 | H100 SXM | ~130 tok/s |
+| 149 | Ministral 8B (2410) | 1237 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 150 | Qwen1.5-110B-Chat | 1234 | 110 | Dense | ? | 210 | 114 | 67.0 | H200 SXM / NVL | ~32 tok/s |
+| 151 | Qwen1.5-72B-Chat | 1233 | 72 | Dense | ? | 140 | 76.6 | 45.7 | RTX PRO 6000 Blackwell | ~18 tok/s |
+| 152 | Mixtral 8x22B Instruct v0.1 | 1229 | 140.8 (39.6) | MoE | ? | 268 | 144 | 84.2 | B200 | ~100 tok/s |
+| 153 | Command R | 1227 | 35 | Dense | ? | 70.7 | 40.1 | 25.1 | L40S | ~18 tok/s |
+| 154 | Llama 3 8B Instruct | 1223 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 155 | Aya Expanse 8B | 1223 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 156 | Llama 3.1 Tulu 3 8B | 1220 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 157 | Zephyr ORPO 141B A35B v0.1 | 1213 | 141 (35) | MoE | ? | 268 | 145 | 84.3 | B200 | ~120 tok/s |
+| 158 | Yi 1.5 34B Chat | 1212 | 34 | Dense | ? | 68.8 | 39.1 | 24.5 | L40S | ~19 tok/s |
+| 159 | Llama 3.1 8B Instruct | 1211 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 160 | Granite 3.1 8B Instruct | 1208 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 161 | Qwen1.5-32B-Chat | 1204 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 162 | Gemma 2 2B IT | 1200 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
+| 163 | Phi-3 Medium 4K Instruct | 1198 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
+| 164 | Mixtral 8x7B Instruct v0.1 | 1197 | 44.8 (12.6) | MoE | ? | 88.9 | 49.7 | 30.5 | H100 SXM | ~130 tok/s |
+| 165 | DBRX Instruct Preview | 1195 | 132 (36) | MoE | ? | 251 | 136 | 79.3 | B200 | ~110 tok/s |
+| 166 | Qwen1.5-14B-Chat | 1191 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
+| 167 | InternLM2.5 20B Chat | 1190 | 20 | Dense | ? | 42.8 | 25.2 | 16.7 | RTX 5090 | ~63 tok/s |
+| 168 | DeepSeek LLM 67B Chat | 1185 | 67 | Dense | ? | 130 | 71.6 | 42.9 | H100 SXM | ~36 tok/s |
+| 169 | WizardLM 70B | 1184 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 170 | Yi 34B Chat | 1183 | 34 | Dense | ? | 68.8 | 39.1 | 24.5 | L40S | ~19 tok/s |
+| 171 | Granite 3.0 8B Instruct | 1183 | 8 | Dense | ? | 18.4 | 11.4 | 8.0 | RTX 4090 | ~87 tok/s |
+| 172 | OpenChat 3.5 | 1183 | 7.24 | Dense | ? | 17.0 | 10.6 | 7.5 | RTX 4090 | ~95 tok/s |
+| 173 | OpenChat 3.5 (0106) | 1182 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 174 | Gemma 1.1 7B IT | 1182 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 175 | Snowflake Arctic Instruct | 1180 | 478.6 (17) | MoE | ? | 897 | 478 | 273 | 8x H100 SXM | ~110 tok/s |
+| 176 | Granite 3.1 2B Instruct | 1179 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
+| 177 | Tulu 2 DPO 70B | 1177 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 178 | OpenHermes 2.5 Mistral 7B | 1176 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 179 | Vicuna 33B | 1173 | 33 | Dense | ? | 67.0 | 38.1 | 23.9 | L40S | ~19 tok/s |
+| 180 | Phi-3 Small 8K Instruct | 1171 | 7.4 | Dense | ? | 17.3 | 10.8 | 7.6 | RTX 4090 | ~93 tok/s |
+| 181 | Starling LM 7B Beta | 1171 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 182 | Llama 2 70B Chat | 1170 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 183 | Starling LM 7B Alpha | 1167 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 184 | Llama 3.2 3B Instruct | 1166 | 3 | Dense | ? | 9.1 | 6.5 | 5.2 | RTX 4090 | ~200 tok/s |
+| 185 | Nous Hermes 2 Mixtral 8x7B DPO | 1164 | 44.8 (12.6) | MoE | ? | 88.9 | 49.7 | 30.5 | H100 SXM | ~130 tok/s |
+| 186 | Granite 3.0 2B Instruct | 1156 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
+| 187 | Llama 2 70B SteerLM Chat | 1154 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 188 | QwQ-32B-Preview | 1154 | 32 | Dense | ? | 65.1 | 37.1 | 23.4 | L40S | ~20 tok/s |
+| 189 | SOLAR 10.7B Instruct v1.0 | 1152 | 10.7 | Dense | ? | 23.4 | 14.1 | 9.5 | RTX 4090 | ~66 tok/s |
+| 190 | Dolphin 2.2.1 Mistral 7B | 1152 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 191 | MPT 30B Chat | 1150 | 30 | Dense | ? | 61.4 | 35.1 | 22.3 | L40S | ~21 tok/s |
+| 192 | WizardLM 13B | 1149 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 193 | Mistral 7B Instruct v0.2 | 1149 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 194 | Falcon 180B Chat | 1148 | 180 | Dense | ? | 341 | 183 | 106 | B300 | ~32 tok/s |
+| 195 | Qwen1.5-7B-Chat | 1143 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 196 | Phi-3 Mini 4K Instruct (June 2024) | 1143 | ? | ? | ? | ? | ? | ? | ? | ? |
+| 197 | Vicuna 13B | 1141 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 198 | Llama 2 13B Chat | 1141 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 199 | Qwen-14B-Chat | 1139 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
+| 200 | Gemma 7B IT | 1137 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 201 | Code Llama 34B Instruct | 1137 | 34 | Dense | ? | 68.8 | 39.1 | 24.5 | L40S | ~19 tok/s |
+| 202 | Zephyr 7B Beta | 1130 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 203 | Phi-3 Mini 128K Instruct | 1130 | 3.8 | Dense | ? | 10.6 | 7.3 | 5.6 | RTX 4090 | ~170 tok/s |
+| 204 | Phi-3 Mini 4K Instruct | 1128 | 3.8 | Dense | ? | 10.6 | 7.3 | 5.6 | RTX 4090 | ~170 tok/s |
+| 205 | Guanaco 33B | 1127 | 33 | Dense | ? | 67.0 | 38.1 | 23.9 | L40S | ~19 tok/s |
+| 206 | Zephyr 7B Alpha | 1127 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 207 | StripedHyena Nous 7B | 1121 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 208 | Code Llama 70B Instruct | 1119 | 70 | Dense | ? | 136 | 74.6 | 44.6 | H100 SXM | ~35 tok/s |
+| 209 | Gemma 1.1 2B IT | 1116 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
+| 210 | Vicuna 7B | 1115 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 211 | SmolLM2 1.7B Instruct | 1114 | 1.7 | Dense | ? | 6.7 | 5.2 | 4.4 | RTX 4090 | ~310 tok/s |
+| 212 | Llama 3.2 1B Instruct | 1111 | 1 | Dense | ? | 5.4 | 4.5 | 4.1 | RTX 4090 | ~430 tok/s |
+| 213 | Mistral 7B Instruct | 1110 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 214 | Llama 2 7B Chat | 1108 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 215 | Gemma 2B IT | 1093 | 2 | Dense | ? | 7.2 | 5.5 | 4.6 | RTX 4090 | ~280 tok/s |
+| 216 | Qwen1.5-4B-Chat | 1091 | 4 | Dense | ? | 11.0 | 7.4 | 5.7 | RTX 4090 | ~160 tok/s |
+| 217 | OLMo 7B Instruct | 1073 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 218 | Koala 13B | 1071 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 219 | Alpaca 13B | 1070 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 220 | GPT4All 13B Snoozy | 1067 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 221 | MPT 7B Chat | 1063 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
+| 222 | ChatGLM3 6B | 1056 | 6 | Dense | ? | 14.7 | 9.4 | 6.9 | RTX 4090 | ~110 tok/s |
+| 223 | RWKV-4 Raven 14B | 1042 | 14 | Dense | ? | 29.6 | 17.3 | 11.3 | RTX 4090 | ~52 tok/s |
+| 224 | ChatGLM2 6B | 1024 | 6 | Dense | ? | 14.7 | 9.4 | 6.9 | RTX 4090 | ~110 tok/s |
+| 225 | OpenAssistant Pythia 12B | 1023 | 12 | Dense | ? | 25.9 | 15.3 | 10.2 | RTX 4090 | ~60 tok/s |
+| 226 | ChatGLM 6B | 995 | 6 | Dense | ? | 14.7 | 9.4 | 6.9 | RTX 4090 | ~110 tok/s |
+| 227 | FastChat-T5 3B | 992 | 3 | Dense | ? | 9.1 | 6.5 | 5.2 | RTX 4090 | ~200 tok/s |
+| 228 | Dolly 2.0 12B | 982 | 12 | Dense | ? | 25.9 | 15.3 | 10.2 | RTX 4090 | ~60 tok/s |
+| 229 | LLaMA 13B | 975 | 13 | Dense | ? | 27.7 | 16.3 | 10.8 | RTX 4090 | ~55 tok/s |
+| 230 | StableLM Tuned Alpha 7B | 953 | 7 | Dense | ? | 16.5 | 10.4 | 7.4 | RTX 4090 | ~98 tok/s |
 
 </details>
 
