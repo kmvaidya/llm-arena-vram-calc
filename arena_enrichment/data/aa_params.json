@@ -6,10 +6,18 @@
     "hf_repo": "CohereForAI/c4ai-command-a-03-2025",
     "total_params_b": 111.0
   },
+  "command-a-(03-2025)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "command-a-03-2025": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-11-14",
+    "hf_repo": null,
     "total_params_b": null
   },
   "command-r": {
@@ -62,7 +70,7 @@
   "dbrx-instruct": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-31",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -194,7 +202,7 @@
   "deepseek-v3-2-exp": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-31",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -229,7 +237,7 @@
   "deepseek-v3.1-terminus": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-07",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -278,7 +286,7 @@
   "deepseek-v3.2-exp-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -313,7 +321,7 @@
   "deepseek-v4-1-flash-20260910-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -341,7 +349,7 @@
   "deepseek-v4-flash-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -375,14 +383,35 @@
   "deepseek-v4-pro-(high,-20260813)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v4-pro-high,-20260813": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-pro-preview": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-pro-preview-(high)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "deepseek-v4-pro-preview-high": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -534,7 +563,7 @@
   "glm-5-2-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-07",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -551,6 +580,13 @@
     "checked": "2026-10-17",
     "hf_repo": "zai-org/GLM-5.3-Flash",
     "total_params_b": 320.0
+  },
+  "glm-5-3-max": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
   },
   "glm-5.1": {
     "active_params_b": null,
@@ -580,10 +616,18 @@
     "hf_repo": null,
     "total_params_b": null
   },
+  "glm-5.3-(max)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "glm-5.3-flash": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-17",
+    "checked": "2026-11-14",
+    "hf_repo": null,
     "total_params_b": null
   },
   "gpt-oss-120b": {
@@ -620,6 +664,13 @@
     "checked": "2026-10-17",
     "hf_repo": "ibm-granite/granite-4.2-8b",
     "total_params_b": 8.0
+  },
+  "granite-4.0-h-small": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
   },
   "hunyuan-hy3": {
     "active_params_b": null,
@@ -748,7 +799,7 @@
   "kimi-k2-preview-0905": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -762,7 +813,7 @@
   "kimi-k2.5-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -787,10 +838,24 @@
     "hf_repo": "moonshotai/Kimi-K3.1-Pro",
     "total_params_b": 2800.0
   },
+  "kimi-k3-1-pro-max": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "kimi-k3-max": {
     "active_params_b": null,
     "architecture": null,
     "checked": "2026-11-06",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "kimi-k3.1-pro-(max)": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -886,7 +951,21 @@
   "mimo-v2.5-pro": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-07",
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "mimo-v2.6-flash": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
+  "mimo-v2.6-pro": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -941,7 +1020,7 @@
   "minimax-m2.1-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-10-31",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -969,14 +1048,14 @@
   "mistral-large-(2411)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
   "mistral-large-2-(2407)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -997,7 +1076,7 @@
   "mistral-large-2411": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1022,6 +1101,13 @@
     "hf_repo": "mistralai/Mistral-Medium-3.5-128B",
     "total_params_b": 128.0
   },
+  "mistral-medium-3.5": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
+  },
   "mistral-small-2506": {
     "active_params_b": null,
     "architecture": null,
@@ -1031,7 +1117,7 @@
   "mistral-small-3-2-2506": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1099,7 +1185,7 @@
   "openchat-3-5-0106": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1153,7 +1239,7 @@
   "qwen-max-0919": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-14",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1191,6 +1277,13 @@
     "checked": "2026-10-17",
     "hf_repo": "inclusionAI/Ring-flash-2.0",
     "total_params_b": 103.0
+  },
+  "ring-flash-2.0": {
+    "active_params_b": null,
+    "architecture": null,
+    "checked": "2026-11-14",
+    "hf_repo": null,
+    "total_params_b": null
   },
   "snowflake-arctic": {
     "active_params_b": null,
