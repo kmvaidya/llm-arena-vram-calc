@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-15T13:16:23.454925+00:00",
+  "fetched_at": "2026-11-16T14:29:55.289114+00:00",
   "model_count": 290,
   "models": {
     "agnes25probeta": {
@@ -2414,15 +2414,6 @@
       "slug": "",
       "total_params_b": null
     },
-    "qwen38max0902": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 983616,
-      "is_open_weights": false,
-      "name": "Qwen3.8 Max (0902)",
-      "slug": "",
-      "total_params_b": null
-    },
     "qwen3codernext": {
       "active_params_b": null,
       "architecture": null,
@@ -2465,6 +2456,15 @@
       "context_window": 65536,
       "is_open_weights": true,
       "name": "Qwen3 Omni 30B A3B (Reasoning)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "qwen4max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 983616,
+      "is_open_weights": false,
+      "name": "Qwen4 Max",
       "slug": "",
       "total_params_b": null
     },

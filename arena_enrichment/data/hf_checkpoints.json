@@ -13,11 +13,11 @@
   },
   "MiniMaxAI/MiniMax-M2-1": {
     "bytes": null,
-    "checked": "2026-11-06"
+    "checked": "2026-11-16"
   },
   "MiniMaxAI/MiniMax-M2.1": {
     "bytes": 230134264792,
-    "checked": "2026-10-17"
+    "checked": "2026-11-16"
   },
   "MiniMaxAI/MiniMax-M2.5": {
     "bytes": 230134264560,
@@ -53,7 +53,7 @@
   },
   "Qwen/Qwen3-VL-235B-A22B-Instruct": {
     "bytes": 471340223736,
-    "checked": "2026-10-17"
+    "checked": "2026-11-16"
   },
   "Qwen/Qwen3-VL-235B-A22B-Thinking": {
     "bytes": 471340223736,
@@ -129,7 +129,7 @@
   },
   "deepseek-ai/DeepSeek-Coder-V2-Instruct": {
     "bytes": 471486512925,
-    "checked": "2026-10-17"
+    "checked": "2026-11-16"
   },
   "deepseek-ai/DeepSeek-R1-0528": {
     "bytes": 688586727753,
@@ -165,7 +165,7 @@
   },
   "deepseek-ai/DeepSeek-V4-Pro-0813": {
     "bytes": 892744322880,
-    "checked": "2026-10-17"
+    "checked": "2026-11-16"
   },
   "deepseek-ai/DeepSeek-V4.1-Flash": {
     "bytes": 510296708312,
@@ -329,11 +329,11 @@
   },
   "zai-org/GLM-4.6": {
     "bytes": 713577411472,
-    "checked": "2026-10-17"
+    "checked": "2026-11-16"
   },
   "zai-org/GLM-4.6V": {
     "bytes": 215424400376,
-    "checked": "2026-10-17"
+    "checked": "2026-11-16"
   },
   "zai-org/GLM-4.7": {
     "bytes": 716681196792,
