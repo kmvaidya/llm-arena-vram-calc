@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-16T14:29:55.289114+00:00",
-  "model_count": 290,
+  "fetched_at": "2026-11-17T15:20:19.010630+00:00",
+  "model_count": 277,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -272,15 +272,6 @@
       "slug": "",
       "total_params_b": null
     },
-    "commanda": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 256000,
-      "is_open_weights": true,
-      "name": "Command A",
-      "slug": "",
-      "total_params_b": null
-    },
     "commanda+": {
       "active_params_b": null,
       "architecture": null,
@@ -425,24 +416,6 @@
       "slug": "",
       "total_params_b": null
     },
-    "exaone4032bnonreasoning": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 131000,
-      "is_open_weights": true,
-      "name": "EXAONE 4.0 32B (Non-reasoning)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "exaone4032breasoning": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 131000,
-      "is_open_weights": true,
-      "name": "EXAONE 4.0 32B (Reasoning)",
-      "slug": "",
-      "total_params_b": null
-    },
     "exaone4533bnonreasoning": {
       "active_params_b": null,
       "architecture": null,
@@ -503,33 +476,6 @@
       "context_window": 1000000,
       "is_open_weights": false,
       "name": "Gemini 3.5 Flash-Lite",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gemini38flashhigh": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "Gemini 3.8 Flash (High)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gemini38flashlow": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "Gemini 3.8 Flash (Low)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gemini38flashmedium": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "Gemini 3.8 Flash (Medium)",
       "slug": "",
       "total_params_b": null
     },
@@ -1154,15 +1100,6 @@
       "slug": "",
       "total_params_b": null
     },
-    "hy3": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 256000,
-      "is_open_weights": true,
-      "name": "Hy3",
-      "slug": "",
-      "total_params_b": null
-    },
     "hyperclovaxseedthink32b": {
       "active_params_b": null,
       "architecture": null,
@@ -1187,15 +1124,6 @@
       "context_window": 1024000,
       "is_open_weights": true,
       "name": "Inkling 2 Small",
-      "slug": "",
-      "total_params_b": null
-    },
-    "inklingsmall": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": true,
-      "name": "Inkling Small",
       "slug": "",
       "total_params_b": null
     },
@@ -1313,42 +1241,6 @@
       "context_window": 524288,
       "is_open_weights": true,
       "name": "K2 Horizon MoVA 36B A4B",
-      "slug": "",
-      "total_params_b": null
-    },
-    "k2thinkv2": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 262144,
-      "is_open_weights": true,
-      "name": "K2 Think V2",
-      "slug": "",
-      "total_params_b": null
-    },
-    "k2v2high": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 512000,
-      "is_open_weights": true,
-      "name": "K2-V2 (High)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "k2v2low": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 512000,
-      "is_open_weights": true,
-      "name": "K2-V2 (Low)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "k2v2medium": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 512000,
-      "is_open_weights": true,
-      "name": "K2-V2 (Medium)",
       "slug": "",
       "total_params_b": null
     },
@@ -1475,15 +1367,6 @@
       "context_window": 262144,
       "is_open_weights": true,
       "name": "Ling 3.0 Tiny",
-      "slug": "",
-      "total_params_b": null
-    },
-    "ling31flash": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": true,
-      "name": "Ling 3.1 Flash",
       "slug": "",
       "total_params_b": null
     },

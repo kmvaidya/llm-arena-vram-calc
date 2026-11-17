@@ -101,7 +101,7 @@
   },
   "ai21labs/AI21-Jamba-1.5-Mini": {
     "bytes": 103140804416,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "allenai/Molmo2-8B": {
     "bytes": 34646910272,
@@ -157,7 +157,7 @@
   },
   "deepseek-ai/DeepSeek-V3.2": {
     "bytes": 689483049129,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "deepseek-ai/DeepSeek-V4-Flash-0731": {
     "bytes": 166886535336,
@@ -237,7 +237,7 @@
   },
   "mistralai/Mistral-Medium-3.5-128B": {
     "bytes": 133606164352,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "moonshotai/Kimi-K2-Instruct": {
     "bytes": 1029190981272,
@@ -249,7 +249,7 @@
   },
   "moonshotai/Kimi-K2-Thinking": {
     "bytes": 594232561304,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "moonshotai/Kimi-K2.5": {
     "bytes": 595177988208,
@@ -289,7 +289,7 @@
   },
   "stepfun-ai/Step-3.5-Flash": {
     "bytes": 398768720200,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "stepfun-ai/step3": {
     "bytes": 641940029760,
@@ -305,7 +305,7 @@
   },
   "thinkingmachines/Inkling": {
     "bytes": 1904755463940,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "thinkingmachines/Inkling-2-Small": {
     "bytes": 393480084520,
@@ -337,11 +337,11 @@
   },
   "zai-org/GLM-4.7": {
     "bytes": 716681196792,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "zai-org/GLM-4.7-Flash": {
     "bytes": 62444175504,
-    "checked": "2026-10-17"
+    "checked": "2026-11-17"
   },
   "zai-org/GLM-5": {
     "bytes": 1507735819176,
