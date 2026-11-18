@@ -29,14 +29,14 @@
   "command-r+-(08-2024)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
   "command-r+-08-2024": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -77,7 +77,7 @@
   "dbrx-instruct-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -105,7 +105,7 @@
   "deepseek-r1-0528": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -146,14 +146,14 @@
   "deepseek-v3": {
     "active_params_b": 37.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "deepseek-ai/DeepSeek-V3",
     "total_params_b": 671.0
   },
   "deepseek-v3-(0324)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-09",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -174,7 +174,7 @@
   "deepseek-v3-1-terminus": {
     "active_params_b": 37.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "deepseek-ai/DeepSeek-V3.1-Terminus",
     "total_params_b": 685.0
   },
@@ -195,7 +195,7 @@
   "deepseek-v3-2": {
     "active_params_b": 37.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "deepseek-ai/DeepSeek-V3.2",
     "total_params_b": 685.0
   },
@@ -223,7 +223,7 @@
   "deepseek-v3.1": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -244,7 +244,7 @@
   "deepseek-v3.1-terminus-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -265,7 +265,7 @@
   "deepseek-v3.2": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -356,14 +356,14 @@
   "deepseek-v4-flash-preview-(high)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v4-flash-preview-high": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -556,7 +556,7 @@
   "glm-5-2": {
     "active_params_b": 40.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "zai-org/GLM-5.2",
     "total_params_b": 753.0
   },
@@ -570,7 +570,7 @@
   "glm-5-3": {
     "active_params_b": 40.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "zai-org/GLM-5.3",
     "total_params_b": 753.0
   },
@@ -687,7 +687,7 @@
   "hy3": {
     "active_params_b": 21.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "tencent/Hy3",
     "total_params_b": 299.0
   },
@@ -701,7 +701,7 @@
   "inkling": {
     "active_params_b": 41.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-18",
     "hf_repo": "thinkingmachines/Inkling",
     "total_params_b": 975.0
   },
@@ -743,7 +743,7 @@
   "jamba-1.5-large": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -764,7 +764,7 @@
   "kimi-k2-5-instant": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -792,7 +792,7 @@
   "kimi-k2-preview-0711": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -806,7 +806,7 @@
   "kimi-k2.5-(instant)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-04",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -917,14 +917,14 @@
   "mimo-v2-flash-(non-thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
   "mimo-v2-flash-(thinking)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1013,7 +1013,7 @@
   "minimax-m2.1": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-02",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1034,7 +1034,7 @@
   "minimax-m2.7": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -1124,7 +1124,7 @@
   "mistral-small-3.2-(2506)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-11",
+    "checked": "2026-11-18",
     "hf_repo": null,
     "total_params_b": null
   },

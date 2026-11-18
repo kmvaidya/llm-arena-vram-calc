@@ -29,7 +29,7 @@
   },
   "MiniMaxAI/MiniMax-M3": {
     "bytes": 854176398808,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "PrimeIntellect/INTELLECT-3": {
     "bytes": 213706747392,
@@ -37,7 +37,7 @@
   },
   "Qwen/Qwen3-235B-A22B": {
     "bytes": 470191875096,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "Qwen/Qwen3-235B-A22B-Instruct-2507": {
     "bytes": 470191875040,
@@ -153,7 +153,7 @@
   },
   "deepseek-ai/DeepSeek-V3.1-Terminus": {
     "bytes": 688588816461,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "deepseek-ai/DeepSeek-V3.2": {
     "bytes": 689483049129,
@@ -201,7 +201,7 @@
   },
   "inclusionAI/Ring-flash-2.0": {
     "bytes": 205782456216,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "meituan-longcat/LongCat-Flash-Chat": {
     "bytes": 1123995572272,
@@ -281,7 +281,7 @@
   },
   "openai/gpt-oss-120b": {
     "bytes": 65248893184,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "openai/gpt-oss-20b": {
     "bytes": 13761316904,
@@ -317,7 +317,7 @@
   },
   "zai-org/GLM-4.5": {
     "bytes": 716681196672,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "zai-org/GLM-4.5-Air": {
     "bytes": 220939943456,
@@ -349,7 +349,7 @@
   },
   "zai-org/GLM-5.1": {
     "bytes": 1507735819176,
-    "checked": "2026-10-17"
+    "checked": "2026-11-18"
   },
   "zai-org/GLM-5.2": {
     "bytes": 1506667387408,

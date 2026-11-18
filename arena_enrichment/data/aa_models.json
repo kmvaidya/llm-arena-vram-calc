@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-17T15:20:19.010630+00:00",
-  "model_count": 277,
+  "fetched_at": "2026-11-18T14:55:51.441441+00:00",
+  "model_count": 283,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -53,6 +53,15 @@
       "context_window": 128000,
       "is_open_weights": true,
       "name": "Apriel-v1.6-15B-Thinker",
+      "slug": "",
+      "total_params_b": null
+    },
+    "astraforlaw62max": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Astra for Law 6.2 (Max)",
       "slug": "",
       "total_params_b": null
     },
@@ -722,51 +731,6 @@
       "slug": "",
       "total_params_b": null
     },
-    "gpt61solhigh": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-6.1 Sol (High)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gpt61sollow": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-6.1 Sol (Low)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gpt61solmax": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-6.1 Sol (Max)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gpt61solmedium": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-6.1 Sol (Medium)",
-      "slug": "",
-      "total_params_b": null
-    },
-    "gpt61solxhigh": {
-      "active_params_b": null,
-      "architecture": null,
-      "context_window": 1000000,
-      "is_open_weights": false,
-      "name": "GPT-6.1 Sol (Xhigh)",
-      "slug": "",
-      "total_params_b": null
-    },
     "gpt61terrahigh": {
       "active_params_b": null,
       "architecture": null,
@@ -821,48 +785,93 @@
       "slug": "",
       "total_params_b": null
     },
-    "gpt6astrahigh": {
+    "gpt62astrahigh": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
       "is_open_weights": false,
-      "name": "GPT-6 Astra (High)",
+      "name": "GPT-6.2 Astra (High)",
       "slug": "",
       "total_params_b": null
     },
-    "gpt6astralow": {
+    "gpt62astralow": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
       "is_open_weights": false,
-      "name": "GPT-6 Astra (Low)",
+      "name": "GPT-6.2 Astra (Low)",
       "slug": "",
       "total_params_b": null
     },
-    "gpt6astramax": {
+    "gpt62astramax": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
       "is_open_weights": false,
-      "name": "GPT-6 Astra (Max)",
+      "name": "GPT-6.2 Astra (Max)",
       "slug": "",
       "total_params_b": null
     },
-    "gpt6astramedium": {
+    "gpt62astramedium": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
       "is_open_weights": false,
-      "name": "GPT-6 Astra (Medium)",
+      "name": "GPT-6.2 Astra (Medium)",
       "slug": "",
       "total_params_b": null
     },
-    "gpt6astraxhigh": {
+    "gpt62astraxhigh": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
       "is_open_weights": false,
-      "name": "GPT-6 Astra (Xhigh)",
+      "name": "GPT-6.2 Astra (Xhigh)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gpt62solhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.2 Sol (High)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gpt62sollow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.2 Sol (Low)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gpt62solmax": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.2 Sol (Max)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gpt62solmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.2 Sol (Medium)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gpt62solxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "GPT-6.2 Sol (Xhigh)",
       "slug": "",
       "total_params_b": null
     },
@@ -1127,6 +1136,15 @@
       "slug": "",
       "total_params_b": null
     },
+    "inklinghigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": true,
+      "name": "Inkling (High)",
+      "slug": "",
+      "total_params_b": null
+    },
     "inklingxhigh": {
       "active_params_b": null,
       "architecture": null,
@@ -1172,6 +1190,15 @@
       "slug": "",
       "total_params_b": null
     },
+    "joyaivlpreview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": false,
+      "name": "JoyAI-VL-Preview",
+      "slug": "",
+      "total_params_b": null
+    },
     "jt35bflash": {
       "active_params_b": null,
       "architecture": null,
@@ -1205,6 +1232,15 @@
       "context_window": 131072,
       "is_open_weights": true,
       "name": "K2 Horizon 0.9B",
+      "slug": "",
+      "total_params_b": null
+    },
+    "k2horizon32b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 524288,
+      "is_open_weights": true,
+      "name": "K2 Horizon 32B",
       "slug": "",
       "total_params_b": null
     },
@@ -1340,6 +1376,24 @@
       "context_window": 32000,
       "is_open_weights": true,
       "name": "LFM2.5-VL-1.6B",
+      "slug": "",
+      "total_params_b": null
+    },
+    "lfm317b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 262144,
+      "is_open_weights": true,
+      "name": "LFM3-1.7B",
+      "slug": "",
+      "total_params_b": null
+    },
+    "lfm3vl2b": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 128000,
+      "is_open_weights": true,
+      "name": "LFM3-VL-2B",
       "slug": "",
       "total_params_b": null
     },
