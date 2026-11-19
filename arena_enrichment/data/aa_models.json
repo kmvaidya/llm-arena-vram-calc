@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-18T14:55:51.441441+00:00",
-  "model_count": 283,
+  "fetched_at": "2026-11-19T15:01:20.311108+00:00",
+  "model_count": 287,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -575,6 +575,42 @@
       "context_window": 1000000,
       "is_open_weights": false,
       "name": "Gemini 4 Hydrogen (Xhigh)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gemini4neonhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Neon (High)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gemini4neonlow": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Neon (Low)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gemini4neonmedium": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Neon (Medium)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "gemini4neonxhigh": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Gemini 4 Neon (Xhigh)",
       "slug": "",
       "total_params_b": null
     },

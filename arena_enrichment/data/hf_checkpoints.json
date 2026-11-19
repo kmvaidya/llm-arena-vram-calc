@@ -33,7 +33,7 @@
   },
   "PrimeIntellect/INTELLECT-3": {
     "bytes": 213706747392,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "Qwen/Qwen3-235B-A22B": {
     "bytes": 470191875096,
@@ -125,7 +125,7 @@
   },
   "databricks/dbrx-instruct": {
     "bytes": null,
-    "checked": "2026-11-08"
+    "checked": "2026-11-19"
   },
   "deepseek-ai/DeepSeek-Coder-V2-Instruct": {
     "bytes": 471486512925,
@@ -133,7 +133,7 @@
   },
   "deepseek-ai/DeepSeek-R1-0528": {
     "bytes": 688586727753,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "deepseek-ai/DeepSeek-V2.5-1210": {
     "bytes": 471486512925,
@@ -149,7 +149,7 @@
   },
   "deepseek-ai/DeepSeek-V3.1": {
     "bytes": 688586727753,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "deepseek-ai/DeepSeek-V3.1-Terminus": {
     "bytes": 688588816461,
@@ -205,7 +205,7 @@
   },
   "meituan-longcat/LongCat-Flash-Chat": {
     "bytes": 1123995572272,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
     "bytes": 803167703320,
@@ -217,7 +217,7 @@
   },
   "meta-models/Muse-Glimmer-30B": {
     "bytes": 59553435272,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "microsoft/phi-4": {
     "bytes": 29319042992,
@@ -253,7 +253,7 @@
   },
   "moonshotai/Kimi-K2.5": {
     "bytes": 595177988208,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "moonshotai/Kimi-K2.6": {
     "bytes": 595177988208,
@@ -285,7 +285,7 @@
   },
   "openai/gpt-oss-20b": {
     "bytes": 13761316904,
-    "checked": "2026-10-17"
+    "checked": "2026-11-19"
   },
   "stepfun-ai/Step-3.5-Flash": {
     "bytes": 398768720200,

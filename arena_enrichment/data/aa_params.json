@@ -91,7 +91,7 @@
   "deepseek-r1": {
     "active_params_b": 37.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-19",
     "hf_repo": "deepseek-ai/DeepSeek-R1-0528",
     "total_params_b": 685.0
   },
@@ -500,7 +500,7 @@
   "glm-4.5-air": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-08",
+    "checked": "2026-11-19",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -514,7 +514,7 @@
   "glm-4.6": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-08",
+    "checked": "2026-11-19",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -549,7 +549,7 @@
   "glm-5-1": {
     "active_params_b": 40.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-19",
     "hf_repo": "zai-org/GLM-5.1",
     "total_params_b": 744.0
   },
@@ -591,7 +591,7 @@
   "glm-5.1": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-08",
+    "checked": "2026-11-19",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -848,7 +848,7 @@
   "kimi-k3-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-06",
+    "checked": "2026-11-19",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -862,7 +862,7 @@
   "ling-flash-2-0": {
     "active_params_b": 6.1,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-19",
     "hf_repo": "inclusionAI/Ling-flash-2.0",
     "total_params_b": 103.0
   },
@@ -938,7 +938,7 @@
   "mimo-v2-flash-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-08",
+    "checked": "2026-11-19",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -992,14 +992,14 @@
   "minimax-m2-1-preview": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-08",
+    "checked": "2026-11-19",
     "hf_repo": null,
     "total_params_b": null
   },
   "minimax-m2-5": {
     "active_params_b": 10.0,
     "architecture": "moe",
-    "checked": "2026-10-17",
+    "checked": "2026-11-19",
     "hf_repo": "MiniMaxAI/MiniMax-M2.5",
     "total_params_b": 230.0
   },
