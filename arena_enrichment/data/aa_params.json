@@ -50,7 +50,7 @@
   "command-r-08-2024": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-05",
+    "checked": "2026-11-20",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -98,7 +98,7 @@
   "deepseek-r1-(0528)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-05",
+    "checked": "2026-11-20",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -605,7 +605,7 @@
   "glm-5.2-(max)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-20",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -771,7 +771,7 @@
   "kimi-k2-5-thinking": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-10",
+    "checked": "2026-11-20",
     "hf_repo": null,
     "total_params_b": null
   },
