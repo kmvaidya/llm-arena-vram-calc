@@ -25,7 +25,7 @@
   },
   "MiniMaxAI/MiniMax-M2.7": {
     "bytes": 230134260592,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "MiniMaxAI/MiniMax-M3": {
     "bytes": 854176398808,
@@ -65,7 +65,7 @@
   },
   "Qwen/Qwen3.5-27B": {
     "bytes": 55563022432,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "Qwen/Qwen3.5-397B-A17B": {
     "bytes": 806796241352,
@@ -97,7 +97,7 @@
   },
   "ai21labs/AI21-Jamba-1.5-Large": {
     "bytes": 797110651224,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "ai21labs/AI21-Jamba-1.5-Mini": {
     "bytes": 103140804416,
@@ -117,7 +117,7 @@
   },
   "arcee-ai/Trinity-Large-Preview": {
     "bytes": 797275954480,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "arcee-ai/Trinity-Large-Thinking": {
     "bytes": 797275981696,
@@ -137,7 +137,7 @@
   },
   "deepseek-ai/DeepSeek-V2.5-1210": {
     "bytes": 471486512925,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "deepseek-ai/DeepSeek-V3": {
     "bytes": 688586727753,
@@ -161,7 +161,7 @@
   },
   "deepseek-ai/DeepSeek-V4-Flash-0731": {
     "bytes": 166886535336,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "deepseek-ai/DeepSeek-V4-Pro-0813": {
     "bytes": 892744322880,
@@ -313,7 +313,7 @@
   },
   "thinkingmachines/Inkling-Small": {
     "bytes": 531913022276,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "zai-org/GLM-4.5": {
     "bytes": 716681196672,
@@ -353,7 +353,7 @@
   },
   "zai-org/GLM-5.2": {
     "bytes": 1506667387408,
-    "checked": "2026-10-17"
+    "checked": "2026-11-21"
   },
   "zai-org/GLM-5.3": {
     "bytes": 755632050320,

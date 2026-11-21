@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-20T14:44:04.822534+00:00",
-  "model_count": 287,
+  "fetched_at": "2026-11-21T13:59:43.769619+00:00",
+  "model_count": 288,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -1160,6 +1160,15 @@
       "context_window": 131072,
       "is_open_weights": true,
       "name": "HyperNova 60B 2605 (High, Based on gpt-oss-120b)",
+      "slug": "",
+      "total_params_b": null
+    },
+    "inkling2mini": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1024000,
+      "is_open_weights": true,
+      "name": "Inkling 2 Mini",
       "slug": "",
       "total_params_b": null
     },
@@ -2553,7 +2562,7 @@
       "active_params_b": null,
       "architecture": null,
       "context_window": 1048576,
-      "is_open_weights": false,
+      "is_open_weights": true,
       "name": "Tencent Hy4",
       "slug": "",
       "total_params_b": null

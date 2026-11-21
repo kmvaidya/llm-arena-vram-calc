@@ -237,7 +237,7 @@
   "deepseek-v3.1-terminus": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -404,14 +404,14 @@
   "deepseek-v4-pro-preview-(high)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
   "deepseek-v4-pro-preview-high": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -563,7 +563,7 @@
   "glm-5-2-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -584,7 +584,7 @@
   "glm-5-3-max": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -951,7 +951,7 @@
   "mimo-v2.5-pro": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
@@ -965,7 +965,7 @@
   "mimo-v2.6-pro": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-14",
+    "checked": "2026-11-21",
     "hf_repo": null,
     "total_params_b": null
   },
