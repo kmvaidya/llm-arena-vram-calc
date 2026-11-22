@@ -9,7 +9,7 @@
   },
   "MiniMaxAI/MiniMax-M2": {
     "bytes": 230134264792,
-    "checked": "2026-10-17"
+    "checked": "2026-11-22"
   },
   "MiniMaxAI/MiniMax-M2-1": {
     "bytes": null,
@@ -89,11 +89,11 @@
   },
   "XiaomiMiMo/MiMo-V2.6-Flash-RL": {
     "bytes": 172932505264,
-    "checked": "2026-10-17"
+    "checked": "2026-11-22"
   },
   "XiaomiMiMo/MiMo-V2.6-Pro-RL": {
     "bytes": 566048103896,
-    "checked": "2026-10-17"
+    "checked": "2026-11-22"
   },
   "ai21labs/AI21-Jamba-1.5-Large": {
     "bytes": 797110651224,
@@ -141,7 +141,7 @@
   },
   "deepseek-ai/DeepSeek-V3": {
     "bytes": 688586727753,
-    "checked": "2026-10-17"
+    "checked": "2026-11-22"
   },
   "deepseek-ai/DeepSeek-V3-0324": {
     "bytes": 688586727753,
@@ -301,7 +301,7 @@
   },
   "tencent/Hy3-preview": {
     "bytes": 597578240176,
-    "checked": "2026-10-17"
+    "checked": "2026-11-22"
   },
   "thinkingmachines/Inkling": {
     "bytes": 1904755463940,
@@ -345,7 +345,7 @@
   },
   "zai-org/GLM-5": {
     "bytes": 1507735819176,
-    "checked": "2026-10-17"
+    "checked": "2026-11-22"
   },
   "zai-org/GLM-5.1": {
     "bytes": 1507735819176,
