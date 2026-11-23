@@ -418,7 +418,7 @@
   "deepseek-v4.1-flash-20260910-(max)": {
     "active_params_b": null,
     "architecture": null,
-    "checked": "2026-11-12",
+    "checked": "2026-11-23",
     "hf_repo": null,
     "total_params_b": null
   },

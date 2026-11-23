@@ -5,7 +5,7 @@
   },
   "MiniMaxAI/MiniMax-M1-80k": {
     "bytes": 912211851456,
-    "checked": "2026-10-17"
+    "checked": "2026-11-23"
   },
   "MiniMaxAI/MiniMax-M2": {
     "bytes": 230134264792,
@@ -85,7 +85,7 @@
   },
   "XiaomiMiMo/MiMo-V2.5-Pro": {
     "bytes": 1033389872152,
-    "checked": "2026-10-17"
+    "checked": "2026-11-23"
   },
   "XiaomiMiMo/MiMo-V2.6-Flash-RL": {
     "bytes": 172932505264,
@@ -213,7 +213,7 @@
   },
   "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
     "bytes": 217283738720,
-    "checked": "2026-10-17"
+    "checked": "2026-11-23"
   },
   "meta-models/Muse-Glimmer-30B": {
     "bytes": 59553435272,
@@ -297,7 +297,7 @@
   },
   "tencent/Hy3": {
     "bytes": 597578239288,
-    "checked": "2026-10-17"
+    "checked": "2026-11-23"
   },
   "tencent/Hy3-preview": {
     "bytes": 597578240176,
@@ -361,6 +361,6 @@
   },
   "zai-org/GLM-5.3-Flash": {
     "bytes": 328337455672,
-    "checked": "2026-10-17"
+    "checked": "2026-11-23"
   }
 }

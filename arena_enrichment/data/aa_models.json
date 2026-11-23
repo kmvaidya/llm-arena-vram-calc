@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-22T13:53:31.166268+00:00",
-  "model_count": 288,
+  "fetched_at": "2026-11-23T17:03:32.578128+00:00",
+  "model_count": 290,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -1475,6 +1475,24 @@
       "context_window": 1048576,
       "is_open_weights": true,
       "name": "Ling 3.1 Flash 1019",
+      "slug": "",
+      "total_params_b": null
+    },
+    "ling32air": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "Ling-3.2-air",
+      "slug": "",
+      "total_params_b": null
+    },
+    "lingsante31flash": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1048576,
+      "is_open_weights": true,
+      "name": "LingSante-3.1-flash",
       "slug": "",
       "total_params_b": null
     },
