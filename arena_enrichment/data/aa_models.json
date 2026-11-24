@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-23T17:03:32.578128+00:00",
+  "fetched_at": "2026-11-24T16:49:57.334811+00:00",
   "model_count": 290,
   "models": {
     "agnes25probeta": {
@@ -713,12 +713,12 @@
       "slug": "",
       "total_params_b": null
     },
-    "glm53flash": {
+    "glm53flashmax": {
       "active_params_b": null,
       "architecture": null,
       "context_window": 1000000,
       "is_open_weights": true,
-      "name": "GLM-5.3-Flash",
+      "name": "GLM-5.3-Flash (Max)",
       "slug": "",
       "total_params_b": null
     },
