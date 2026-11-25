@@ -81,7 +81,7 @@
   },
   "XiaomiMiMo/MiMo-V2.5": {
     "bytes": 315040382024,
-    "checked": "2026-10-17"
+    "checked": "2026-11-25"
   },
   "XiaomiMiMo/MiMo-V2.5-Pro": {
     "bytes": 1033389872152,
@@ -197,7 +197,7 @@
   },
   "inclusionAI/Ling-flash-2.0": {
     "bytes": 205782456216,
-    "checked": "2026-10-17"
+    "checked": "2026-11-25"
   },
   "inclusionAI/Ring-flash-2.0": {
     "bytes": 205782456216,
@@ -209,7 +209,7 @@
   },
   "meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
     "bytes": 803167703320,
-    "checked": "2026-10-17"
+    "checked": "2026-11-25"
   },
   "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
     "bytes": 217283738720,
@@ -225,7 +225,7 @@
   },
   "mistralai/Mistral-Large-3-675B-Instruct-2512": {
     "bytes": 681504807752,
-    "checked": "2026-10-17"
+    "checked": "2026-11-25"
   },
   "mistralai/Mistral-Large-4-1T-A52B": {
     "bytes": 1060554587912,
@@ -325,7 +325,7 @@
   },
   "zai-org/GLM-4.5V": {
     "bytes": 215424400616,
-    "checked": "2026-10-17"
+    "checked": "2026-11-25"
   },
   "zai-org/GLM-4.6": {
     "bytes": 713577411472,
@@ -357,7 +357,7 @@
   },
   "zai-org/GLM-5.3": {
     "bytes": 755632050320,
-    "checked": "2026-10-17"
+    "checked": "2026-11-25"
   },
   "zai-org/GLM-5.3-Flash": {
     "bytes": 328337455672,
