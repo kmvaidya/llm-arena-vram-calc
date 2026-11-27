@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-11-26T16:10:30.588163+00:00",
-  "model_count": 290,
+  "fetched_at": "2026-11-27T15:57:11.283878+00:00",
+  "model_count": 292,
   "models": {
     "agnes25probeta": {
       "active_params_b": null,
@@ -404,6 +404,15 @@
       "context_window": 128000,
       "is_open_weights": false,
       "name": "ERNIE 5.0 Thinking Preview",
+      "slug": "",
+      "total_params_b": null
+    },
+    "ernie55flashpreview": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1024000,
+      "is_open_weights": true,
+      "name": "ERNIE 5.5 Flash Preview",
       "slug": "",
       "total_params_b": null
     },
@@ -2195,6 +2204,15 @@
       "context_window": 128000,
       "is_open_weights": true,
       "name": "Phi-4 Multimodal Instruct",
+      "slug": "",
+      "total_params_b": null
+    },
+    "quasar12358bmax,basedonglm53": {
+      "active_params_b": null,
+      "architecture": null,
+      "context_window": 1000000,
+      "is_open_weights": false,
+      "name": "Quasar 1.2 358B (Max, Based on GLM-5.3)",
       "slug": "",
       "total_params_b": null
     },
